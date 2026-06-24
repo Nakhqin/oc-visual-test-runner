@@ -124,7 +124,14 @@ Expect `ux_result.json` terminal state:
 
 ```bash
 python3 -c "import json; print(json.load(open('/tmp/ux_report_output/ux_result.json'))['terminal_state'])"
-# blocked — until agent loop is implemented
+# blocked — stub decision maker until VLM integration
+```
+
+Expect one loop step in `action_trace.json`:
+
+```bash
+python3 -c "import json; t=json.load(open('/tmp/ux_report_output/action_trace.json')); print(len(t['steps']), t['steps'][0]['decision']['source'])"
+# 1 stub
 ```
 
 ### Verify Output Files (full Phase 1 — future)

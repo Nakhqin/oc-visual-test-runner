@@ -12,7 +12,6 @@ from adapters.browser import ObservationFrame
 from core.config import TargetConfig
 
 SCHEMA_VERSION = "1"
-TERMINAL_BLOCKED = "blocked"
 
 
 @dataclass(frozen=True)
@@ -21,45 +20,47 @@ class RunArtifacts:
     ux_result_path: Path
 
 
+class TraceBuilder:
+    def __init__(self, config: TargetConfig) -> None:
+        self._config = config
+        self._steps: list[dict[str, Any]] = []
+
+    def add_step(self, step: dict[str, Any]) -> None:
+        self._steps.append(step)
+
+    @property
+    def steps(self) -> list[dict[str, Any]]:
+        return list(self._steps)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "created_at": _utc_now_iso(),
+            "target": self._config.target,
+            "url": self._config.url,
+            "persona": self._config.persona,
+            "goal": self._config.goal,
+            "adapter": "browser",
+            "runner": "visual_agent",
+            "steps": self._steps,
+        }
+
+
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
-def build_action_trace(config: TargetConfig, frame: ObservationFrame) -> dict[str, Any]:
-    screenshot_ref = frame.image_path.relative_to(config.output_dir).as_posix()
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "created_at": _utc_now_iso(),
-        "target": config.target,
-        "url": config.url,
-        "persona": config.persona,
-        "goal": config.goal,
-        "adapter": "browser",
-        "runner": "visual_agent",
-        "steps": [
-            {
-                "step": frame.step,
-                "phase": "observation",
-                "action": None,
-                "observation": {
-                    "screenshot": screenshot_ref,
-                    "page_url": frame.url,
-                    "viewport_width": frame.viewport_width,
-                    "viewport_height": frame.viewport_height,
-                },
-                "note": "Initial observation frame captured before agent loop.",
-            }
-        ],
-    }
-
-
 def build_ux_result(
     config: TargetConfig,
-    frame: ObservationFrame,
+    final_frame: ObservationFrame,
     *,
-    terminal_state: str = TERMINAL_BLOCKED,
+    terminal_state: str,
+    summary: str,
+    main_finding: str,
+    classifications: list[str],
+    steps_taken: int,
 ) -> dict[str, Any]:
-    screenshot_ref = frame.image_path.relative_to(config.output_dir).as_posix()
+    screenshot_ref = final_frame.image_path.relative_to(config.output_dir).as_posix()
     return {
         "schema_version": SCHEMA_VERSION,
         "created_at": _utc_now_iso(),
@@ -68,15 +69,9 @@ def build_ux_result(
         "persona": config.persona,
         "goal": config.goal,
         "terminal_state": terminal_state,
-        "summary": (
-            "Initial observation frame captured. "
-            "Visual agent loop is not implemented yet."
-        ),
-        "main_finding": (
-            "The runner opened the target and captured a screenshot, "
-            "but cannot continue the persona walkthrough until the agent loop ships."
-        ),
-        "classifications": [],
+        "summary": summary,
+        "main_finding": main_finding,
+        "classifications": classifications,
         "adapter": "browser",
         "runner": "visual_agent",
         "output_dir": str(config.output_dir),
@@ -90,7 +85,7 @@ def build_ux_result(
         "limits": {
             "max_steps": config.max_steps,
             "timeout_seconds": config.timeout_seconds,
-            "steps_taken": 0,
+            "steps_taken": steps_taken,
         },
     }
 
@@ -100,11 +95,32 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-def write_run_artifacts(config: TargetConfig, frame: ObservationFrame) -> RunArtifacts:
+def write_loop_artifacts(
+    config: TargetConfig,
+    trace: TraceBuilder,
+    *,
+    final_frame: ObservationFrame,
+    terminal_state: str,
+    summary: str,
+    main_finding: str,
+    classifications: list[str],
+    steps_taken: int,
+) -> RunArtifacts:
     action_trace_path = config.output_dir / "action_trace.json"
     ux_result_path = config.output_dir / "ux_result.json"
-    _write_json(action_trace_path, build_action_trace(config, frame))
-    _write_json(ux_result_path, build_ux_result(config, frame))
+    _write_json(action_trace_path, trace.to_dict())
+    _write_json(
+        ux_result_path,
+        build_ux_result(
+            config,
+            final_frame,
+            terminal_state=terminal_state,
+            summary=summary,
+            main_finding=main_finding,
+            classifications=classifications,
+            steps_taken=steps_taken,
+        ),
+    )
     return RunArtifacts(
         action_trace_path=action_trace_path,
         ux_result_path=ux_result_path,
