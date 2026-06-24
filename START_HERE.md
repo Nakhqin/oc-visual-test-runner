@@ -16,13 +16,13 @@ Onboarding checklist for contributors and Cursor agents.
 
 8. Create a plan under **`.cursor/plans/`** before multi-file or architectural work.
 
-## Phase 0 Rules
+## Phase 0 (complete)
 
-9. **Phase 0 allows only scaffold and documentation changes.** No runtime code, no API calls, no Playwright, no Gemini integration.
+9. Phase 0 scaffold is **Done** (2026-06-24). Documentation and project context only — no runtime was added in that phase.
 
-## When Runtime Starts
+## Phase 1 rules
 
-10. **Runtime implementation begins in Phase 1.** See `docs/TASKS.md` for the browser visual runner milestone.
+10. **Phase 1 adds runtime implementation.** Start with CLI, target config, browser adapter, and visual agent loop. See `docs/TASKS.md`.
 
 ## Optional Setup (later phases)
 

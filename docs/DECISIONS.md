@@ -118,6 +118,29 @@ Phase 2 verification informs but does not auto-tag UX defects.
 
 ---
 
+### 2026-06-24 — Phase 1 package layout and CLI defaults
+
+**Status:** Accepted
+
+**Context:**
+Phase 1 needs a stable entrypoint and config model before browser adapter and agent loop land.
+
+**Decision:**
+- CLI entry: `scripts/ux_testing.py`
+- Config module: `scripts/core/config.py` with `TargetConfig` dataclass
+- Future loop/writers under `scripts/core/`; platform adapters under `scripts/adapters/` (next slices)
+- CLI defaults: `max_steps=10`, `timeout_seconds=180` (aligned with `.env.example`)
+- Phase 1 dependencies in `requirements.txt`: Playwright + `google-generativeai`
+
+**Reasoning:**
+Keeps the first vertical slice small: validate inputs and `--help` before Playwright/Gemini wiring.
+
+**Consequences:**
+- `python3 ./scripts/ux_testing.py --help` is the first runtime verification step
+- Full runs remain blocked until browser adapter and visual agent loop ship
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

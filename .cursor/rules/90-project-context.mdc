@@ -13,11 +13,11 @@ oc-visual-test-runner
 
 ## Current Stage
 
-Phase 0 — scaffold conversion (documentation and context only; no runtime).
+Phase 1 — browser visual runner for `figma` and `web`. CLI and config exist; browser adapter, agent loop, and VLM integration in progress.
 
 ## Project Purpose
 
-Persona-based visual UX testing runner. VLM observes screen → structured action → platform adapter executes → feedback observation → trace/result output until `done`, `blocked`, `max_steps`, or `timeout`.
+**OpenClaw Skill runtime** for persona-based visual UI testing. User NL request → OpenClaw structured input → CLI runner → visual agent loop → artifacts → OpenClaw user-facing summary. Not only a standalone Python script.
 
 ## Phase 1 Supported Targets
 
@@ -33,24 +33,34 @@ Persona-based visual UX testing runner. VLM observes screen → structured actio
 ## Core Architecture Direction
 
 ```text
-target config → platform adapter → observation frame
-  → VLM action decision → action execution → feedback observation → trace/result output
+OpenClaw (NL → structured input)
+  → scripts/ux_testing.py
+  → target config → platform adapter → observation frame
+  → VLM action decision → action execution → feedback observation
+  → trace/result output → OpenClaw user-facing return
 ```
 
-Organized around a **universal visual agent loop**.
+Organized around a **universal visual agent loop** behind an OpenClaw Skill layer.
+
+## Phase 1 Output (Implemented Target)
+
+- `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/`
+- **Not yet:** `ux_report.md`, `index.html` (Phase 4), OpenClaw end-to-end delivery (Phase 5)
 
 ## Current Non-Goals
 
-- No runtime code, Gemini, Playwright, or browser adapter implementation
+- No full browser adapter / agent loop / VLM integration until Phase 1 tasks complete
 - No Android or Windows adapters
-- No OpenClaw deployment integration
+- No formal HTML/Markdown reports in Phase 1
+- No OpenClaw / Feishu end-to-end Skill delivery in Phase 1
 - No Figma API grounding or DOM-selector-first automation
 - No legacy runner migration
 
 ## Cursor Agent Must Not Assume
 
-- Runtime or CLI (`scripts/ux_testing.py`) already exists — check `docs/TASKS.md`
+- Full runtime walkthrough already works — check `docs/TASKS.md`
+- `ux_report.md` or `index.html` exist — Phase 4
+- OpenClaw user-facing return is implemented — Phase 5
 - Failed clicks automatically mean UX issues
 - Legacy `figma_runner.py` / `web_runner.py` exist in this repo
-- Package layout or `requirements.txt` is finalized — decide in Phase 1
 - Real API keys belong in the repo — use `.env` locally only

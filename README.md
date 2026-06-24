@@ -1,6 +1,40 @@
 # oc-visual-test-runner
 
-A persona-based visual UX testing runner for Figma prototypes and websites. It simulates a human participant by letting a VLM observe the screen, decide a structured action, execute that action through a platform adapter, observe feedback, and continue until a terminal state is reached.
+An **OpenClaw Skill runtime** for persona-based visual UI testing on Figma prototypes and websites. Users ask OpenClaw in natural language; OpenClaw derives structured runner parameters, invokes this project's CLI runner, and returns a concise summary plus report and evidence links.
+
+The runner is not only a standalone Python script — it is the execution layer behind the Skill. Direct CLI use is supported for development and smoke tests.
+
+## How Users Use the Skill
+
+```text
+User natural-language request
+    ↓
+OpenClaw derives structured parameters (target, url, persona, goal, limits, viewport, run_id)
+    ↓
+OpenClaw invokes scripts/ux_testing.py
+    ↓
+Runner executes visual agent loop (observe → decide → act → record)
+    ↓
+Runner writes result JSON, trace, recording, screenshots (and later reports)
+    ↓
+OpenClaw returns human-readable summary + report/evidence paths
+```
+
+See `SKILL.md` for the full Skill contract, structured input example, and user-facing return format. See `docs/PRD.md` for main usage scenarios.
+
+## Main Usage Scenarios
+
+| Scenario | Target | Value |
+|---|---|---|
+| Redesigning an existing website | `web` | Narrow UX scope before deeper human user testing |
+| Reviewing a new Figma prototype | `figma` | Quick persona feedback before coworker review or recruitment |
+| Future device UI testing | `android`, `windows` (planned) | Same Skill model on native surfaces — **not implemented** |
+
+Example user request:
+
+> "Test this website as a first-time visitor who wants to understand the product and find the pricing page."
+
+OpenClaw should return whether the persona completed the goal, where they hesitated, what looked clickable or confusing, classification (UX issue vs limitation vs automation/system issue), and links to the report and evidence.
 
 ## Current Supported Targets (Phase 1)
 
@@ -15,8 +49,8 @@ Both use a **shared browser adapter**.
 
 | Target | Status |
 |---|---|
-| `android` | Future adapter (design Phase 5; implementation Phase 6) |
-| `windows` | Future adapter (design Phase 5; implementation Phase 6) |
+| `android` | Future adapter (design Phase 6; implementation Phase 7) |
+| `windows` | Future adapter (design Phase 6; implementation Phase 7) |
 
 ## Core Concept
 
@@ -60,9 +94,15 @@ trace / result output
     └── visual agent loop (repeat)
 ```
 
-## Future CLI Shape
+## Runner Invocation (Skill → CLI)
 
-> Not implemented in Phase 0. See `docs/TASKS.md`.
+OpenClaw calls the runner through the CLI. The runner prints selection metadata for the Skill layer, for example:
+
+```text
+SELECTED_TARGET=figma
+SELECTED_ADAPTER=browser
+SELECTED_RUNNER=visual_agent
+```
 
 ```bash
 python3 ./scripts/ux_testing.py \
@@ -84,34 +124,52 @@ python3 ./scripts/ux_testing.py \
   --max-steps 10
 ```
 
-## Expected Future Output Contract
+> **Phase 1 (current):** CLI and config validation exist; full visual agent loop is in progress. See `docs/TASKS.md`.
+
+## Output Contract (by Phase)
+
+**Phase 1 (implemented target):**
 
 ```text
 /tmp/ux_report_output/
-├── ux_result.json
-├── action_trace.json
-├── ux_test_recording.webm
-└── screenshots/
+├── ux_result.json          # system-facing — OpenClaw / Skill integration
+├── action_trace.json       # system-facing — debug and audit
+├── ux_test_recording.webm  # user-facing evidence
+└── screenshots/            # user-facing + raw evidence
 ```
+
+**Phase 3+ (planned):** minimal human-readable report  
+**Phase 4+ (planned):** `ux_report.md`, `index.html`, improved `ux_result.json` for Skill delivery  
+**Phase 5 (planned):** OpenClaw / Feishu-style end-to-end Skill delivery
+
+Full file purposes: see `SKILL.md`.
 
 ## Current Phase
 
-**Phase 0 — scaffold conversion.** Documentation and project context only.
+**Phase 1 — browser visual runner for `figma` and `web`.** See `docs/TASKS.md`.
 
-## Non-Goals (Current Phase)
+## Out of Scope (Phase 1)
 
-- No runtime code
-- No Gemini integration
-- No Playwright integration
-- No Android implementation
-- No Windows implementation
-- No OpenClaw deployment integration
+- No Android or Windows adapters yet
+- No formal `ux_report.md` / `index.html` yet (Phase 4)
+- No OpenClaw / Feishu end-to-end Skill delivery yet (Phase 5)
+- No Figma API grounding or DOM-selector-first automation
+
+## Development (Phase 1)
+
+```bash
+pip install -r requirements.txt
+python3 ./scripts/ux_testing.py --help
+```
+
+See `docs/VERIFY.md` for full install and smoke-test steps.
 
 ## Documentation Map
 
 | File | Purpose |
 |---|---|
-| `SKILL.md` | OpenClaw skill execution contract |
+| `SKILL.md` | OpenClaw Skill execution contract (primary usage model) |
+| `requirements.txt` | Phase 1 Python dependencies |
 | `AGENTS.md` | Instructions for Cursor agents |
 | `START_HERE.md` | Onboarding checklist |
 | `docs/PRD.md` | Product requirements |

@@ -4,17 +4,24 @@ Stable facts for oc-visual-test-runner. Keep this file short.
 
 ## Project Summary
 
-Persona-based visual UX testing runner. A VLM observes the screen, reasons from a persona, decides structured actions, and a platform adapter executes them visually until `done`, `blocked`, `max_steps`, or `timeout`.
+**OpenClaw Skill runtime** for persona-based visual UI testing. Users ask OpenClaw in natural language; OpenClaw derives structured parameters, invokes `scripts/ux_testing.py`, and returns a concise summary plus report and evidence links. The runner is not only a standalone CLI — it is the execution layer behind the Skill.
 
 ## Current Stage
 
-**Phase 0 — scaffold conversion.** Documentation and context only. No runtime, no API calls, no Playwright, no Gemini integration.
+**Phase 1 — browser visual runner.** CLI and target config exist; browser adapter, visual agent loop, and VLM integration are in progress.
 
 ## Users / Audience
 
-- UX researchers and designers (Figma prototypes)
-- Product and QA teams (web flows)
-- OpenClaw orchestrators (skill invocation)
+- Designers and product teams reviewing live websites before deeper user testing
+- Designers seeking quick Figma prototype feedback
+- OpenClaw users invoking visual UX tests as a Skill
+- Developers smoke-testing the CLI directly
+
+## Skill Usage (One Line)
+
+NL request → OpenClaw structured input → CLI runner → artifacts → OpenClaw user-facing summary.
+
+Full contract: `SKILL.md`.
 
 ## Tech Stack Expectation
 
@@ -24,8 +31,7 @@ Persona-based visual UX testing runner. A VLM observes the screen, reasons from 
 | CLI | `scripts/ux_testing.py` | 1 |
 | Browser automation | Playwright (visual control) | 1 |
 | VLM | Google Gemini (`GOOGLE_API_KEY`) | 1 |
-
-Not confirmed from the current repository: exact package layout, `requirements.txt`, internal module names.
+| Skill orchestration | OpenClaw (NL → structured input → user return) | 5 |
 
 ## Phase 1 Targets
 
@@ -34,27 +40,38 @@ Not confirmed from the current repository: exact package layout, `requirements.t
 
 ## Planned Targets
 
-- `android` (Phase 5 design, Phase 6 exploration)
-- `windows` (Phase 5 design, Phase 6 exploration)
+- `android` (Phase 6 design, Phase 7 exploration) — **not implemented**
+- `windows` (Phase 6 design, Phase 7 exploration) — **not implemented**
+
+## Output Contract (by Phase)
+
+| Phase | Artifacts |
+|---|---|
+| 1 | `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/` |
+| 3 | Minimal human-readable report |
+| 4 | `ux_report.md`, `index.html`; improved `ux_result.json` |
+| 5 | OpenClaw / Feishu-style end-to-end Skill delivery |
+
+User-facing vs system-facing roles: see `SKILL.md`.
 
 ## Important Constraints
 
 - Persona-based visual behavior; VLM is the decision-maker, adapter executes
 - No Figma API grounding; no DOM-selector-first automation
 - Failed clicks are not automatically UX issues
-- Output contract: `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/`
+- User-facing Skill return is a summary — not raw runner logs
 
 ## Current Assumptions
 
 - Gemini is the Phase 1 VLM provider
 - Figma prototypes are tested as browser pages, not via Figma REST API
 - Default output directory placeholder: `/tmp/ux_report_output`
+- `viewport_width`, `viewport_height`, `run_id` are Skill-level fields; CLI flags may follow in Phase 1+
 
 ## Things Cursor Agent Should Not Assume
 
-- Runtime or `scripts/ux_testing.py` already exists
+- Full visual agent loop or browser adapter already works — check `docs/TASKS.md`
+- `ux_report.md` or `index.html` exist in Phase 1 — Phase 4
+- OpenClaw NL → user return works end-to-end — Phase 5
 - Legacy `figma_runner.py` / `web_runner.py` exist in this repo
-- Figma MCP or Figma API is required for Phase 1
 - Failed clicks imply UX bugs
-- Phase 1 code already exists — check `docs/TASKS.md` first
-- Implementation directories (`scripts/core/`, `scripts/adapters/`, `scripts/targets/`) exist — they are planned, not present in Phase 0

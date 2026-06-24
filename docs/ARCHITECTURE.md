@@ -2,11 +2,39 @@
 
 ## Overview
 
-oc-visual-test-runner implements a **universal visual agent loop** driven by target configuration. A platform adapter exposes the target surface; each iteration captures an observation frame, asks a VLM for a structured action, executes it visually, observes feedback, and appends to the trace until a terminal condition.
+oc-visual-test-runner is the **OpenClaw Skill runtime** for persona-based visual UI testing. Users ask OpenClaw in natural language; OpenClaw derives structured parameters, invokes the CLI runner, and returns a human-readable summary with report and evidence links.
 
-Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future targets (`android`, `windows`) will add dedicated adapters behind the same loop interface.
+The runner implements a **universal visual agent loop** driven by target configuration. A platform adapter exposes the target surface; each iteration captures an observation frame, asks a VLM for a structured action, executes it visually, observes feedback, and appends to the trace until a terminal condition.
 
-> **Phase 0:** Architecture below is **planned**. No runtime implementation exists yet.
+Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future targets (`android`, `windows`) will add dedicated adapters behind the same loop and Skill model.
+
+> **Phase 1:** CLI and config exist; browser adapter, agent loop, and VLM integration are in progress.
+
+## OpenClaw Skill Flow
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│  User (natural language)                                      │
+│  "Test this site as a first-time visitor… find pricing"       │
+└───────────────────────────┬──────────────────────────────────┘
+                            ▼
+┌──────────────────────────────────────────────────────────────┐
+│  OpenClaw Skill layer                                         │
+│  NL → structured input (target, url, persona, goal, limits)   │
+│  invokes CLI → reads ux_result.json → user-facing summary     │
+└───────────────────────────┬──────────────────────────────────┘
+                            ▼
+┌──────────────────────────────────────────────────────────────┐
+│  scripts/ux_testing.py (CLI)                                  │
+│  prints SELECTED_TARGET / SELECTED_ADAPTER / SELECTED_RUNNER  │
+└───────────────────────────┬──────────────────────────────────┘
+                            ▼
+                    [Visual Agent Loop — below]
+                            ▼
+┌──────────────────────────────────────────────────────────────┐
+│  output_dir artifacts → OpenClaw → user (summary + links)     │
+└──────────────────────────────────────────────────────────────┘
+```
 
 ## System Diagram
 
@@ -48,8 +76,8 @@ Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future 
 
 | Component | Responsibility | Status |
 |---|---|---|
-| `scripts/ux_testing.py` | CLI entrypoint | **Planned** (Phase 1) |
-| Target config | Parse and validate CLI/skill inputs | **Planned** (Phase 1) |
+| `scripts/ux_testing.py` | CLI entrypoint; prints `SELECTED_*` metadata | **Partial** (Phase 1) |
+| Target config | Parse and validate CLI/Skill inputs | **Partial** (Phase 1) |
 | Core visual agent loop | Orchestrate observe → decide → act → feedback → record | **Planned** (Phase 1) |
 | Browser platform adapter | Navigate, capture frames, visual click/type/scroll | **Planned** (Phase 1) |
 | Observation frame | Screenshot + metadata (step, viewport, timestamp) | **Planned** (Phase 1) |
@@ -60,17 +88,18 @@ Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future 
 | Recording capture | `ux_test_recording.webm` | **Planned** (Phase 1) |
 | Cursor/hover observer | Marker overlay, hover-before-click | **Planned** (Phase 1.5) |
 | Post-click verifier | Confirm UI change; retry policy | **Planned** (Phase 2) |
-| Report generator | Minimal human-readable summary | **Planned** (Phase 3) |
-| Skill integration | OpenClaw-compatible wrapper | **Planned** (Phase 4) |
-| Android adapter | Device/emulator visual control | **Planned** (Phase 5–6) |
-| Windows adapter | Desktop visual control | **Planned** (Phase 5–6) |
+| Report generator (minimal) | Phase 3 human-readable summary | **Planned** (Phase 3) |
+| Report generator (formal) | `ux_report.md`, `index.html` | **Planned** (Phase 4) |
+| Skill delivery layer | OpenClaw / Feishu-style end-to-end return | **Planned** (Phase 5) |
+| Android adapter | Device/emulator visual control | **Planned** (Phase 6–7) |
+| Windows adapter | Desktop visual control | **Planned** (Phase 6–7) |
 
 ## Main Directories
 
 | Path | Purpose | Status |
 |---|---|---|
-| `scripts/ux_testing.py` | CLI entry | **Planned** (Phase 1) |
-| `scripts/core/` | Visual agent loop, config, writers | **Planned** (Phase 1) — do not create in Phase 0 |
+| `scripts/ux_testing.py` | CLI entry | **Exists** (Phase 1 — config validation) |
+| `scripts/core/` | Visual agent loop, config, writers | **Partial** (Phase 1) |
 | `scripts/adapters/` | Platform adapters (browser, future android/windows) | **Planned** (Phase 1+) — do not create in Phase 0 |
 | `scripts/targets/` | Target-specific config/helpers | **Planned** (Phase 1+) — do not create in Phase 0 |
 | `docs/` | Product and architecture docs | **Exists** (Phase 0) |
@@ -80,7 +109,16 @@ Exact package layout will be decided at Phase 1 start and recorded in `docs/DECI
 
 ## Data Flow
 
-1. **Load target config** — `target=figma|web`, URL, persona, goal, output_dir, limits.
+### Skill path (user-facing)
+
+1. **User request** — natural language (target, URL, persona, goal, optional constraints).
+2. **OpenClaw** — derives structured Skill input per `SKILL.md`.
+3. **CLI invocation** — `scripts/ux_testing.py` with structured parameters; runner prints `SELECTED_*` metadata.
+4. **Runner loop** — see below.
+5. **OpenClaw return** — concise summary + report/evidence paths (not raw logs).
+
+### Runner loop (execution)
+1. **Load target config** — `target=figma|web`, URL, persona, goal, output_dir, limits, optional viewport, `run_id`.
 2. **Initialize platform adapter** — Browser opens URL; viewport set; recording started.
 3. **Loop:**
    - Adapter captures **observation frame** (screenshot + metadata).
@@ -89,7 +127,20 @@ Exact package layout will be decided at Phase 1 start and recorded in `docs/DECI
    - **Feedback observation** — capture post-action frame or hover state.
    - **Trace writer** appends to `action_trace.json`; save screenshot.
    - Exit if action is `done` or `blocked`, or limits exceeded.
-4. **Finalize** — Write `ux_result.json`; stop recording → `ux_test_recording.webm`.
+4. **Finalize** — Write `ux_result.json`; stop recording → `ux_test_recording.webm`. Phase 3+ adds reports; Phase 4 adds `ux_report.md` and `index.html`.
+
+## Output Artifacts
+
+| Artifact | Audience | Phase |
+|---|---|---|
+| `ux_result.json` | System — OpenClaw / Skill / Feishu | 1+ |
+| `action_trace.json` | System — debug, audit | 1+ |
+| `screenshots/` | Both — evidence | 1+ |
+| `ux_test_recording.webm` | User-facing evidence | 1+ |
+| Minimal report | User-facing | 3+ |
+| `ux_report.md`, `index.html` | User-facing primary report | 4+ |
+
+See `SKILL.md` for report content expectations and user-facing return format.
 
 ## External Services
 

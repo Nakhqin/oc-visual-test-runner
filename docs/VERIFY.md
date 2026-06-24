@@ -2,7 +2,7 @@
 
 How to verify changes at each project stage.
 
-## Phase 0 — Documentation Scaffold (Current)
+## Phase 0 — Documentation Scaffold (Complete)
 
 No runtime to execute. Verify documentation and scope only.
 
@@ -27,13 +27,13 @@ grep -r "starter kit" README.md SKILL.md docs/ 2>/dev/null || echo "OK: no start
 
 ### Manual Checklist
 
-- [ ] Starter-kit naming has been fully replaced with oc-visual-test-runner
-- [ ] `README.md` describes project name, Phase 1 targets (`figma`, `web`), planned targets (`android`, `windows`), architecture, CLI shape, output contract, Phase 0 non-goals
-- [ ] `SKILL.md` exists and describes skill contract: inputs, outputs, action protocol, classifications
-- [ ] `docs/` files are no longer TODO placeholders — they reflect the real project
-- [ ] No runtime implementation files were created (`scripts/ux_testing.py`, `scripts/core/`, adapters, etc.)
-- [ ] No secrets were added — `.env.example` has placeholders only
-- [ ] Git diff only includes scaffold/context files (docs, rules, README, SKILL, AGENTS, START_HERE, `.env.example`, `.gitignore`, `.cursorignore`)
+- [x] Starter-kit naming has been fully replaced with oc-visual-test-runner
+- [x] `README.md` describes project name, Phase 1 targets (`figma`, `web`), planned targets (`android`, `windows`), architecture, CLI shape, output contract, Phase 0 non-goals
+- [x] `SKILL.md` exists and describes skill contract: inputs, outputs, action protocol, classifications
+- [x] `docs/` files are no longer TODO placeholders — they reflect the real project
+- [x] No runtime implementation files were created (`scripts/ux_testing.py`, `scripts/core/`, adapters, etc.)
+- [x] No secrets were added — `.env.example` has placeholders only
+- [x] Git diff only includes scaffold/context files (docs, rules, README, SKILL, AGENTS, START_HERE, `.env.example`, `.gitignore`, `.cursorignore`)
 
 ### Definition of Done (Phase 0)
 
@@ -43,7 +43,7 @@ grep -r "starter kit" README.md SKILL.md docs/ 2>/dev/null || echo "OK: no start
 
 ---
 
-## Phase 1 — Browser Visual Runner (Future)
+## Phase 1 — Browser Visual Runner (Current)
 
 ### Install Dependencies
 
@@ -118,8 +118,28 @@ ruff check .
 - [ ] `action_trace.json` records steps with actions and observation refs
 - [ ] Screenshots exist for each step
 - [ ] `ux_test_recording.webm` captures the session
+- [ ] Runner prints `SELECTED_TARGET`, `SELECTED_ADAPTER`, `SELECTED_RUNNER` metadata
 - [ ] Clicks use visual coordinates, not Figma node IDs or CSS selectors
 - [ ] Failed click logged without automatic UX defect classification
+
+### Verify Phase 3+ Output (Future)
+
+```bash
+# Phase 3 — minimal report (path TBD in DECISIONS.md)
+# Phase 4 — formal reports
+ls /tmp/ux_report_output/ux_report.md
+ls /tmp/ux_report_output/index.html
+```
+
+### Documentation: OpenClaw Skill Usage Model
+
+After Skill documentation updates, confirm:
+
+- [ ] `SKILL.md` describes NL user input → structured input → CLI → artifacts → user-facing return
+- [ ] `docs/PRD.md` documents three main usage scenarios (web redesign, Figma prototype, future devices)
+- [ ] User-facing vs system-facing output files are distinguished
+- [ ] Phase 1 output does **not** claim `ux_report.md` or `index.html` exist yet
+- [ ] Android / Windows described as planned only
 
 ---
 

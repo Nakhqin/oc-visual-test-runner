@@ -6,38 +6,29 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 
 ## Current Priority
 
-**Phase 0 — Convert starter kit into oc-visual-test-runner scaffold**
-
-Documentation and project-context only. No runtime code, no API calls, no Playwright, no Gemini, no browser adapter.
+**Phase 1 — Browser visual runner for figma/web**
 
 | Status | Task |
 |---|---|
-| In Progress | Rewrite README, SKILL, AGENTS, START_HERE, docs/, rules for oc-visual-test-runner |
-| Todo | Mark Phase 0 Done after VERIFY.md checks pass |
-
-**Exit criteria:** All context files describe the real project; agents can read docs and know what to build next; git diff contains only scaffold/context files.
-
----
-
-## Backlog
-
-### Phase 1 — Browser visual runner for figma/web
-
-| Status | Task |
-|---|---|
-| Todo | Create `scripts/ux_testing.py` CLI entry |
-| Todo | Define target config parsing |
+| Done | Create `scripts/ux_testing.py` CLI entry |
+| Done | Define target config parsing |
 | Todo | Implement shared browser platform adapter |
 | Todo | Implement core visual agent loop |
 | Todo | Integrate VLM (Gemini) for action decisions |
 | Todo | Implement action schema and executor |
 | Todo | Write trace/result output (`action_trace.json`, `ux_result.json`, screenshots, `.webm`) |
-| Todo | Decide package layout; record in DECISIONS.md |
-| Todo | Add `requirements.txt` when stack chosen |
+| Done | Decide package layout; record in DECISIONS.md |
+| Todo | Print `SELECTED_TARGET`, `SELECTED_ADAPTER`, `SELECTED_RUNNER` metadata for OpenClaw |
 
-**Exit criteria:** End-to-end run against one Figma prototype URL and one web URL with full output contract.
+| Done | Add `requirements.txt` when stack chosen |
+
+**Phase 1 output:** `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/` only.
+
+**Exit criteria:** End-to-end run against one Figma prototype URL and one web URL with Phase 1 output contract.
 
 ---
+
+## Backlog
 
 ### Phase 1.5 — Cursor marker + hover observation loop
 
@@ -47,7 +38,7 @@ Documentation and project-context only. No runtime code, no API calls, no Playwr
 | Todo | Hover-before-click observation step |
 | Todo | VLM reacts to hover/visual feedback in loop |
 
-**Exit criteria:** Trace shows hover/marker steps; documented in VERIFY.md.
+**Exit criteria:** Trace shows hover/marker steps; VLM can decide click / adjust / wait / block after hover feedback; documented in VERIFY.md.
 
 ---
 
@@ -71,23 +62,38 @@ Documentation and project-context only. No runtime code, no API calls, no Playwr
 | Todo | Optional UX finding tags with explicit criteria |
 | Todo | Document report schema in DECISIONS.md |
 
-**Exit criteria:** Report generated alongside `ux_result.json`; no legacy report system.
+**Exit criteria:** Minimal user-facing report generated alongside `ux_result.json`; no legacy report system.
 
 ---
 
-### Phase 4 — OpenClaw skill integration
+### Phase 4 — Formal reports and Skill-ready result JSON
+
+| Status | Task |
+|---|---|
+| Todo | Generate formal `ux_report.md` |
+| Todo | Generate formal `index.html` (main human-readable report) |
+| Todo | Improve `ux_result.json` schema for OpenClaw Skill integration |
+| Todo | Align report content with `SKILL.md` (journey, findings, classification, evidence) |
+
+**Exit criteria:** User-facing report paths (`index.html`, `ux_report.md`) populated; OpenClaw can build user-facing return from artifacts.
+
+---
+
+### Phase 5 — OpenClaw / Feishu-style Skill delivery
 
 | Status | Task |
 |---|---|
 | Todo | Skill entrypoint matching SKILL.md contract |
+| Todo | NL → structured input conversion in OpenClaw layer |
+| Todo | User-facing summary template (not raw logs) |
+| Todo | End-to-end Skill invocation test with report/evidence links |
 | Todo | OpenClaw manifest or registration docs |
-| Todo | End-to-end skill invocation test |
 
-**Exit criteria:** OpenClaw invokes runner and consumes output files.
+**Exit criteria:** User asks in natural language; OpenClaw invokes runner and returns concise summary plus report/recording/result paths.
 
 ---
 
-### Phase 5 — Android/Windows adapter design
+### Phase 6 — Android/Windows adapter design
 
 | Status | Task |
 |---|---|
@@ -99,7 +105,7 @@ Documentation and project-context only. No runtime code, no API calls, no Playwr
 
 ---
 
-### Phase 6 — Android/Windows implementation exploration
+### Phase 7 — Android/Windows implementation exploration
 
 | Status | Task |
 |---|---|
@@ -121,7 +127,7 @@ Documentation and project-context only. No runtime code, no API calls, no Playwr
 
 | Date | Task | Notes |
 |---|---|---|
-| — | — | — |
+| 2026-06-24 | Phase 0 — Convert starter kit into oc-visual-test-runner scaffold | VERIFY.md checks passed; docs/rules/SKILL aligned to project name and architecture |
 
 ## Explicitly Not Doing
 

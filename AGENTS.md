@@ -46,5 +46,5 @@ Summarize:
 
 - Do not run destructive commands without explicit approval.
 - Do not modify production or deployment configuration unless explicitly asked.
-- Do not create runtime implementation files during Phase 0.
+- Do not create runtime implementation files outside the current phase in `docs/TASKS.md`.
 - Do not call external APIs (Gemini, Figma API, etc.) unless the task explicitly requires it and the phase allows it.
