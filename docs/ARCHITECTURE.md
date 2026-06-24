@@ -100,7 +100,7 @@ Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future 
 |---|---|---|
 | `scripts/ux_testing.py` | CLI entry | **Exists** (Phase 1 — config validation) |
 | `scripts/core/` | Visual agent loop, config, writers | **Partial** (Phase 1) |
-| `scripts/adapters/` | Platform adapters (browser, future android/windows) | **Planned** (Phase 1+) — do not create in Phase 0 |
+| `scripts/adapters/browser.py` | Browser platform adapter | **Partial** (Phase 1 — initial capture) |
 | `scripts/targets/` | Target-specific config/helpers | **Planned** (Phase 1+) — do not create in Phase 0 |
 | `docs/` | Product and architecture docs | **Exists** (Phase 0) |
 | `scripts/` | Setup helpers | **Exists** (Phase 0) |

@@ -11,6 +11,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+from adapters.browser import BrowserAdapterError, run_initial_capture  # noqa: E402
 from core.config import (  # noqa: E402
     DEFAULT_MAX_STEPS,
     DEFAULT_TIMEOUT_SECONDS,
@@ -78,6 +79,12 @@ def parse_args(argv: list[str] | None = None) -> TargetConfig:
     )
 
 
+def print_selection_metadata(config: TargetConfig) -> None:
+    print(f"SELECTED_TARGET={config.target}")
+    print("SELECTED_ADAPTER=browser")
+    print("SELECTED_RUNNER=visual_agent")
+
+
 def main(argv: list[str] | None = None) -> int:
     try:
         config = parse_args(argv)
@@ -85,15 +92,25 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
+    print_selection_metadata(config)
+
+    try:
+        frame = run_initial_capture(
+            target=config.target,
+            url=config.url,
+            output_dir=config.output_dir,
+            timeout_seconds=config.timeout_seconds,
+        )
+    except BrowserAdapterError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
     print(
-        "Config validated. Visual agent loop and browser adapter are not implemented yet.",
+        "Initial observation frame captured. Visual agent loop is not implemented yet.",
         file=sys.stderr,
     )
-    print(
-        f"target={config.target} url={config.url} output_dir={config.output_dir}",
-        file=sys.stderr,
-    )
-    return 1
+    print(f"screenshot={frame.image_path}", file=sys.stderr)
+    return 0
 
 
 if __name__ == "__main__":
