@@ -6,38 +6,25 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 
 ## Current Priority
 
-**Phase 0 — Convert starter kit into oc-visual-test-runner scaffold**
-
-Documentation and project-context only. No runtime code, no API calls, no Playwright, no Gemini, no browser adapter.
+**Phase 1 — Browser visual runner for figma/web**
 
 | Status | Task |
 |---|---|
-| In Progress | Rewrite README, SKILL, AGENTS, START_HERE, docs/, rules for oc-visual-test-runner |
-| Todo | Mark Phase 0 Done after VERIFY.md checks pass |
-
-**Exit criteria:** All context files describe the real project; agents can read docs and know what to build next; git diff contains only scaffold/context files.
-
----
-
-## Backlog
-
-### Phase 1 — Browser visual runner for figma/web
-
-| Status | Task |
-|---|---|
-| Todo | Create `scripts/ux_testing.py` CLI entry |
-| Todo | Define target config parsing |
+| Done | Create `scripts/ux_testing.py` CLI entry |
+| Done | Define target config parsing |
 | Todo | Implement shared browser platform adapter |
 | Todo | Implement core visual agent loop |
 | Todo | Integrate VLM (Gemini) for action decisions |
 | Todo | Implement action schema and executor |
 | Todo | Write trace/result output (`action_trace.json`, `ux_result.json`, screenshots, `.webm`) |
-| Todo | Decide package layout; record in DECISIONS.md |
-| Todo | Add `requirements.txt` when stack chosen |
+| Done | Decide package layout; record in DECISIONS.md |
+| Done | Add `requirements.txt` when stack chosen |
 
 **Exit criteria:** End-to-end run against one Figma prototype URL and one web URL with full output contract.
 
 ---
+
+## Backlog
 
 ### Phase 1.5 — Cursor marker + hover observation loop
 
@@ -121,7 +108,7 @@ Documentation and project-context only. No runtime code, no API calls, no Playwr
 
 | Date | Task | Notes |
 |---|---|---|
-| — | — | — |
+| 2026-06-24 | Phase 0 — Convert starter kit into oc-visual-test-runner scaffold | VERIFY.md checks passed; docs/rules/SKILL aligned to project name and architecture |
 
 ## Explicitly Not Doing
 

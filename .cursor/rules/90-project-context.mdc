@@ -13,7 +13,7 @@ oc-visual-test-runner
 
 ## Current Stage
 
-Phase 0 — scaffold conversion (documentation and context only; no runtime).
+Phase 1 — browser visual runner for `figma` and `web` (shared browser adapter, visual agent loop, VLM integration).
 
 ## Project Purpose
 

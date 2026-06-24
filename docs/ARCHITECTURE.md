@@ -6,7 +6,7 @@ oc-visual-test-runner implements a **universal visual agent loop** driven by tar
 
 Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future targets (`android`, `windows`) will add dedicated adapters behind the same loop interface.
 
-> **Phase 0:** Architecture below is **planned**. No runtime implementation exists yet.
+> **Phase 1:** Architecture below is **planned**; runtime implementation is the current priority.
 
 ## System Diagram
 

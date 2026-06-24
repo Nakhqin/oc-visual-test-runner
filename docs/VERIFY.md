@@ -2,7 +2,7 @@
 
 How to verify changes at each project stage.
 
-## Phase 0 — Documentation Scaffold (Current)
+## Phase 0 — Documentation Scaffold (Complete)
 
 No runtime to execute. Verify documentation and scope only.
 
@@ -27,13 +27,13 @@ grep -r "starter kit" README.md SKILL.md docs/ 2>/dev/null || echo "OK: no start
 
 ### Manual Checklist
 
-- [ ] Starter-kit naming has been fully replaced with oc-visual-test-runner
-- [ ] `README.md` describes project name, Phase 1 targets (`figma`, `web`), planned targets (`android`, `windows`), architecture, CLI shape, output contract, Phase 0 non-goals
-- [ ] `SKILL.md` exists and describes skill contract: inputs, outputs, action protocol, classifications
-- [ ] `docs/` files are no longer TODO placeholders — they reflect the real project
-- [ ] No runtime implementation files were created (`scripts/ux_testing.py`, `scripts/core/`, adapters, etc.)
-- [ ] No secrets were added — `.env.example` has placeholders only
-- [ ] Git diff only includes scaffold/context files (docs, rules, README, SKILL, AGENTS, START_HERE, `.env.example`, `.gitignore`, `.cursorignore`)
+- [x] Starter-kit naming has been fully replaced with oc-visual-test-runner
+- [x] `README.md` describes project name, Phase 1 targets (`figma`, `web`), planned targets (`android`, `windows`), architecture, CLI shape, output contract, Phase 0 non-goals
+- [x] `SKILL.md` exists and describes skill contract: inputs, outputs, action protocol, classifications
+- [x] `docs/` files are no longer TODO placeholders — they reflect the real project
+- [x] No runtime implementation files were created (`scripts/ux_testing.py`, `scripts/core/`, adapters, etc.)
+- [x] No secrets were added — `.env.example` has placeholders only
+- [x] Git diff only includes scaffold/context files (docs, rules, README, SKILL, AGENTS, START_HERE, `.env.example`, `.gitignore`, `.cursorignore`)
 
 ### Definition of Done (Phase 0)
 
@@ -43,7 +43,7 @@ grep -r "starter kit" README.md SKILL.md docs/ 2>/dev/null || echo "OK: no start
 
 ---
 
-## Phase 1 — Browser Visual Runner (Future)
+## Phase 1 — Browser Visual Runner (Current)
 
 ### Install Dependencies
 

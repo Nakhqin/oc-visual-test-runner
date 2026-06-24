@@ -62,7 +62,7 @@ trace / result output
 
 ## Future CLI Shape
 
-> Not implemented in Phase 0. See `docs/TASKS.md`.
+> Planned CLI — see `docs/TASKS.md` for Phase 1 implementation status.
 
 ```bash
 python3 ./scripts/ux_testing.py \
@@ -96,22 +96,28 @@ python3 ./scripts/ux_testing.py \
 
 ## Current Phase
 
-**Phase 0 — scaffold conversion.** Documentation and project context only.
+**Phase 1 — browser visual runner for `figma` and `web`.** See `docs/TASKS.md`.
 
-## Non-Goals (Current Phase)
+## Out of Scope (Phase 1)
 
-- No runtime code
-- No Gemini integration
-- No Playwright integration
-- No Android implementation
-- No Windows implementation
-- No OpenClaw deployment integration
+- No Android or Windows adapters yet
+- No OpenClaw deployment integration yet
+- No Figma API grounding or DOM-selector-first automation
+
+## Development (Phase 1)
+
+```bash
+pip install -r requirements.txt
+python3 ./scripts/ux_testing.py --help
+```
+
+See `docs/VERIFY.md` for full install and smoke-test steps.
 
 ## Documentation Map
 
 | File | Purpose |
 |---|---|
-| `SKILL.md` | OpenClaw skill execution contract |
+| `requirements.txt` | Phase 1 Python dependencies |
 | `AGENTS.md` | Instructions for Cursor agents |
 | `START_HERE.md` | Onboarding checklist |
 | `docs/PRD.md` | Product requirements |

@@ -13,8 +13,8 @@ Run persona-based visual UX walkthroughs. The runner simulates a human participa
 | `persona` | Yes | Participant persona for VLM reasoning |
 | `goal` | Yes | Task or scenario the persona should attempt |
 | `output_dir` | Yes | Directory for run artifacts |
-| `max_steps` | No | Maximum agent loop iterations (default TBD in Phase 1) |
-| `timeout_seconds` | No | Overall run timeout (default TBD in Phase 1) |
+| `max_steps` | No | Maximum agent loop iterations (default: 10) |
+| `timeout_seconds` | No | Overall run timeout (default: 180 seconds) |
 
 ## Supported Targets (Phase 1)
 
@@ -59,7 +59,7 @@ python3 ./scripts/ux_testing.py \
   --max-steps 10
 ```
 
-> **Phase 0:** Runtime implementation is not yet available. Commands above define the intended contract only.
+> **Phase 1:** Runtime implementation in progress. Commands above define the intended CLI contract.
 
 ## Output Files
 
@@ -117,4 +117,4 @@ UX findings require explicit persona reasoning or verified criteria—not click 
 
 ## Current Phase
 
-**Phase 0 — scaffold only.** Runtime implementation, VLM integration, browser adapter, and CLI entrypoint are not yet available. See `docs/TASKS.md` for the implementation roadmap.
+**Phase 1 — browser visual runner.** Runtime implementation for `figma` and `web` via shared browser adapter. See `docs/TASKS.md` for the implementation roadmap.

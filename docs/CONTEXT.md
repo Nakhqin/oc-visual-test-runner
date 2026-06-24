@@ -8,7 +8,7 @@ Persona-based visual UX testing runner. A VLM observes the screen, reasons from 
 
 ## Current Stage
 
-**Phase 0 — scaffold conversion.** Documentation and context only. No runtime, no API calls, no Playwright, no Gemini integration.
+**Phase 1 — browser visual runner.** Implement CLI, shared browser adapter, visual agent loop, and VLM integration for `figma` and `web` targets.
 
 ## Users / Audience
 
@@ -57,4 +57,4 @@ Not confirmed from the current repository: exact package layout, `requirements.t
 - Figma MCP or Figma API is required for Phase 1
 - Failed clicks imply UX bugs
 - Phase 1 code already exists — check `docs/TASKS.md` first
-- Implementation directories (`scripts/core/`, `scripts/adapters/`, `scripts/targets/`) exist — they are planned, not present in Phase 0
+- Implementation directories (`scripts/core/`, `scripts/adapters/`, `scripts/targets/`) are planned for Phase 1 — check `docs/TASKS.md` before assuming they exist
