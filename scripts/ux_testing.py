@@ -19,6 +19,7 @@ from core.config import (  # noqa: E402
     TargetConfig,
     build_target_config,
 )
+from core.writers import write_run_artifacts  # noqa: E402
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -101,15 +102,14 @@ def main(argv: list[str] | None = None) -> int:
             output_dir=config.output_dir,
             timeout_seconds=config.timeout_seconds,
         )
+        artifacts = write_run_artifacts(config, frame)
     except BrowserAdapterError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
-    print(
-        "Initial observation frame captured. Visual agent loop is not implemented yet.",
-        file=sys.stderr,
-    )
     print(f"screenshot={frame.image_path}", file=sys.stderr)
+    print(f"action_trace={artifacts.action_trace_path}", file=sys.stderr)
+    print(f"ux_result={artifacts.ux_result_path}", file=sys.stderr)
     return 0
 
 

@@ -12,11 +12,11 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 |---|---|
 | Done | Create `scripts/ux_testing.py` CLI entry |
 | Done | Define target config parsing |
-| In Progress | Implement shared browser platform adapter (initial URL open + screenshot capture) |
+| Done | Implement shared browser platform adapter (initial URL open + screenshot capture) |
 | Todo | Implement core visual agent loop |
 | Todo | Integrate VLM (Gemini) for action decisions |
 | Todo | Implement action schema and executor |
-| Todo | Write trace/result output (`action_trace.json`, `ux_result.json`, screenshots, `.webm`) |
+| In Progress | Write trace/result output (`action_trace.json`, `ux_result.json`, screenshots, `.webm`) |
 | Done | Decide package layout; record in DECISIONS.md |
 | Done | Print `SELECTED_TARGET`, `SELECTED_ADAPTER`, `SELECTED_RUNNER` metadata for OpenClaw |
 | Done | Add `requirements.txt` when stack chosen |
