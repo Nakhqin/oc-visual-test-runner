@@ -181,6 +181,27 @@ OpenClaw needs structured `ux_result.json` and `action_trace.json` before the fu
 
 ---
 
+### 2026-06-24 — Visual agent loop skeleton with stub decision maker
+
+**Status:** Accepted
+
+**Context:**
+Phase 1 needs the observe → decide → record loop before Gemini integration.
+
+**Decision:**
+- Add `scripts/core/loop.py` to orchestrate browser capture, decision, and artifact writes
+- Add `scripts/core/actions.py` for minimal `Action` types and terminal detection
+- Add `scripts/core/decision.py` with `StubDecisionMaker` returning `blocked` until VLM lands
+- Refactor `scripts/core/writers.py` to `TraceBuilder` + `write_loop_artifacts`
+- Stub-blocked runs classify as `automation limitation` (runner cannot decide persona actions yet)
+- Action execution and feedback observation remain `null` until executor ships
+
+**Consequences:**
+- CLI runs full loop skeleton and writes updated trace/result JSON
+- Next slice: swap `StubDecisionMaker` for Gemini client and add action executor
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

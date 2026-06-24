@@ -11,7 +11,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from adapters.browser import BrowserAdapterError, run_initial_capture  # noqa: E402
+from adapters.browser import BrowserAdapterError  # noqa: E402
 from core.config import (  # noqa: E402
     DEFAULT_MAX_STEPS,
     DEFAULT_TIMEOUT_SECONDS,
@@ -19,7 +19,7 @@ from core.config import (  # noqa: E402
     TargetConfig,
     build_target_config,
 )
-from core.writers import write_run_artifacts  # noqa: E402
+from core.loop import run_visual_agent_loop  # noqa: E402
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -96,20 +96,15 @@ def main(argv: list[str] | None = None) -> int:
     print_selection_metadata(config)
 
     try:
-        frame = run_initial_capture(
-            target=config.target,
-            url=config.url,
-            output_dir=config.output_dir,
-            timeout_seconds=config.timeout_seconds,
-        )
-        artifacts = write_run_artifacts(config, frame)
+        result = run_visual_agent_loop(config)
     except BrowserAdapterError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
-    print(f"screenshot={frame.image_path}", file=sys.stderr)
-    print(f"action_trace={artifacts.action_trace_path}", file=sys.stderr)
-    print(f"ux_result={artifacts.ux_result_path}", file=sys.stderr)
+    print(f"terminal_state={result.terminal_state}", file=sys.stderr)
+    print(f"steps_taken={result.steps_taken}", file=sys.stderr)
+    print(f"action_trace={result.artifacts.action_trace_path}", file=sys.stderr)
+    print(f"ux_result={result.artifacts.ux_result_path}", file=sys.stderr)
     return 0
 
 
