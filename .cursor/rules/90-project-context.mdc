@@ -1,44 +1,56 @@
 ---
-description: Project-specific context. Update this file for every new project.
+description: Project-specific context for oc-visual-test-runner.
 alwaysApply: true
 ---
 
 # Project Context
 
-Keep this file short. It should contain only stable project facts.
+Short, strict, factual. Not a PRD.
 
 ## Project Name
 
-TODO
-
-## Project Goal
-
-TODO
+oc-visual-test-runner
 
 ## Current Stage
 
-TODO
+Phase 0 — scaffold conversion (documentation and context only; no runtime).
 
-## Tech Stack
+## Project Purpose
 
-TODO
+Persona-based visual UX testing runner. VLM observes screen → structured action → platform adapter executes → feedback observation → trace/result output until `done`, `blocked`, `max_steps`, or `timeout`.
 
-## Main Directories
+## Phase 1 Supported Targets
 
-TODO
+- `figma` — Figma prototype URL in browser
+- `web` — website URL in browser
+- Both use a **shared browser adapter**
 
-## How to Run
+## Planned Future Targets
 
-TODO
+- `android` — future platform adapter (not implemented)
+- `windows` — future platform adapter (not implemented)
 
-## How to Test / Verify
+## Core Architecture Direction
 
-TODO
+```text
+target config → platform adapter → observation frame
+  → VLM action decision → action execution → feedback observation → trace/result output
+```
 
-## Non-Negotiable Rules
+Organized around a **universal visual agent loop**.
 
-TODO
+## Current Non-Goals
 
-## Do Not Touch Without Confirmation
+- No runtime code, Gemini, Playwright, or browser adapter implementation
+- No Android or Windows adapters
+- No OpenClaw deployment integration
+- No Figma API grounding or DOM-selector-first automation
+- No legacy runner migration
 
-TODO
+## Cursor Agent Must Not Assume
+
+- Runtime or CLI (`scripts/ux_testing.py`) already exists — check `docs/TASKS.md`
+- Failed clicks automatically mean UX issues
+- Legacy `figma_runner.py` / `web_runner.py` exist in this repo
+- Package layout or `requirements.txt` is finalized — decide in Phase 1
+- Real API keys belong in the repo — use `.env` locally only

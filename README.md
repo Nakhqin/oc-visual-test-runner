@@ -1,52 +1,122 @@
-# Nana Cursor Starter Kit
+# oc-visual-test-runner
 
-A minimal starter kit for Cursor-based projects.
+A persona-based visual UX testing runner for Figma prototypes and websites. It simulates a human participant by letting a VLM observe the screen, decide a structured action, execute that action through a platform adapter, observe feedback, and continue until a terminal state is reached.
 
-The goal is to give Cursor Agent enough structure to work safely without bloating context.
+## Current Supported Targets (Phase 1)
 
-## What This Includes
+| Target | Description |
+|---|---|
+| `figma` | Figma prototype URL opened in a browser |
+| `web` | Normal website URL opened in a browser |
+
+Both use a **shared browser adapter**.
+
+## Planned Targets
+
+| Target | Status |
+|---|---|
+| `android` | Future adapter (design Phase 5; implementation Phase 6) |
+| `windows` | Future adapter (design Phase 5; implementation Phase 6) |
+
+## Core Concept
 
 ```text
-.cursor/
-  rules/
-    00-agent-discipline.mdc
-    10-code-quality.mdc
-    20-safety.mdc
-    90-project-context.mdc
-  plans/
-    .gitkeep
-  mcp.json.example
-
-docs/
-  PRD.md
-  ARCHITECTURE.md
-  TASKS.md
-  DECISIONS.md
-  VERIFY.md
-  CONTEXT.md
-
-AGENTS.md
-START_HERE.md
-.cursorignore
-.gitignore
-.env.example
+VLM observes screen → decides action → adapter executes → runner observes feedback → trace/result output
 ```
 
-## First Setup
+The VLM behaves like a user looking at the interface: deciding what appears actionable, moving the cursor or pointer, observing feedback, and continuing the walkthrough.
 
-1. Rename this folder to your project name.
-2. Update `README.md` with the real project overview.
-3. Update `.cursor/rules/90-project-context.mdc` with stable project facts.
-4. Fill in `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/TASKS.md`, and `docs/VERIFY.md`.
-5. Copy `.cursor/mcp.json.example` to `.cursor/mcp.json` only when MCP is needed.
-6. Copy `.env.example` to `.env` locally and never commit real secrets.
+## Why This Exists
 
-## Best Practice
+Traditional UX testing often relies on manual sessions or brittle automation (DOM selectors, Figma API node mapping). This runner simulates **persona-based UX walkthroughs** more like a human participant—visual observation and action, not selector-first scripts.
 
-Use this starter as a skeleton, not as a project encyclopedia.
+## High-Level Architecture
 
-- Rules should be short and strict.
-- Docs should describe current reality.
-- Plans should be created before large changes.
-- Skills should be added only for specialized workflows.
-- MCP should use the minimum permissions needed.
+| Component | Role |
+|---|---|
+| **Visual agent loop** | Orchestrates observe → decide → act → record until terminal state |
+| **Target config** | Parses `target`, `url`, `persona`, `goal`, limits |
+| **Platform adapter** | Opens target, captures observations, executes actions, records evidence |
+| **Observation frames** | Screenshot + metadata per loop iteration |
+| **Action schema** | Structured VLM actions (`click`, `scroll`, `done`, `blocked`, etc.) |
+| **Trace writer** | Persists `action_trace.json` and step screenshots |
+| **Result writer** | Persists `ux_result.json` with terminal state and classifications |
+
+```text
+target config
+    ↓
+platform adapter
+    ↓
+observation frame
+    ↓
+VLM action decision
+    ↓
+action execution
+    ↓
+feedback observation
+    ↓
+trace / result output
+    ↑
+    └── visual agent loop (repeat)
+```
+
+## Future CLI Shape
+
+> Not implemented in Phase 0. See `docs/TASKS.md`.
+
+```bash
+python3 ./scripts/ux_testing.py \
+  --target figma \
+  --url "$URL" \
+  --persona "$PERSONA" \
+  --goal "$GOAL" \
+  --output-dir /tmp/ux_report_output \
+  --max-steps 10
+```
+
+```bash
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "$URL" \
+  --persona "$PERSONA" \
+  --goal "$GOAL" \
+  --output-dir /tmp/ux_report_output \
+  --max-steps 10
+```
+
+## Expected Future Output Contract
+
+```text
+/tmp/ux_report_output/
+├── ux_result.json
+├── action_trace.json
+├── ux_test_recording.webm
+└── screenshots/
+```
+
+## Current Phase
+
+**Phase 0 — scaffold conversion.** Documentation and project context only.
+
+## Non-Goals (Current Phase)
+
+- No runtime code
+- No Gemini integration
+- No Playwright integration
+- No Android implementation
+- No Windows implementation
+- No OpenClaw deployment integration
+
+## Documentation Map
+
+| File | Purpose |
+|---|---|
+| `SKILL.md` | OpenClaw skill execution contract |
+| `AGENTS.md` | Instructions for Cursor agents |
+| `START_HERE.md` | Onboarding checklist |
+| `docs/PRD.md` | Product requirements |
+| `docs/ARCHITECTURE.md` | System design |
+| `docs/TASKS.md` | Implementation roadmap |
+| `docs/DECISIONS.md` | Architecture decision log |
+| `docs/VERIFY.md` | Verification steps |
+| `docs/CONTEXT.md` | Stable project facts |

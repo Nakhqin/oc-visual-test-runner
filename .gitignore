@@ -1,4 +1,18 @@
-# Dependencies
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+*.egg
+
+# Dependencies (if added later)
 node_modules/
 vendor/
 
@@ -11,11 +25,7 @@ out/
 .cache/
 coverage/
 
-# Logs
-*.log
-logs/
-
-# Environment / secrets
+# Local env files
 .env
 .env.*
 !.env.example
@@ -25,9 +35,33 @@ credentials.json
 secrets.*
 .secret*
 
-# OS / editor
+# Runner output directories
+runs/
+output/
+traces/
+reports/
+/tmp/ux_report_output/
+playwright-report/
+test-results/
+.blob/
+
+# Screenshots and videos
+screenshots/
+*.webm
+*.mp4
+*.mov
+*.avi
+
+# Logs
+*.log
+logs/
+
+# OS / IDE noise
 .DS_Store
 Thumbs.db
+.idea/
+*.swp
+*.swo
 
 # Cursor local/private config
 .cursor/mcp.json

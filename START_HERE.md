@@ -1,58 +1,39 @@
-# Start Here
+# Start Here — oc-visual-test-runner
 
-Use this checklist when creating a new project from this starter.
+Onboarding checklist for contributors and Cursor agents.
 
-## 1. Define the Project
+## Read in This Order
 
-Update:
+1. **`README.md`** — project name, summary, targets, architecture, current phase
+2. **`SKILL.md`** — skill contract: inputs, outputs, action protocol, classifications
+3. **`.cursor/rules/90-project-context.mdc`** — short project facts and non-goals
+4. **`docs/PRD.md`** — problem, scope, requirements, success criteria
+5. **`docs/ARCHITECTURE.md`** — components, data flow, planned interfaces
+6. **`docs/TASKS.md`** — implementation roadmap; work only on the current phase
+7. **`docs/VERIFY.md`** — how to verify work at each phase
 
-- `README.md`
-- `.cursor/rules/90-project-context.mdc`
-- `docs/CONTEXT.md`
+## For Large Changes
 
-Keep these files short and factual.
+8. Create a plan under **`.cursor/plans/`** before multi-file or architectural work.
 
-## 2. Define the Work
+## Phase 0 Rules
 
-Update:
+9. **Phase 0 allows only scaffold and documentation changes.** No runtime code, no API calls, no Playwright, no Gemini integration.
 
-- `docs/PRD.md`
-- `docs/TASKS.md`
-- `docs/DECISIONS.md`
+## When Runtime Starts
 
-Do not turn the PRD into a long essay. Write clear scope, requirements, and success criteria.
+10. **Runtime implementation begins in Phase 1.** See `docs/TASKS.md` for the browser visual runner milestone.
 
-## 3. Define the Architecture
+## Optional Setup (later phases)
 
-Update:
+When Phase 1 lands:
 
-- `docs/ARCHITECTURE.md`
+1. Copy `.env.example` to `.env` and set values locally (never commit `.env`).
+2. Install dependencies per `docs/VERIFY.md`.
+3. Run verification commands before claiming completion.
 
-Only document architecture that actually exists or has been explicitly decided.
+## Agent Reminders
 
-## 4. Define Verification
-
-Update:
-
-- `docs/VERIFY.md`
-
-Cursor Agent should know how to check work before claiming completion.
-
-## 5. Configure Tools
-
-If MCP is needed:
-
-1. Copy `.cursor/mcp.json.example` to `.cursor/mcp.json`.
-2. Add only the MCP servers required for this project.
-3. Do not put real tokens in config files.
-4. Prefer read-only tools unless write access is required.
-
-## 6. For Large Tasks
-
-Ask Cursor to create a plan first and save it under:
-
-```text
-.cursor/plans/
-```
-
-Then execute the plan step by step.
+- Read `AGENTS.md` for the full working contract.
+- Record architecture decisions in `docs/DECISIONS.md`.
+- Stay within the current phase in `docs/TASKS.md`.
