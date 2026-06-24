@@ -141,6 +141,26 @@ Keeps the first vertical slice small: validate inputs and `--help` before Playwr
 
 ---
 
+### 2026-06-24 — Browser adapter first slice: open URL and capture frame
+
+**Status:** Accepted
+
+**Context:**
+Phase 1 needs a shared browser surface for `figma` and `web` before the visual agent loop and VLM integration.
+
+**Decision:**
+- Implement `scripts/adapters/browser.py` with `BrowserPlatformAdapter`
+- Use Playwright Chromium, headless, default viewport 1280×900
+- `figma` navigation waits for `networkidle`; `web` uses `domcontentloaded`
+- First slice: open URL, capture `screenshots/step-000.png`, print `SELECTED_*` metadata from CLI
+- Recording, click/scroll actions, and trace writers follow in later Phase 1 tasks
+
+**Consequences:**
+- CLI exits 0 after initial capture; agent loop still returns a not-implemented message on stderr
+- Full Phase 1 exit criteria still require loop, VLM, and complete output contract
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

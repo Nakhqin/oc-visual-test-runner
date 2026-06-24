@@ -87,7 +87,32 @@ python3 ./scripts/ux_testing.py \
   --max-steps 10
 ```
 
-### Verify Output Files
+### Verify Initial Browser Capture (Phase 1 slice)
+
+```bash
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "https://example.com" \
+  --persona "first-time visitor" \
+  --goal "view homepage" \
+  --output-dir /tmp/ux_report_output
+```
+
+Expect stdout:
+
+```text
+SELECTED_TARGET=web
+SELECTED_ADAPTER=browser
+SELECTED_RUNNER=visual_agent
+```
+
+Expect screenshot:
+
+```bash
+ls /tmp/ux_report_output/screenshots/step-000.png
+```
+
+### Verify Output Files (full Phase 1 — future)
 
 ```bash
 ls /tmp/ux_report_output/ux_result.json
