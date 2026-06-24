@@ -118,8 +118,28 @@ ruff check .
 - [ ] `action_trace.json` records steps with actions and observation refs
 - [ ] Screenshots exist for each step
 - [ ] `ux_test_recording.webm` captures the session
+- [ ] Runner prints `SELECTED_TARGET`, `SELECTED_ADAPTER`, `SELECTED_RUNNER` metadata
 - [ ] Clicks use visual coordinates, not Figma node IDs or CSS selectors
 - [ ] Failed click logged without automatic UX defect classification
+
+### Verify Phase 3+ Output (Future)
+
+```bash
+# Phase 3 — minimal report (path TBD in DECISIONS.md)
+# Phase 4 — formal reports
+ls /tmp/ux_report_output/ux_report.md
+ls /tmp/ux_report_output/index.html
+```
+
+### Documentation: OpenClaw Skill Usage Model
+
+After Skill documentation updates, confirm:
+
+- [ ] `SKILL.md` describes NL user input → structured input → CLI → artifacts → user-facing return
+- [ ] `docs/PRD.md` documents three main usage scenarios (web redesign, Figma prototype, future devices)
+- [ ] User-facing vs system-facing output files are distinguished
+- [ ] Phase 1 output does **not** claim `ux_report.md` or `index.html` exist yet
+- [ ] Android / Windows described as planned only
 
 ---
 

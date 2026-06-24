@@ -18,9 +18,13 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 | Todo | Implement action schema and executor |
 | Todo | Write trace/result output (`action_trace.json`, `ux_result.json`, screenshots, `.webm`) |
 | Done | Decide package layout; record in DECISIONS.md |
+| Todo | Print `SELECTED_TARGET`, `SELECTED_ADAPTER`, `SELECTED_RUNNER` metadata for OpenClaw |
+
 | Done | Add `requirements.txt` when stack chosen |
 
-**Exit criteria:** End-to-end run against one Figma prototype URL and one web URL with full output contract.
+**Phase 1 output:** `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/` only.
+
+**Exit criteria:** End-to-end run against one Figma prototype URL and one web URL with Phase 1 output contract.
 
 ---
 
@@ -34,7 +38,7 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 | Todo | Hover-before-click observation step |
 | Todo | VLM reacts to hover/visual feedback in loop |
 
-**Exit criteria:** Trace shows hover/marker steps; documented in VERIFY.md.
+**Exit criteria:** Trace shows hover/marker steps; VLM can decide click / adjust / wait / block after hover feedback; documented in VERIFY.md.
 
 ---
 
@@ -58,23 +62,38 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 | Todo | Optional UX finding tags with explicit criteria |
 | Todo | Document report schema in DECISIONS.md |
 
-**Exit criteria:** Report generated alongside `ux_result.json`; no legacy report system.
+**Exit criteria:** Minimal user-facing report generated alongside `ux_result.json`; no legacy report system.
 
 ---
 
-### Phase 4 — OpenClaw skill integration
+### Phase 4 — Formal reports and Skill-ready result JSON
+
+| Status | Task |
+|---|---|
+| Todo | Generate formal `ux_report.md` |
+| Todo | Generate formal `index.html` (main human-readable report) |
+| Todo | Improve `ux_result.json` schema for OpenClaw Skill integration |
+| Todo | Align report content with `SKILL.md` (journey, findings, classification, evidence) |
+
+**Exit criteria:** User-facing report paths (`index.html`, `ux_report.md`) populated; OpenClaw can build user-facing return from artifacts.
+
+---
+
+### Phase 5 — OpenClaw / Feishu-style Skill delivery
 
 | Status | Task |
 |---|---|
 | Todo | Skill entrypoint matching SKILL.md contract |
+| Todo | NL → structured input conversion in OpenClaw layer |
+| Todo | User-facing summary template (not raw logs) |
+| Todo | End-to-end Skill invocation test with report/evidence links |
 | Todo | OpenClaw manifest or registration docs |
-| Todo | End-to-end skill invocation test |
 
-**Exit criteria:** OpenClaw invokes runner and consumes output files.
+**Exit criteria:** User asks in natural language; OpenClaw invokes runner and returns concise summary plus report/recording/result paths.
 
 ---
 
-### Phase 5 — Android/Windows adapter design
+### Phase 6 — Android/Windows adapter design
 
 | Status | Task |
 |---|---|
@@ -86,7 +105,7 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 
 ---
 
-### Phase 6 — Android/Windows implementation exploration
+### Phase 7 — Android/Windows implementation exploration
 
 | Status | Task |
 |---|---|
