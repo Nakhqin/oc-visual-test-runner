@@ -1,0 +1,18 @@
+---
+description: Core behavior rules for Cursor Agent.
+alwaysApply: true
+---
+
+# Agent Discipline
+
+- Inspect relevant files before editing.
+- Do not invent APIs, file paths, environment variables, commands, or project structure.
+- Prefer small, reviewable changes over large rewrites.
+- Preserve existing architecture unless the task explicitly asks for refactoring.
+- When uncertain, search the repository before assuming.
+- Do not silently change unrelated files.
+- After changes, summarize:
+  - files changed
+  - reason for each change
+  - how to verify
+  - known risks or unresolved questions

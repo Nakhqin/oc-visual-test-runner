@@ -1,0 +1,21 @@
+---
+description: Safety rules for secrets, git, files, terminal, and destructive operations.
+alwaysApply: true
+---
+
+# Safety
+
+- Never print, commit, or expose secrets.
+- Never create real credentials in code or documentation.
+- Use placeholders in examples.
+- Do not modify production configuration unless explicitly asked.
+- Do not run destructive commands without explicit approval:
+  - rm -rf
+  - git reset --hard
+  - git clean -fd
+  - force push
+  - database drop/reset
+  - production migration
+- Do not overwrite user-created work without checking the diff.
+- Prefer backups before large mechanical changes.
+- Treat `.env`, keys, credentials, tokens, and private data as out of scope unless the task explicitly involves safe configuration templates.

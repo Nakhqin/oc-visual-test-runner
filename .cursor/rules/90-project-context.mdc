@@ -1,0 +1,44 @@
+---
+description: Project-specific context. Update this file for every new project.
+alwaysApply: true
+---
+
+# Project Context
+
+Keep this file short. It should contain only stable project facts.
+
+## Project Name
+
+TODO
+
+## Project Goal
+
+TODO
+
+## Current Stage
+
+TODO
+
+## Tech Stack
+
+TODO
+
+## Main Directories
+
+TODO
+
+## How to Run
+
+TODO
+
+## How to Test / Verify
+
+TODO
+
+## Non-Negotiable Rules
+
+TODO
+
+## Do Not Touch Without Confirmation
+
+TODO

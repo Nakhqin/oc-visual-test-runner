@@ -1,0 +1,16 @@
+---
+description: General code quality rules.
+alwaysApply: true
+---
+
+# Code Quality
+
+- Prefer readable, explicit code over clever code.
+- Keep functions focused and reasonably small.
+- Avoid duplicated logic; extract helpers when duplication becomes meaningful.
+- Add or update tests when behavior changes.
+- Do not add dependencies unless necessary.
+- If adding a dependency, explain why existing code or standard tooling is insufficient.
+- Keep public interfaces stable unless the task explicitly requires a breaking change.
+- Prefer typed interfaces where the language supports them.
+- Keep generated, build, and formatting-only changes separate from functional changes when practical.

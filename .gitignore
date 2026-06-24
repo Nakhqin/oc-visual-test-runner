@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+coverage/
+
+# Logs
+*.log
+logs/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+credentials.json
+secrets.*
+.secret*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Cursor local/private config
+.cursor/mcp.json
