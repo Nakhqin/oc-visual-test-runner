@@ -161,6 +161,26 @@ Phase 1 needs a shared browser surface for `figma` and `web` before the visual a
 
 ---
 
+### 2026-06-24 — Phase 1 JSON artifact schema v1
+
+**Status:** Accepted
+
+**Context:**
+OpenClaw needs structured `ux_result.json` and `action_trace.json` before the full visual agent loop exists.
+
+**Decision:**
+- Add `scripts/core/writers.py` with schema version `"1"`
+- `action_trace.json` records initial observation step with screenshot ref and page URL
+- `ux_result.json` uses `terminal_state: blocked` until the agent loop can continue the walkthrough
+- `classifications` remains empty on this slice — no UX issue inferred from capture-only runs
+- `artifacts.recording` is `null` until `.webm` capture lands
+
+**Consequences:**
+- CLI writes both JSON files after initial browser capture
+- Schema may evolve in Phase 4 when Skill integration hardens `ux_result.json`
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

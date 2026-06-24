@@ -112,6 +112,21 @@ Expect screenshot:
 ls /tmp/ux_report_output/screenshots/step-000.png
 ```
 
+Expect screenshot and JSON artifacts:
+
+```bash
+ls /tmp/ux_report_output/screenshots/step-000.png
+ls /tmp/ux_report_output/action_trace.json
+ls /tmp/ux_report_output/ux_result.json
+```
+
+Expect `ux_result.json` terminal state:
+
+```bash
+python3 -c "import json; print(json.load(open('/tmp/ux_report_output/ux_result.json'))['terminal_state'])"
+# blocked — until agent loop is implemented
+```
+
 ### Verify Output Files (full Phase 1 — future)
 
 ```bash

@@ -83,8 +83,8 @@ Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future 
 | Observation frame | Screenshot + metadata (step, viewport, timestamp) | **Planned** (Phase 1) |
 | VLM client | Send frame + persona/goal context; parse structured action | **Planned** (Phase 1) |
 | Action schema | Protocol types per `SKILL.md` | **Planned** (Phase 1) |
-| Trace writer | `action_trace.json`, screenshots | **Planned** (Phase 1) |
-| Result writer | `ux_result.json`, classifications | **Planned** (Phase 1) |
+| Trace writer | `action_trace.json`, screenshots | **Partial** (Phase 1 — initial step) |
+| Result writer | `ux_result.json`, classifications | **Partial** (Phase 1 — blocked stub) |
 | Recording capture | `ux_test_recording.webm` | **Planned** (Phase 1) |
 | Cursor/hover observer | Marker overlay, hover-before-click | **Planned** (Phase 1.5) |
 | Post-click verifier | Confirm UI change; retry policy | **Planned** (Phase 2) |
