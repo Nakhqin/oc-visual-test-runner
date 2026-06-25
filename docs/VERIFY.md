@@ -55,6 +55,42 @@ pip install -r requirements.txt
 playwright install chromium
 cp .env.example .env
 # Set GOOGLE_API_KEY locally — never commit .env
+# Optional: GEMINI_MODEL=gemini-2.0-flash
+```
+
+### Run With Gemini (requires GOOGLE_API_KEY)
+
+```bash
+export GOOGLE_API_KEY="your-key-here"
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "https://example.com" \
+  --persona "first-time visitor" \
+  --goal "view homepage" \
+  --output-dir /tmp/ux_report_output
+```
+
+Expect stderr:
+
+```text
+SELECTED_DECISION_MAKER=gemini
+```
+
+### Run With Stub Decision Maker
+
+```bash
+python3 ./scripts/ux_testing.py --use-stub \
+  --target web \
+  --url "https://example.com" \
+  --persona "first-time visitor" \
+  --goal "view homepage" \
+  --output-dir /tmp/ux_report_output
+```
+
+Expect stderr:
+
+```text
+SELECTED_DECISION_MAKER=stub
 ```
 
 ### Run CLI Help

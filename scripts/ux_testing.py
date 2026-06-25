@@ -19,6 +19,7 @@ from core.config import (  # noqa: E402
     TargetConfig,
     build_target_config,
 )
+from core.decision import create_decision_maker  # noqa: E402
 from core.loop import run_visual_agent_loop  # noqa: E402
 
 
@@ -63,13 +64,18 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_TIMEOUT_SECONDS,
         help=f"Overall run timeout in seconds (default: {DEFAULT_TIMEOUT_SECONDS})",
     )
+    parser.add_argument(
+        "--use-stub",
+        action="store_true",
+        help="Force stub decision maker (skip Gemini even if GOOGLE_API_KEY is set)",
+    )
     return parser
 
 
-def parse_args(argv: list[str] | None = None) -> TargetConfig:
+def parse_args(argv: list[str] | None = None) -> tuple[TargetConfig, bool]:
     parser = build_parser()
     args = parser.parse_args(argv)
-    return build_target_config(
+    config = build_target_config(
         target=args.target,
         url=args.url,
         persona=args.persona,
@@ -78,6 +84,7 @@ def parse_args(argv: list[str] | None = None) -> TargetConfig:
         max_steps=args.max_steps,
         timeout_seconds=args.timeout_seconds,
     )
+    return config, args.use_stub
 
 
 def print_selection_metadata(config: TargetConfig) -> None:
@@ -88,15 +95,17 @@ def print_selection_metadata(config: TargetConfig) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     try:
-        config = parse_args(argv)
+        config, use_stub = parse_args(argv)
     except ConfigError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
     print_selection_metadata(config)
+    decision_maker = create_decision_maker(use_stub=use_stub)
+    print(f"SELECTED_DECISION_MAKER={decision_maker.source}", file=sys.stderr)
 
     try:
-        result = run_visual_agent_loop(config)
+        result = run_visual_agent_loop(config, decision_maker=decision_maker)
     except BrowserAdapterError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
