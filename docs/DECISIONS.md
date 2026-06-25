@@ -224,6 +224,26 @@ Phase 1 needs persona-based action decisions from observation frames.
 
 ---
 
+### 2026-06-25 — Browser action executor for visual agent loop
+
+**Status:** Accepted
+
+**Context:**
+Gemini can return non-terminal actions, but the loop previously recorded `execution: null` without acting.
+
+**Decision:**
+- Add `scripts/core/executor.py` to map `Action` → browser adapter calls
+- Extend `BrowserPlatformAdapter` with `move_to`, `click`, `scroll`, `type`, `wait`, cursor tracking
+- Loop executes non-terminal actions, records `execution` in trace, pauses briefly for UI feedback
+- Execution failures are logged in trace — not auto-classified as UX issues
+- Terminal actions (`done`, `blocked`) skip execution
+
+**Consequences:**
+- Multi-step runs can progress when VLM returns click/scroll/wait actions
+- `.webm` recording and post-click verification remain future work
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

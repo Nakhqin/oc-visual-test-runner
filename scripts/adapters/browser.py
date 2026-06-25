@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -9,6 +10,7 @@ if TYPE_CHECKING:
 
 DEFAULT_VIEWPORT_WIDTH = 1280
 DEFAULT_VIEWPORT_HEIGHT = 900
+DEFAULT_ACTION_WAIT_MS = 300
 
 
 @dataclass(frozen=True)
@@ -41,6 +43,39 @@ class BrowserPlatformAdapter:
         self._browser: Browser | None = None
         self._context: BrowserContext | None = None
         self._page: Page | None = None
+        self._cursor_x = viewport_width // 2
+        self._cursor_y = viewport_height // 2
+
+    @property
+    def cursor_position(self) -> dict[str, int]:
+        return {"x": self._cursor_x, "y": self._cursor_y}
+
+    def move_to(self, x: int, y: int) -> None:
+        self.page.mouse.move(x, y)
+        self._cursor_x = x
+        self._cursor_y = y
+
+    def move_by_delta(self, delta_x: int, delta_y: int) -> None:
+        self.move_to(self._cursor_x + delta_x, self._cursor_y + delta_y)
+
+    def click(self, x: int, y: int) -> None:
+        self.move_to(x, y)
+        self.page.mouse.click(x, y)
+
+    def click_current(self) -> None:
+        self.page.mouse.click(self._cursor_x, self._cursor_y)
+
+    def scroll(self, delta_y: int) -> None:
+        self.page.mouse.wheel(0, delta_y)
+
+    def wait(self, wait_ms: int) -> None:
+        time.sleep(max(wait_ms, 0) / 1000)
+
+    def type_text(self, text: str) -> None:
+        self.page.keyboard.type(text)
+
+    def pause_for_feedback(self, wait_ms: int = DEFAULT_ACTION_WAIT_MS) -> None:
+        self.wait(wait_ms)
 
     def __enter__(self) -> BrowserPlatformAdapter:
         try:

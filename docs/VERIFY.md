@@ -170,6 +170,12 @@ python3 -c "import json; t=json.load(open('/tmp/ux_report_output/action_trace.js
 # 1 stub
 ```
 
+Expect `execution` object when using Gemini with non-terminal actions:
+
+```bash
+python3 -c "import json; t=json.load(open('/tmp/ux_report_output/action_trace.json')); print(t['steps'][0].get('execution'))"
+```
+
 ### Verify Output Files (full Phase 1 — future)
 
 ```bash
