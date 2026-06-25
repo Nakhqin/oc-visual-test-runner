@@ -85,7 +85,7 @@ Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future 
 | Action schema | Protocol types per `SKILL.md` | **Partial** (Phase 1 — `core/actions.py`) |
 | Trace writer | `action_trace.json`, screenshots | **Partial** (Phase 1 — initial step) |
 | Result writer | `ux_result.json`, classifications | **Partial** (Phase 1 — blocked stub) |
-| Recording capture | `ux_test_recording.webm` | **Planned** (Phase 1) |
+| Recording capture | `ux_test_recording.webm` | **Partial** (Phase 1) |
 | Cursor/hover observer | Marker overlay, hover-before-click | **Planned** (Phase 1.5) |
 | Post-click verifier | Confirm UI change; retry policy | **Planned** (Phase 2) |
 | Report generator (minimal) | Phase 3 human-readable summary | **Planned** (Phase 3) |

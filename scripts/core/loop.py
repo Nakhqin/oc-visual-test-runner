@@ -4,7 +4,12 @@ import time
 from dataclasses import dataclass
 from typing import Protocol
 
-from adapters.browser import BrowserAdapterError, BrowserPlatformAdapter, ObservationFrame
+from adapters.browser import (
+    BrowserAdapterError,
+    BrowserPlatformAdapter,
+    ObservationFrame,
+    RECORDING_FILENAME,
+)
 from core.actions import Action, is_terminal_action
 from core.config import TargetConfig
 from core.decision import StubDecisionMaker
@@ -97,7 +102,12 @@ def run_visual_agent_loop(
     steps_taken = 0
     final_frame: ObservationFrame | None = None
 
-    with BrowserPlatformAdapter(navigation_timeout_ms=navigation_timeout_ms) as adapter:
+    recording_path = config.output_dir / RECORDING_FILENAME
+
+    with BrowserPlatformAdapter(
+        navigation_timeout_ms=navigation_timeout_ms,
+        record_video_path=recording_path,
+    ) as adapter:
         adapter.open(config.url, target=config.target)
 
         for step_index in range(config.max_steps):
@@ -140,6 +150,8 @@ def run_visual_agent_loop(
             )
             adapter.pause_for_feedback()
 
+    finalized_recording = adapter.recording_path
+
     summary, main_finding = _summary_for_terminal(terminal_state, terminal_action)
     classifications = _classifications_for_terminal(
         terminal_state,
@@ -159,6 +171,7 @@ def run_visual_agent_loop(
         main_finding=main_finding or summary,
         classifications=classifications,
         steps_taken=steps_taken,
+        recording_path=finalized_recording,
     )
 
     return LoopRunResult(

@@ -18,6 +18,7 @@ SCHEMA_VERSION = "1"
 class RunArtifacts:
     action_trace_path: Path
     ux_result_path: Path
+    recording_path: Path | None
 
 
 class TraceBuilder:
@@ -59,8 +60,14 @@ def build_ux_result(
     main_finding: str,
     classifications: list[str],
     steps_taken: int,
+    recording_path: Path | None = None,
 ) -> dict[str, Any]:
     screenshot_ref = final_frame.image_path.relative_to(config.output_dir).as_posix()
+    recording_ref = (
+        recording_path.relative_to(config.output_dir).as_posix()
+        if recording_path is not None and recording_path.exists()
+        else None
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "created_at": _utc_now_iso(),
@@ -79,7 +86,7 @@ def build_ux_result(
             "action_trace": "action_trace.json",
             "ux_result": "ux_result.json",
             "screenshots_dir": "screenshots/",
-            "recording": None,
+            "recording": recording_ref,
             "initial_screenshot": screenshot_ref,
         },
         "limits": {
@@ -105,6 +112,7 @@ def write_loop_artifacts(
     main_finding: str,
     classifications: list[str],
     steps_taken: int,
+    recording_path: Path | None = None,
 ) -> RunArtifacts:
     action_trace_path = config.output_dir / "action_trace.json"
     ux_result_path = config.output_dir / "ux_result.json"
@@ -119,9 +127,11 @@ def write_loop_artifacts(
             main_finding=main_finding,
             classifications=classifications,
             steps_taken=steps_taken,
+            recording_path=recording_path,
         ),
     )
     return RunArtifacts(
         action_trace_path=action_trace_path,
         ux_result_path=ux_result_path,
+        recording_path=recording_path if recording_path and recording_path.exists() else None,
     )
