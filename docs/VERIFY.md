@@ -154,6 +154,14 @@ Expect screenshot and JSON artifacts:
 ls /tmp/ux_report_output/screenshots/step-000.png
 ls /tmp/ux_report_output/action_trace.json
 ls /tmp/ux_report_output/ux_result.json
+ls /tmp/ux_report_output/ux_test_recording.webm
+```
+
+Expect `ux_result.json` recording reference:
+
+```bash
+python3 -c "import json; print(json.load(open('/tmp/ux_report_output/ux_result.json'))['artifacts']['recording'])"
+# ux_test_recording.webm
 ```
 
 Expect `ux_result.json` terminal state:

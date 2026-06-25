@@ -244,6 +244,25 @@ Gemini can return non-terminal actions, but the loop previously recorded `execut
 
 ---
 
+### 2026-06-25 — Playwright screen recording to ux_test_recording.webm
+
+**Status:** Accepted
+
+**Context:**
+Phase 1 output contract requires `ux_test_recording.webm` for human review and OpenClaw evidence links.
+
+**Decision:**
+- Enable Playwright `record_video_dir` on browser context during visual agent loop runs
+- Finalize recording on context close and move to `output_dir/ux_test_recording.webm`
+- Set `artifacts.recording` in `ux_result.json` when file exists
+- CLI prints `recording=` path on stderr
+
+**Consequences:**
+- Phase 1 JSON + screenshot + recording output contract is complete
+- Recording quality and codec settings may be tuned later in DECISIONS if needed
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

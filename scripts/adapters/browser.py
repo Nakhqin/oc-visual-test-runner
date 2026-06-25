@@ -1,16 +1,18 @@
 from __future__ import annotations
 
+import shutil
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from playwright.sync_api import Browser, BrowserContext, Page, Playwright
+    from playwright.sync_api import Browser, BrowserContext, Page, Playwright, Video
 
 DEFAULT_VIEWPORT_WIDTH = 1280
 DEFAULT_VIEWPORT_HEIGHT = 900
 DEFAULT_ACTION_WAIT_MS = 300
+RECORDING_FILENAME = "ux_test_recording.webm"
 
 
 @dataclass(frozen=True)
@@ -35,10 +37,14 @@ class BrowserPlatformAdapter:
         viewport_width: int = DEFAULT_VIEWPORT_WIDTH,
         viewport_height: int = DEFAULT_VIEWPORT_HEIGHT,
         navigation_timeout_ms: int = 30_000,
+        record_video_path: Path | None = None,
     ) -> None:
         self.viewport_width = viewport_width
         self.viewport_height = viewport_height
         self.navigation_timeout_ms = navigation_timeout_ms
+        self._record_video_path = record_video_path
+        self._record_video_dir: Path | None = None
+        self._finalized_recording_path: Path | None = None
         self._playwright: Playwright | None = None
         self._browser: Browser | None = None
         self._context: BrowserContext | None = None
@@ -77,6 +83,10 @@ class BrowserPlatformAdapter:
     def pause_for_feedback(self, wait_ms: int = DEFAULT_ACTION_WAIT_MS) -> None:
         self.wait(wait_ms)
 
+    @property
+    def recording_path(self) -> Path | None:
+        return self._finalized_recording_path
+
     def __enter__(self) -> BrowserPlatformAdapter:
         try:
             from playwright.sync_api import sync_playwright
@@ -88,18 +98,50 @@ class BrowserPlatformAdapter:
 
         self._playwright = sync_playwright().start()
         self._browser = self._playwright.chromium.launch(headless=True)
-        self._context = self._browser.new_context(
-            viewport={
+        context_kwargs: dict = {
+            "viewport": {
                 "width": self.viewport_width,
                 "height": self.viewport_height,
             }
-        )
+        }
+        if self._record_video_path is not None:
+            self._record_video_dir = self._record_video_path.parent / ".playwright-video"
+            self._record_video_dir.mkdir(parents=True, exist_ok=True)
+            context_kwargs["record_video_dir"] = str(self._record_video_dir)
+            context_kwargs["record_video_size"] = {
+                "width": self.viewport_width,
+                "height": self.viewport_height,
+            }
+        self._context = self._browser.new_context(**context_kwargs)
         self._page = self._context.new_page()
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
+        video: Video | None = None
+        if self._page is not None and self._page.video is not None:
+            video = self._page.video
+
         if self._context is not None:
             self._context.close()
+
+        if video is not None and self._record_video_path is not None:
+            try:
+                raw_path = Path(video.path())
+                if raw_path.exists():
+                    self._record_video_path.parent.mkdir(parents=True, exist_ok=True)
+                    if self._record_video_path.exists():
+                        self._record_video_path.unlink()
+                    shutil.move(str(raw_path), str(self._record_video_path))
+                    self._finalized_recording_path = self._record_video_path
+            except Exception:
+                self._finalized_recording_path = None
+
+        if self._record_video_dir is not None and self._record_video_dir.exists():
+            try:
+                self._record_video_dir.rmdir()
+            except OSError:
+                pass
+
         if self._browser is not None:
             self._browser.close()
         if self._playwright is not None:

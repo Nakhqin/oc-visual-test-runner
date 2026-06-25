@@ -114,6 +114,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"steps_taken={result.steps_taken}", file=sys.stderr)
     print(f"action_trace={result.artifacts.action_trace_path}", file=sys.stderr)
     print(f"ux_result={result.artifacts.ux_result_path}", file=sys.stderr)
+    if result.artifacts.recording_path is not None:
+        print(f"recording={result.artifacts.recording_path}", file=sys.stderr)
     return 0
 
 
