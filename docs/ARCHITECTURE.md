@@ -79,7 +79,7 @@ Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future 
 | `scripts/ux_testing.py` | CLI entrypoint; prints `SELECTED_*` metadata | **Partial** (Phase 1) |
 | Target config | Parse and validate CLI/Skill inputs | **Partial** (Phase 1) |
 | Core visual agent loop | Orchestrate observe → decide → act → feedback → record | **Partial** (Phase 1 — stub decision) |
-| Browser platform adapter | Navigate, capture frames, visual click/type/scroll | **Planned** (Phase 1) |
+| Browser platform adapter | Navigate, capture frames, visual click/type/scroll | **Partial** (Phase 1 — no recording yet) |
 | Observation frame | Screenshot + metadata (step, viewport, timestamp) | **Planned** (Phase 1) |
 | VLM client | Send frame + persona/goal context; parse structured action | **Partial** (Phase 1 — Gemini) |
 | Action schema | Protocol types per `SKILL.md` | **Partial** (Phase 1 — `core/actions.py`) |

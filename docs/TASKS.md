@@ -15,7 +15,7 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 | Done | Implement shared browser platform adapter (initial URL open + screenshot capture) |
 | Done | Implement core visual agent loop |
 | Done | Integrate VLM (Gemini) for action decisions |
-| In Progress | Implement action schema and executor (schema + VLM parse; executor TODO) |
+| Done | Implement action schema and executor (browser visual actions) |
 | In Progress | Write trace/result output (`action_trace.json`, `ux_result.json`, screenshots, `.webm`) |
 | Done | Decide package layout; record in DECISIONS.md |
 | Done | Print `SELECTED_TARGET`, `SELECTED_ADAPTER`, `SELECTED_RUNNER` metadata for OpenClaw |

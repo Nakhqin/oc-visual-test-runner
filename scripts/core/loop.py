@@ -8,6 +8,7 @@ from adapters.browser import BrowserAdapterError, BrowserPlatformAdapter, Observ
 from core.actions import Action, is_terminal_action
 from core.config import TargetConfig
 from core.decision import StubDecisionMaker
+from core.executor import execute_action
 from core.writers import RunArtifacts, TraceBuilder, write_loop_artifacts
 
 
@@ -109,6 +110,23 @@ def run_visual_agent_loop(
             action = maker.decide(config, frame, step_index)
             steps_taken = step_index + 1
 
+            if is_terminal_action(action):
+                trace.add_step(
+                    {
+                        "step": step_index,
+                        "observation": _observation_dict(config, frame),
+                        "decision": {
+                            "action": action.to_dict(),
+                            "source": maker.source,
+                        },
+                        "execution": None,
+                    }
+                )
+                terminal_state = action.type
+                terminal_action = action
+                break
+
+            execution = execute_action(adapter, action)
             trace.add_step(
                 {
                     "step": step_index,
@@ -117,14 +135,10 @@ def run_visual_agent_loop(
                         "action": action.to_dict(),
                         "source": maker.source,
                     },
-                    "execution": None,
+                    "execution": execution,
                 }
             )
-
-            if is_terminal_action(action):
-                terminal_state = action.type
-                terminal_action = action
-                break
+            adapter.pause_for_feedback()
 
     summary, main_finding = _summary_for_terminal(terminal_state, terminal_action)
     classifications = _classifications_for_terminal(
