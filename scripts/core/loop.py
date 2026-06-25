@@ -60,6 +60,25 @@ def _summary_for_terminal(terminal_state: str, action: Action | None) -> tuple[s
     return "Walkthrough ended.", ""
 
 
+def _classifications_for_terminal(
+    terminal_state: str,
+    action: Action | None,
+    *,
+    decision_source: str,
+) -> list[str]:
+    if terminal_state == "timeout":
+        return ["system-runtime issue"]
+    if terminal_state == "max_steps":
+        return []
+    if terminal_state != "blocked" or action is None:
+        return []
+    if decision_source == "stub":
+        return ["automation limitation"]
+    if action.reason and action.reason.startswith("VLM"):
+        return ["system-runtime issue"]
+    return []
+
+
 def run_visual_agent_loop(
     config: TargetConfig,
     *,
@@ -76,7 +95,6 @@ def run_visual_agent_loop(
     terminal_action: Action | None = None
     steps_taken = 0
     final_frame: ObservationFrame | None = None
-    classifications: list[str] = []
 
     with BrowserPlatformAdapter(navigation_timeout_ms=navigation_timeout_ms) as adapter:
         adapter.open(config.url, target=config.target)
@@ -106,15 +124,14 @@ def run_visual_agent_loop(
             if is_terminal_action(action):
                 terminal_state = action.type
                 terminal_action = action
-                if terminal_state == "blocked" and maker.source == "stub":
-                    classifications = ["automation limitation"]
                 break
 
     summary, main_finding = _summary_for_terminal(terminal_state, terminal_action)
-    if terminal_state == "timeout":
-        classifications = ["system-runtime issue"]
-    elif terminal_state == "max_steps":
-        classifications = []
+    classifications = _classifications_for_terminal(
+        terminal_state,
+        terminal_action,
+        decision_source=maker.source,
+    )
 
     if final_frame is None:
         raise BrowserAdapterError("Visual agent loop finished without capturing a frame.")

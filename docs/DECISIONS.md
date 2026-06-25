@@ -202,6 +202,28 @@ Phase 1 needs the observe → decide → record loop before Gemini integration.
 
 ---
 
+### 2026-06-24 — Gemini VLM decision maker
+
+**Status:** Accepted
+
+**Context:**
+Phase 1 needs persona-based action decisions from observation frames.
+
+**Decision:**
+- Add `scripts/core/vlm.py` with `GeminiDecisionMaker` using `google-generativeai`
+- Default model: `gemini-2.0-flash` (override via `GEMINI_MODEL`)
+- API key from `GOOGLE_API_KEY`; fallback to `StubDecisionMaker` when unset
+- CLI flag `--use-stub` forces stub for local testing
+- VLM returns JSON actions per `SKILL.md`; parse failures become `blocked` with system-runtime classification
+- Persona-driven `blocked`/`done` from Gemini do not auto-map to UX issue classifications
+- Action execution in browser remains TODO — non-terminal actions advance the loop without executing
+
+**Consequences:**
+- CLI prints `SELECTED_DECISION_MAKER=gemini|stub` on stderr
+- Next slice: action executor in browser adapter
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title
