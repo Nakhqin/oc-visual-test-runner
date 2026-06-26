@@ -45,38 +45,49 @@ grep -r "starter kit" README.md SKILL.md docs/ 2>/dev/null || echo "OK: no start
 
 ## Phase 1 — Browser Visual Runner (Current)
 
-### Install Dependencies
+Phase 1 is **not Done** until you complete the [End-to-End Verification Checklist](#phase-1-end-to-end-verification-checklist) below on **one Figma prototype URL** and **one web URL** with the full output contract.
+
+### One-Time Setup
+
+From repo root:
 
 ```bash
-# Placeholder — update when Phase 1 lands
 python3 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-playwright install chromium
-cp .env.example .env
-# Set GOOGLE_API_KEY locally — never commit .env
-# Optional: GEMINI_MODEL=gemini-2.0-flash
 ```
 
-### Run With Gemini (requires GOOGLE_API_KEY)
+**Windows (PowerShell):**
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m playwright install chromium
+Copy-Item .env.example .env
+# Edit .env — set GOOGLE_API_KEY locally; never commit .env
+```
+
+**macOS / Linux:**
 
 ```bash
-export GOOGLE_API_KEY="your-key-here"
-python3 ./scripts/ux_testing.py \
-  --target web \
-  --url "https://example.com" \
-  --persona "first-time visitor" \
-  --goal "view homepage" \
-  --output-dir /tmp/ux_report_output
+source .venv/bin/activate
+pip install -r requirements.txt
+python3 -m playwright install chromium
+cp .env.example .env
+# Set GOOGLE_API_KEY in .env — never commit .env
 ```
 
-Expect stderr:
+Optional in `.env`:
 
 ```text
-SELECTED_DECISION_MAKER=gemini
+GEMINI_MODEL=gemini-2.0-flash
+URL=
+PERSONA=
+GOAL=
+OUTPUT_DIR=/tmp/ux_report_output
 ```
 
-### Run With Stub Decision Maker
+### Quick Sanity Check (optional, no API key)
+
+Confirms CLI, browser, JSON, and recording without calling Gemini:
 
 ```bash
 python3 ./scripts/ux_testing.py --use-stub \
@@ -87,11 +98,189 @@ python3 ./scripts/ux_testing.py --use-stub \
   --output-dir /tmp/ux_report_output
 ```
 
+**Windows:** `--output-dir` can be `C:\temp\ux_report_output` or `/tmp/ux_report_output` (both work on many setups).
+
 Expect stderr:
 
 ```text
 SELECTED_DECISION_MAKER=stub
+SELECTED_TARGET=web
+SELECTED_ADAPTER=browser
+SELECTED_RUNNER=visual_agent
+terminal_state=blocked
 ```
+
+Expect files:
+
+```bash
+ls /tmp/ux_report_output/ux_result.json
+ls /tmp/ux_report_output/action_trace.json
+ls /tmp/ux_report_output/ux_test_recording.webm
+ls /tmp/ux_report_output/screenshots/step-000.png
+```
+
+---
+
+### Phase 1 End-to-End Verification Checklist
+
+Use this checklist to close Phase 1. Run **both** targets with **Gemini** (not `--use-stub`). Replace placeholders with your real URLs and scenarios.
+
+#### Before you start
+
+- [ ] `python3 ./scripts/ux_testing.py --help` succeeds
+- [ ] `GOOGLE_API_KEY` is set in `.env` or your shell (never commit the key)
+- [ ] You have a **Figma prototype URL** (share link that opens the prototype in browser)
+- [ ] You have a **live website URL** to test
+- [ ] Output directories are empty or new for each run (avoid mixing artifacts)
+
+#### Test A — Web target (Gemini)
+
+Pick a real page and a persona scenario, for example a pricing page walkthrough.
+
+**macOS / Linux:**
+
+```bash
+export GOOGLE_API_KEY="your-key-here"   # or rely on .env if your shell loads it
+
+WEB_URL="https://example.com"
+WEB_PERSONA="A first-time visitor who has never seen this product before."
+WEB_GOAL="Understand what the product does and try to find pricing information."
+WEB_OUTPUT="/tmp/ux_report_web"
+
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "$WEB_URL" \
+  --persona "$WEB_PERSONA" \
+  --goal "$WEB_GOAL" \
+  --output-dir "$WEB_OUTPUT" \
+  --max-steps 10 \
+  --timeout-seconds 180
+```
+
+**Windows (PowerShell):**
+
+```powershell
+$env:GOOGLE_API_KEY = "your-key-here"
+
+$WEB_URL = "https://example.com"
+$WEB_PERSONA = "A first-time visitor who has never seen this product before."
+$WEB_GOAL = "Understand what the product does and try to find pricing information."
+$WEB_OUTPUT = "C:\temp\ux_report_web"
+
+python scripts/ux_testing.py `
+  --target web `
+  --url $WEB_URL `
+  --persona $WEB_PERSONA `
+  --goal $WEB_GOAL `
+  --output-dir $WEB_OUTPUT `
+  --max-steps 10 `
+  --timeout-seconds 180
+```
+
+**After Test A, confirm:**
+
+- [ ] stderr shows `SELECTED_DECISION_MAKER=gemini`
+- [ ] stderr shows `SELECTED_TARGET=web`, `SELECTED_ADAPTER=browser`, `SELECTED_RUNNER=visual_agent`
+- [ ] Exit code is `0` (or document failure if non-zero)
+- [ ] `ux_result.json` exists with `terminal_state` (`done`, `blocked`, `max_steps`, or `timeout`)
+- [ ] `action_trace.json` has one or more steps with `observation`, `decision`, and `decision.source` = `gemini`
+- [ ] `screenshots/` contains `step-000.png` (and more if multi-step)
+- [ ] `ux_test_recording.webm` exists and plays
+- [ ] `ux_result.json` → `artifacts.recording` is `ux_test_recording.webm`
+- [ ] Open `action_trace.json`: non-terminal steps should have `execution` with `success` / `page_url_after` when Gemini returned click/scroll/wait
+- [ ] Failed or blocked runs do **not** automatically tag `classifications` as UX issue without persona evidence
+
+**Inspect web run (optional):**
+
+```bash
+python3 -c "import json; r=json.load(open('/tmp/ux_report_web/ux_result.json')); print(r['terminal_state'], r.get('classifications'))"
+python3 -c "import json; t=json.load(open('/tmp/ux_report_web/action_trace.json')); print(len(t['steps']), t['steps'][0]['decision']['source'])"
+```
+
+---
+
+#### Test B — Figma target (Gemini)
+
+Use a **prototype** URL (often `figma.com/proto/...` or `figma.com/design/...` with prototype mode).
+
+**macOS / Linux:**
+
+```bash
+FIGMA_URL="https://www.figma.com/proto/your-prototype-link"
+FIGMA_PERSONA="A first-time tablet user who is cautious and not familiar with this device."
+FIGMA_GOAL="Complete the first-time setup flow shown in the prototype."
+FIGMA_OUTPUT="/tmp/ux_report_figma"
+
+python3 ./scripts/ux_testing.py \
+  --target figma \
+  --url "$FIGMA_URL" \
+  --persona "$FIGMA_PERSONA" \
+  --goal "$FIGMA_GOAL" \
+  --output-dir "$FIGMA_OUTPUT" \
+  --max-steps 10 \
+  --timeout-seconds 180
+```
+
+**Windows (PowerShell):**
+
+```powershell
+$FIGMA_URL = "https://www.figma.com/proto/your-prototype-link"
+$FIGMA_PERSONA = "A first-time tablet user who is cautious and not familiar with this device."
+$FIGMA_GOAL = "Complete the first-time setup flow shown in the prototype."
+$FIGMA_OUTPUT = "C:\temp\ux_report_figma"
+
+python scripts/ux_testing.py `
+  --target figma `
+  --url $FIGMA_URL `
+  --persona $FIGMA_PERSONA `
+  --goal $FIGMA_GOAL `
+  --output-dir $FIGMA_OUTPUT `
+  --max-steps 10 `
+  --timeout-seconds 180
+```
+
+**After Test B, confirm:** (same checklist as Test A, plus Figma-specific notes)
+
+- [ ] Prototype loaded in headless browser (check `screenshots/step-000.png` — not blank/error page)
+- [ ] If Figma shows login wall or cookie gate, record as **blocked** / limitation in trace — do not treat as confirmed UX defect
+- [ ] Clicks in trace use coordinates only (no Figma node IDs or CSS selectors in `action_trace.json`)
+
+**Inspect Figma run (optional):**
+
+```bash
+python3 -c "import json; r=json.load(open('/tmp/ux_report_figma/ux_result.json')); print(r['terminal_state'], r.get('classifications'))"
+```
+
+---
+
+#### Phase 1 Definition of Done
+
+Mark Phase 1 **Done** in `docs/TASKS.md` only when:
+
+- [ ] Test A (web + Gemini) checklist complete
+- [ ] Test B (figma + Gemini) checklist complete
+- [ ] Both runs produced: `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/`
+- [ ] No secrets committed (`.env` stays local)
+- [ ] Known limitations documented (e.g. login-required Figma, timeout, max_steps) in your test notes or PR
+
+**Not required for Phase 1:**
+
+- `ux_report.md` / `index.html` (Phase 4)
+- OpenClaw end-to-end Skill delivery (Phase 5)
+- Post-click verification / hover loop (Phase 1.5 / 2)
+
+---
+
+### Troubleshooting
+
+| Symptom | Likely cause | What to try |
+|---|---|---|
+| `SELECTED_DECISION_MAKER=stub` | No `GOOGLE_API_KEY` | Set key in `.env` or shell; do not pass `--use-stub` |
+| Playwright browser missing | Chromium not installed | `python -m playwright install chromium` |
+| Figma timeout / blank screenshot | Login, slow load, wrong URL | Use public prototype link; increase `--timeout-seconds` |
+| `terminal_state=blocked` + VLM error | API key, quota, model name | Check key; try `GEMINI_MODEL=gemini-2.0-flash` |
+| `terminal_state=max_steps` | Goal too hard for `max_steps` | Increase `--max-steps` for test only; note in results |
+| Recording missing | Context closed before finalize | Re-run; check `ux_test_recording.webm` path on stderr |
 
 ### Run CLI Help
 
@@ -99,117 +288,14 @@ SELECTED_DECISION_MAKER=stub
 python3 ./scripts/ux_testing.py --help
 ```
 
-### Figma Target Smoke Test
-
-```bash
-python3 ./scripts/ux_testing.py \
-  --target figma \
-  --url "$URL" \
-  --persona "$PERSONA" \
-  --goal "$GOAL" \
-  --output-dir /tmp/ux_report_output \
-  --max-steps 10
-```
-
-### Web Target Smoke Test
-
-```bash
-python3 ./scripts/ux_testing.py \
-  --target web \
-  --url "$URL" \
-  --persona "$PERSONA" \
-  --goal "$GOAL" \
-  --output-dir /tmp/ux_report_output \
-  --max-steps 10
-```
-
-### Verify Initial Browser Capture (Phase 1 slice)
-
-```bash
-python3 ./scripts/ux_testing.py \
-  --target web \
-  --url "https://example.com" \
-  --persona "first-time visitor" \
-  --goal "view homepage" \
-  --output-dir /tmp/ux_report_output
-```
-
-Expect stdout:
-
-```text
-SELECTED_TARGET=web
-SELECTED_ADAPTER=browser
-SELECTED_RUNNER=visual_agent
-```
-
-Expect screenshot:
-
-```bash
-ls /tmp/ux_report_output/screenshots/step-000.png
-```
-
-Expect screenshot and JSON artifacts:
-
-```bash
-ls /tmp/ux_report_output/screenshots/step-000.png
-ls /tmp/ux_report_output/action_trace.json
-ls /tmp/ux_report_output/ux_result.json
-ls /tmp/ux_report_output/ux_test_recording.webm
-```
-
-Expect `ux_result.json` recording reference:
-
-```bash
-python3 -c "import json; print(json.load(open('/tmp/ux_report_output/ux_result.json'))['artifacts']['recording'])"
-# ux_test_recording.webm
-```
-
-Expect `ux_result.json` terminal state:
-
-```bash
-python3 -c "import json; print(json.load(open('/tmp/ux_report_output/ux_result.json'))['terminal_state'])"
-# blocked — stub decision maker until VLM integration
-```
-
-Expect one loop step in `action_trace.json`:
-
-```bash
-python3 -c "import json; t=json.load(open('/tmp/ux_report_output/action_trace.json')); print(len(t['steps']), t['steps'][0]['decision']['source'])"
-# 1 stub
-```
-
-Expect `execution` object when using Gemini with non-terminal actions:
-
-```bash
-python3 -c "import json; t=json.load(open('/tmp/ux_report_output/action_trace.json')); print(t['steps'][0].get('execution'))"
-```
-
-### Verify Output Files (full Phase 1 — future)
-
-```bash
-ls /tmp/ux_report_output/ux_result.json
-ls /tmp/ux_report_output/action_trace.json
-ls /tmp/ux_report_output/ux_test_recording.webm
-ls /tmp/ux_report_output/screenshots/
-```
-
-### Inspect Trace
-
-```bash
-# Placeholder — inspect structure once schema is defined
-cat /tmp/ux_report_output/action_trace.json
-ls /tmp/ux_report_output/screenshots/
-```
-
 ### Lint / Test (Future)
 
 ```bash
-# Placeholder — depend on chosen stack
 pytest
 ruff check .
 ```
 
-### Manual Verification (Phase 1+)
+### Manual Verification (ongoing)
 
 - [ ] Run completes with terminal state in `ux_result.json`
 - [ ] `action_trace.json` records steps with actions and observation refs
