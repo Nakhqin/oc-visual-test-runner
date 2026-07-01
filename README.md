@@ -124,7 +124,7 @@ python3 ./scripts/ux_testing.py \
   --max-steps 10
 ```
 
-> **Phase 1 (current):** CLI and config validation exist; full visual agent loop is in progress. See `docs/TASKS.md`.
+> **Phase 1.5 (complete):** Cursor marker + hover-before-click loop — see `docs/VERIFY.md`. **Current:** Phase 2 — see `docs/TASKS.md`.
 
 ## Output Contract (by Phase)
 
@@ -146,7 +146,7 @@ Full file purposes: see `SKILL.md`.
 
 ## Current Phase
 
-**Phase 1 — browser visual runner for `figma` and `web`.** See `docs/TASKS.md`.
+**Phase 2 — post-click verification and retry logic.** Phase 1.5 (cursor marker + hover loop) implemented — see `docs/VERIFY.md`. Phase 1 complete (2026-07-01).
 
 ## Out of Scope (Phase 1)
 

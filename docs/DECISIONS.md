@@ -97,6 +97,8 @@ Improves persona simulation fidelity and action explainability.
 Phase 1 may ship without hover loop; Phase 1.5 is a required follow-up, not optional polish.
 Trace should record hover/marker steps when enabled.
 
+**Implementation (2026-07-01):** Red DOM cursor marker on all observation frames; `click` intents trigger `step-NNN-hover.png` and a second VLM call (`phase=hover`) before `click_current` or adjust/wait/block. See `scripts/core/hover.py`, `scripts/core/loop.py`, `docs/VERIFY.md` Phase 1.5.
+
 ---
 
 ### 2026-06-24 — Failed clicks must not automatically be classified as UX issues

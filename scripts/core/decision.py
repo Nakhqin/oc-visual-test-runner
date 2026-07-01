@@ -25,8 +25,23 @@ class StubDecisionMaker:
         config: TargetConfig,
         frame: ObservationFrame,
         step_index: int,
+        *,
+        phase: str = "observe",
+        pending_action: Action | None = None,
     ) -> Action:
-        _ = config, frame, step_index
+        _ = config, frame, pending_action
+        if phase == "hover":
+            return Action(
+                type="click_current",
+                reason="Stub confirms hover target at marked pointer.",
+            )
+        if step_index == 0:
+            return Action(
+                type="click",
+                x=frame.viewport_width // 2,
+                y=frame.viewport_height // 2,
+                reason="Stub moves to viewport center for hover-loop smoke test.",
+            )
         return Action(type="blocked", reason=self._reason)
 
 

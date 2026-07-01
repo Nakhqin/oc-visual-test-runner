@@ -6,6 +6,7 @@ from typing import Any
 from adapters.browser import ObservationFrame
 from core.actions import Action, ActionParseError, extract_json_object, parse_action_payload
 from core.config import TargetConfig
+from core.hover import validate_hover_action
 
 DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
 ENV_GOOGLE_API_KEY = "GOOGLE_API_KEY"
@@ -29,6 +30,9 @@ Previous steps:
 {history}
 
 Look at the screenshot and choose the single next action as a JSON object only.
+The screenshot includes a red circular cursor marker showing the participant pointer.
+
+- When you intend to click a target, use click with x,y — the runner will move there, capture hover feedback, and ask you to confirm before clicking.
 
 Allowed action types:
 - move_to (requires x, y)
@@ -51,6 +55,44 @@ Rules:
 
 Example:
 {{"type": "click", "x": 420, "y": 180, "reason": "The primary call-to-action looks tappable."}}
+"""
+
+HOVER_ACTION_PROMPT = """You are simulating a human participant in a visual UX test.
+
+Persona:
+{persona}
+
+Goal:
+{goal}
+
+Target type: {target}
+Page URL: {page_url}
+Step index: {step_index} (max steps for this run: {max_steps})
+
+Previous steps:
+{history}
+
+The participant moved the pointer to ({hover_x}, {hover_y}) intending to click there.
+The screenshot shows the UI with a red circular cursor marker at the pointer position.
+
+Review hover / visual feedback at the pointer and choose the single next action as JSON only.
+
+Allowed action types:
+- click_current (confirm click at the marked pointer position)
+- move_to (requires x, y — adjust pointer before clicking)
+- move_by_delta (requires delta_x, delta_y — nudge pointer)
+- wait (optional wait_ms — let UI finish loading or animating)
+- done (requires reason — goal achieved from persona perspective)
+- blocked (requires reason — persona cannot proceed)
+
+Rules:
+- Respond with JSON only. No markdown unless wrapping a single JSON object.
+- Include "reason" referencing what you see at the pointer (tooltip, hover state, ambiguity).
+- Do not use click with x,y here — use click_current to confirm the marked position.
+- A failed or unproductive click is not automatically a UX issue.
+
+Example:
+{{"type": "click_current", "reason": "The button shows a hover state; confirming click."}}
 """
 
 
@@ -87,9 +129,40 @@ def build_vlm_prompt(
     )
 
 
+def build_hover_vlm_prompt(
+    config: TargetConfig,
+    frame: ObservationFrame,
+    step_index: int,
+    history: list[dict[str, Any]],
+    *,
+    hover_x: int,
+    hover_y: int,
+) -> str:
+    return HOVER_ACTION_PROMPT.format(
+        persona=config.persona,
+        goal=config.goal,
+        target=config.target,
+        page_url=frame.url,
+        step_index=step_index,
+        max_steps=config.max_steps,
+        history=_format_history(history),
+        hover_x=hover_x,
+        hover_y=hover_y,
+    )
+
+
 def parse_vlm_response(text: str) -> Action:
     payload = extract_json_object(text)
     return parse_action_payload(payload)
+
+
+def parse_hover_vlm_response(text: str) -> Action:
+    action = parse_vlm_response(text)
+    try:
+        validate_hover_action(action)
+    except ValueError as exc:
+        raise ActionParseError(str(exc)) from exc
+    return action
 
 
 def gemini_request_timeout_seconds() -> int:
@@ -128,11 +201,32 @@ class GeminiDecisionMaker:
         config: TargetConfig,
         frame: ObservationFrame,
         step_index: int,
+        *,
+        phase: str = "observe",
+        pending_action: Action | None = None,
     ) -> Action:
-        prompt = build_vlm_prompt(config, frame, step_index, self._history)
+        if phase == "hover":
+            if pending_action is None or pending_action.x is None or pending_action.y is None:
+                return Action(
+                    type="blocked",
+                    reason="VLM hover decision missing pending click coordinates",
+                )
+            prompt = build_hover_vlm_prompt(
+                config,
+                frame,
+                step_index,
+                self._history,
+                hover_x=pending_action.x,
+                hover_y=pending_action.y,
+            )
+            parse_response = parse_hover_vlm_response
+        else:
+            prompt = build_vlm_prompt(config, frame, step_index, self._history)
+            parse_response = parse_vlm_response
+
         try:
             response_text = self._generate(prompt, frame)
-            action = parse_vlm_response(response_text)
+            action = parse_response(response_text)
         except (ActionParseError, VlmDecisionError) as exc:
             return Action(
                 type="blocked",
@@ -144,9 +238,10 @@ class GeminiDecisionMaker:
                 reason=f"VLM request failed: {exc}",
             )
 
+        history_label = f"{step_index}:hover" if phase == "hover" else step_index
         self._history.append(
             {
-                "step": step_index,
+                "step": history_label,
                 "action": action.to_dict(),
             }
         )

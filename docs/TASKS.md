@@ -6,42 +6,7 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 
 ## Current Priority
 
-**Phase 1 — Browser visual runner for figma/web**
-
-| Status | Task |
-|---|---|
-| Done | Create `scripts/ux_testing.py` CLI entry |
-| Done | Define target config parsing |
-| Done | Implement shared browser platform adapter (initial URL open + screenshot capture) |
-| Done | Implement core visual agent loop |
-| Done | Integrate VLM (Gemini) for action decisions |
-| Done | Implement action schema and executor (browser visual actions) |
-| Done | Write trace/result output (`action_trace.json`, `ux_result.json`, screenshots, `.webm`) |
-| Done | Decide package layout; record in DECISIONS.md |
-| Done | Print `SELECTED_TARGET`, `SELECTED_ADAPTER`, `SELECTED_RUNNER` metadata for OpenClaw |
-| Done | Add `requirements.txt` when stack chosen |
-
-**Phase 1 output:** `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/` only.
-
-**Exit criteria:** End-to-end run against one Figma prototype URL and one web URL with Phase 1 output contract.
-
----
-
-## Backlog
-
-### Phase 1.5 — Cursor marker + hover observation loop
-
-| Status | Task |
-|---|---|
-| Todo | Visual cursor marker overlay on observation frames |
-| Todo | Hover-before-click observation step |
-| Todo | VLM reacts to hover/visual feedback in loop |
-
-**Exit criteria:** Trace shows hover/marker steps; VLM can decide click / adjust / wait / block after hover feedback; documented in VERIFY.md.
-
----
-
-### Phase 2 — Post-click verification and retry logic
+**Phase 2 — Post-click verification and retry logic**
 
 | Status | Task |
 |---|---|
@@ -50,6 +15,66 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 | Todo | Classify click miss vs UI no-response (not auto UX issue) |
 
 **Exit criteria:** Verification outcomes recorded in trace; retries bounded and logged.
+
+---
+
+## Phase 1.5 (Complete)
+
+**Cursor marker + hover observation loop — implemented 2026-07-01**
+
+| Status | Task |
+|---|---|
+| Done | Visual cursor marker overlay on observation frames |
+| Done | Hover-before-click observation step |
+| Done | VLM reacts to hover/visual feedback in loop |
+
+**Exit criteria (met in code):** Trace records `hover` blocks and `-hover` screenshots; hover-phase VLM may return `click_current` / adjust / `wait` / `done` / `blocked`. Gemini E2E re-verification on cloud runner recommended — see `docs/VERIFY.md` Phase 1.5.
+
+---
+
+## Phase 1 (Complete)
+
+**Browser visual runner for `figma` / `web` — verified 2026-07-01**
+
+| Status | Task |
+|---|---|
+| Done | Create `scripts/ux_testing.py` CLI entry |
+| Done | Define target config parsing |
+| Done | Implement shared browser platform adapter (URL open + screenshot + visual actions) |
+| Done | Implement core visual agent loop |
+| Done | Integrate VLM (Gemini via `google-genai`) for action decisions |
+| Done | Implement action schema and executor (browser visual actions) |
+| Done | Write trace/result output (`action_trace.json`, `ux_result.json`, screenshots, `.webm`) |
+| Done | Decide package layout; record in DECISIONS.md |
+| Done | Print `SELECTED_TARGET`, `SELECTED_ADAPTER`, `SELECTED_RUNNER` metadata for OpenClaw |
+| Done | Add `requirements.txt` when stack chosen |
+
+**Phase 1 output:** `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/` only.
+
+**Exit criteria (met):** End-to-end Gemini runs against one web URL and one Figma prototype URL with the Phase 1 output contract. See `docs/VERIFY.md` — Phase 1 verification record.
+
+**Verification environment:** Primary E2E runs on a **cloud runner** (US, direct access to `generativelanguage.googleapis.com`). Local Windows dev validated browser path via `--use-stub`; Gemini E2E requires VPN or the cloud runner.
+
+**Known limitations (Phase 1):**
+
+- Default VLM: `gemini-2.5-flash` (`google-genai`); `gemini-2.0-flash` shut down 2026-06-01
+- Gemini API may return **503 UNAVAILABLE** under high demand — re-run; not classified as UX issue
+- Figma loads with `domcontentloaded` + fixed post-load wait (not `networkidle`)
+- No post-click verification or formal reports yet (Phases 2–4)
+
+---
+
+## Backlog
+
+### Phase 1.5 — Cursor marker + hover observation loop
+
+Moved to **Current Priority** above — implementation complete; E2E verification pending on cloud runner.
+
+---
+
+### Phase 2 — Post-click verification and retry logic
+
+Moved to **Current Priority** above.
 
 ---
 
@@ -126,6 +151,8 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 
 | Date | Task | Notes |
 |---|---|---|
+| 2026-07-01 | Phase 1.5 — Cursor marker + hover observation loop | DOM marker, hover screenshots, dual-phase VLM on click; stub smoke in VERIFY.md |
+| 2026-07-01 | Phase 1 — Browser visual runner for figma/web | E2E on cloud runner: web `max_steps`@10; figma 4 steps + 503; see VERIFY.md |
 | 2026-06-24 | Phase 0 — Convert starter kit into oc-visual-test-runner scaffold | VERIFY.md checks passed; docs/rules/SKILL aligned to project name and architecture |
 
 ## Explicitly Not Doing

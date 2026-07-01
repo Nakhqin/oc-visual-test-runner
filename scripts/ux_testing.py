@@ -91,6 +91,7 @@ def print_selection_metadata(config: TargetConfig) -> None:
     print(f"SELECTED_TARGET={config.target}")
     print("SELECTED_ADAPTER=browser")
     print("SELECTED_RUNNER=visual_agent")
+    print("SELECTED_HOVER_LOOP=enabled")
 
 
 def main(argv: list[str] | None = None) -> int:

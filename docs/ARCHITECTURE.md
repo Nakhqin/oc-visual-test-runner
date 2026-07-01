@@ -8,7 +8,7 @@ The runner implements a **universal visual agent loop** driven by target configu
 
 Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future targets (`android`, `windows`) will add dedicated adapters behind the same loop and Skill model.
 
-> **Phase 1:** CLI and config exist; browser adapter, agent loop, and VLM integration are in progress.
+> **Phase 1.5 (complete):** Cursor marker on frames; hover-before-click with second VLM decision. **Current:** Phase 2 — post-click verification.
 
 ## OpenClaw Skill Flow
 
@@ -86,7 +86,7 @@ Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future 
 | Trace writer | `action_trace.json`, screenshots | **Partial** (Phase 1 — initial step) |
 | Result writer | `ux_result.json`, classifications | **Partial** (Phase 1 — blocked stub) |
 | Recording capture | `ux_test_recording.webm` | **Partial** (Phase 1) |
-| Cursor/hover observer | Marker overlay, hover-before-click | **Planned** (Phase 1.5) |
+| Cursor/hover observer | Marker overlay, hover-before-click, hover-phase VLM | **Implemented** (Phase 1.5) |
 | Post-click verifier | Confirm UI change; retry policy | **Planned** (Phase 2) |
 | Report generator (minimal) | Phase 3 human-readable summary | **Planned** (Phase 3) |
 | Report generator (formal) | `ux_report.md`, `index.html` | **Planned** (Phase 4) |

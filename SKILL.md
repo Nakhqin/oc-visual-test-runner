@@ -289,4 +289,4 @@ The report should explain the **evidence behind the classification**. UX finding
 
 ## Current Phase
 
-**Phase 1 — browser visual runner.** CLI and target config exist; browser adapter, visual agent loop, and VLM integration are in progress. OpenClaw Skill delivery, formal reports, and Feishu-style integration are **planned** (Phases 4–5). See `docs/TASKS.md`.
+**Phase 1.5 complete; Phase 2 in progress.** Hover loop and cursor marker implemented. OpenClaw Skill delivery and formal reports remain **planned** (Phases 4–5). See `docs/TASKS.md`.

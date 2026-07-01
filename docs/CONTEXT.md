@@ -8,7 +8,7 @@ Stable facts for oc-visual-test-runner. Keep this file short.
 
 ## Current Stage
 
-**Phase 1 — browser visual runner.** CLI and target config exist; browser adapter, visual agent loop, and VLM integration are in progress.
+**Phase 1.5 complete — Phase 2 next.** Hover loop and cursor marker on observation frames implemented; post-click verification is Phase 2.
 
 ## Users / Audience
 
@@ -63,14 +63,15 @@ User-facing vs system-facing roles: see `SKILL.md`.
 
 ## Current Assumptions
 
-- Gemini is the Phase 1 VLM provider
+- Gemini via `google-genai` is the Phase 1 VLM provider (default `gemini-2.5-flash`)
+- Primary Gemini E2E verification uses a **US cloud runner**; local CN dev may need VPN for Gemini or use `--use-stub` for browser-only checks
 - Figma prototypes are tested as browser pages, not via Figma REST API
 - Default output directory placeholder: `/tmp/ux_report_output`
 - `viewport_width`, `viewport_height`, `run_id` are Skill-level fields; CLI flags may follow in Phase 1+
 
 ## Things Cursor Agent Should Not Assume
 
-- Full visual agent loop or browser adapter already works — check `docs/TASKS.md`
+- Full visual agent loop works for Phase 1 targets — see `docs/TASKS.md` and `docs/VERIFY.md` verification record
 - `ux_report.md` or `index.html` exist in Phase 1 — Phase 4
 - OpenClaw NL → user return works end-to-end — Phase 5
 - Legacy `figma_runner.py` / `web_runner.py` exist in this repo

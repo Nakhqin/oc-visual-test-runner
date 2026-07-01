@@ -14,6 +14,8 @@ DEFAULT_VIEWPORT_HEIGHT = 900
 DEFAULT_ACTION_WAIT_MS = 300
 FIGMA_POST_LOAD_WAIT_MS = 3000
 RECORDING_FILENAME = "ux_test_recording.webm"
+CURSOR_MARKER_ELEMENT_ID = "oc-visual-test-runner-cursor"
+CURSOR_MARKER_PAINT_MS = 50
 
 
 @dataclass(frozen=True)
@@ -23,6 +25,9 @@ class ObservationFrame:
     url: str
     viewport_width: int
     viewport_height: int
+    cursor_x: int
+    cursor_y: int
+    phase: str = "observe"
 
 
 class BrowserAdapterError(RuntimeError):
@@ -83,6 +88,53 @@ class BrowserPlatformAdapter:
 
     def pause_for_feedback(self, wait_ms: int = DEFAULT_ACTION_WAIT_MS) -> None:
         self.wait(wait_ms)
+
+    def show_cursor_marker(self) -> None:
+        """Overlay a visible pointer marker for VLM observation frames."""
+        x, y = self._cursor_x, self._cursor_y
+        marker_id = CURSOR_MARKER_ELEMENT_ID
+        script = """
+            ({ markerId, x, y }) => {
+                const size = 24;
+                let el = document.getElementById(markerId);
+                if (!el) {
+                    el = document.createElement("div");
+                    el.id = markerId;
+                    el.setAttribute("data-oc-visual-test-runner", "cursor-marker");
+                    el.style.position = "fixed";
+                    el.style.width = size + "px";
+                    el.style.height = size + "px";
+                    el.style.marginLeft = (-size / 2) + "px";
+                    el.style.marginTop = (-size / 2) + "px";
+                    el.style.border = "2px solid #E53935";
+                    el.style.borderRadius = "50%";
+                    el.style.background = "rgba(229, 57, 53, 0.28)";
+                    el.style.pointerEvents = "none";
+                    el.style.zIndex = "2147483647";
+                    el.style.boxShadow = "0 0 0 1px rgba(255,255,255,0.85)";
+                    document.documentElement.appendChild(el);
+                }
+                el.style.left = x + "px";
+                el.style.top = y + "px";
+                el.style.display = "block";
+            }
+        """
+        self.page.evaluate(script, {"markerId": marker_id, "x": x, "y": y})
+        self.wait(CURSOR_MARKER_PAINT_MS)
+
+    def hide_cursor_marker(self) -> None:
+        marker_id = CURSOR_MARKER_ELEMENT_ID
+        self.page.evaluate(
+            """
+            (markerId) => {
+                const el = document.getElementById(markerId);
+                if (el) {
+                    el.style.display = "none";
+                }
+            }
+            """,
+            marker_id,
+        )
 
     @property
     def recording_path(self) -> Path | None:
@@ -171,11 +223,19 @@ class BrowserPlatformAdapter:
         if target == "figma":
             self.wait(FIGMA_POST_LOAD_WAIT_MS)
 
-    def capture_frame(self, *, step: int, output_dir: Path) -> ObservationFrame:
+    def capture_frame(
+        self,
+        *,
+        step: int,
+        output_dir: Path,
+        phase: str = "observe",
+        filename_suffix: str = "",
+    ) -> ObservationFrame:
         screenshots_dir = output_dir / "screenshots"
         screenshots_dir.mkdir(parents=True, exist_ok=True)
-        image_path = screenshots_dir / f"step-{step:03d}.png"
+        image_path = screenshots_dir / f"step-{step:03d}{filename_suffix}.png"
         try:
+            self.show_cursor_marker()
             self.page.screenshot(path=str(image_path), full_page=False)
         except Exception as exc:
             raise BrowserAdapterError(f"Failed to capture screenshot: {exc}") from exc
@@ -186,6 +246,9 @@ class BrowserPlatformAdapter:
             url=self.page.url,
             viewport_width=self.viewport_width,
             viewport_height=self.viewport_height,
+            cursor_x=self._cursor_x,
+            cursor_y=self._cursor_y,
+            phase=phase,
         )
 
 

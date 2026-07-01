@@ -43,7 +43,9 @@ grep -r "starter kit" README.md SKILL.md docs/ 2>/dev/null || echo "OK: no start
 
 ---
 
-## Phase 1 — Browser Visual Runner (Current)
+## Phase 1 — Browser Visual Runner (Complete)
+
+Verified **2026-07-01** on a cloud runner with direct Gemini API access. Phase 1.5 is current — see `docs/TASKS.md`.
 
 Phase 1 is **not Done** until you complete the [End-to-End Verification Checklist](#phase-1-end-to-end-verification-checklist) below on **one Figma prototype URL** and **one web URL** with the full output contract.
 
@@ -128,11 +130,13 @@ Use this checklist to close Phase 1. Run **both** targets with **Gemini** (not `
 
 #### Before you start
 
-- [ ] `python3 ./scripts/ux_testing.py --help` succeeds
-- [ ] `GOOGLE_API_KEY` is set in `.env` or your shell (never commit the key)
-- [ ] You have a **Figma prototype URL** (share link that opens the prototype in browser)
-- [ ] You have a **live website URL** to test
-- [ ] Output directories are empty or new for each run (avoid mixing artifacts)
+- [x] `python3 ./scripts/ux_testing.py --help` succeeds
+- [x] `GOOGLE_API_KEY` is set in `.env` or your shell (never commit the key)
+- [x] You have a **Figma prototype URL** (share link that opens the prototype in browser)
+- [x] You have a **live website URL** to test
+- [x] Output directories are empty or new for each run (avoid mixing artifacts)
+
+**Recommended verification setup:** Run Gemini E2E on a host that can reach `generativelanguage.googleapis.com:443` (e.g. US cloud runner). Local stub runs (`--use-stub`) validate Playwright without Gemini. If local Gemini times out on 443, use the cloud runner — do not treat that as a runner defect.
 
 #### Test A — Web target (Gemini)
 
@@ -256,19 +260,73 @@ python3 -c "import json; r=json.load(open('/tmp/ux_report_figma/ux_result.json')
 
 #### Phase 1 Definition of Done
 
-Mark Phase 1 **Done** in `docs/TASKS.md` only when:
+Phase 1 marked **Done** in `docs/TASKS.md` on **2026-07-01** when:
 
-- [ ] Test A (web + Gemini) checklist complete
-- [ ] Test B (figma + Gemini) checklist complete
-- [ ] Both runs produced: `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/`
-- [ ] No secrets committed (`.env` stays local)
-- [ ] Known limitations documented (e.g. login-required Figma, timeout, max_steps) in your test notes or PR
+- [x] Test A (web + Gemini) checklist complete
+- [x] Test B (figma + Gemini) checklist complete
+- [x] Both runs produced: `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/`
+- [x] No secrets committed (`.env` stays local)
+- [x] Known limitations documented (see verification record below)
+
+#### Phase 1 verification record (2026-07-01)
+
+| Run | Target | Host | Terminal state | Steps | Notes |
+|---|---|---|---|---:|---|
+| Stub | web (Lenovo) | Local Windows | `blocked` (stub) | 1 | Browser + artifacts OK |
+| Stub | figma (proto) | Local Windows | `blocked` (stub) | 1 | Prototype screenshot OK |
+| Gemini | web (Lenovo) | Cloud runner (US) | `max_steps` | 10 | Multi-step; `decision.source=gemini` |
+| Gemini | figma (proto) | Cloud runner (US) | `blocked` (503) | 5 | Steps 0–3: wait + clicks executed; step 4: Gemini **503 UNAVAILABLE** (transient API demand) |
+
+**Documented limitations:**
+
+- Local dev (CN): `generativelanguage.googleapis.com:443` may be blocked — use cloud runner or VPN for Gemini E2E
+- `gemini-2.0-flash` retired 2026-06-01 — use `gemini-2.5-flash` (default in repo)
+- Gemini **503** during peak demand — re-run; classified as `system-runtime issue`, not UX defect
+- Figma: public `figma.com/proto/...` links; adapter uses `domcontentloaded` + 3s wait (not `networkidle`)
 
 **Not required for Phase 1:**
 
 - `ux_report.md` / `index.html` (Phase 4)
 - OpenClaw end-to-end Skill delivery (Phase 5)
-- Post-click verification / hover loop (Phase 1.5 / 2)
+
+---
+
+## Phase 1.5 — Hover Observation Loop (Current)
+
+Implemented in the runner. stderr prints `SELECTED_HOVER_LOOP=enabled`.
+
+### Behavior
+
+1. Every observation screenshot overlays a **red circular cursor marker** at the tracked pointer.
+2. When the VLM returns **`click` with coordinates**, the runner:
+   - moves the pointer to `(x, y)`;
+   - captures **`step-NNN-hover.png`**;
+   - asks the VLM again (hover phase) to choose **`click_current`**, adjust, **`wait`**, **`done`**, or **`blocked`**.
+3. `action_trace.json` records a **`hover`** object on click-intent steps with hover observation, decision, and execution.
+
+### Quick stub check (no Gemini)
+
+```bash
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "https://example.com" \
+  --persona "visitor" \
+  --goal "hover loop smoke" \
+  --output-dir /tmp/ux_hover_stub \
+  --max-steps 2 \
+  --use-stub
+```
+
+**Confirm:**
+
+- [ ] stderr shows `SELECTED_HOVER_LOOP=enabled`
+- [ ] `screenshots/step-000.png` and `screenshots/step-000-hover.png` exist
+- [ ] `action_trace.json` step 0 has `"phase": "observe"` and a `"hover"` block with `"phase": "hover"`
+- [ ] Hover decision allows `click_current`, `move_to`, `move_by_delta`, `wait`, `done`, `blocked` only
+
+### Gemini E2E (cloud runner)
+
+Re-run web or figma with Gemini (no `--use-stub`). On steps where the VLM returns `click`, confirm the trace includes a `hover` block and hover screenshot.
 
 ---
 
@@ -281,6 +339,7 @@ Mark Phase 1 **Done** in `docs/TASKS.md` only when:
 | Figma timeout / blank screenshot | Login, slow load, wrong URL | Use public prototype link (`figma.com/proto/...`); increase `--timeout-seconds`; adapter waits after `domcontentloaded` for canvas render |
 | `terminal_state=blocked` + VLM 404 model | Deprecated model id | `gemini-2.0-flash` shut down 2026-06-01; set `GEMINI_MODEL=gemini-2.5-flash` or `gemini-3.5-flash` |
 | `terminal_state=blocked` + VLM error | API key, quota, network | Check key; confirm `generativelanguage.googleapis.com:443`; adjust `GEMINI_REQUEST_TIMEOUT_SECONDS` |
+| `terminal_state=blocked` + VLM 503 | Gemini API high demand (transient) | Wait and re-run; not a UX finding — `system-runtime issue` |
 | `terminal_state=max_steps` | Goal too hard for `max_steps` | Increase `--max-steps` for test only; note in results |
 | Recording missing | Context closed before finalize | Re-run; check `ux_test_recording.webm` path on stderr |
 
