@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 DEFAULT_VIEWPORT_WIDTH = 1280
 DEFAULT_VIEWPORT_HEIGHT = 900
 DEFAULT_ACTION_WAIT_MS = 300
+FIGMA_POST_LOAD_WAIT_MS = 3000
 RECORDING_FILENAME = "ux_test_recording.webm"
 
 
@@ -158,15 +159,17 @@ class BrowserPlatformAdapter:
         return self._page
 
     def open(self, url: str, *, target: str) -> None:
-        wait_until = "networkidle" if target == "figma" else "domcontentloaded"
+        # Figma prototypes keep long-lived connections; networkidle often never fires.
         try:
             self.page.goto(
                 url,
-                wait_until=wait_until,
+                wait_until="domcontentloaded",
                 timeout=self.navigation_timeout_ms,
             )
         except Exception as exc:
             raise BrowserAdapterError(f"Failed to open {url}: {exc}") from exc
+        if target == "figma":
+            self.wait(FIGMA_POST_LOAD_WAIT_MS)
 
     def capture_frame(self, *, step: int, output_dir: Path) -> ObservationFrame:
         screenshots_dir = output_dir / "screenshots"

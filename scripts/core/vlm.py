@@ -7,9 +7,11 @@ from adapters.browser import ObservationFrame
 from core.actions import Action, ActionParseError, extract_json_object, parse_action_payload
 from core.config import TargetConfig
 
-DEFAULT_GEMINI_MODEL = "gemini-2.0-flash"
+DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
 ENV_GOOGLE_API_KEY = "GOOGLE_API_KEY"
 ENV_GEMINI_MODEL = "GEMINI_MODEL"
+ENV_GEMINI_REQUEST_TIMEOUT_SECONDS = "GEMINI_REQUEST_TIMEOUT_SECONDS"
+DEFAULT_GEMINI_REQUEST_TIMEOUT_SECONDS = 90
 
 ACTION_PROMPT = """You are simulating a human participant in a visual UX test.
 
@@ -90,14 +92,35 @@ def parse_vlm_response(text: str) -> Action:
     return parse_action_payload(payload)
 
 
+def gemini_request_timeout_seconds() -> int:
+    raw = os.environ.get(ENV_GEMINI_REQUEST_TIMEOUT_SECONDS, "").strip()
+    if not raw:
+        return DEFAULT_GEMINI_REQUEST_TIMEOUT_SECONDS
+    try:
+        return max(int(raw), 1)
+    except ValueError:
+        return DEFAULT_GEMINI_REQUEST_TIMEOUT_SECONDS
+
+
 class GeminiDecisionMaker:
     """Gemini VLM decision maker for the visual agent loop."""
 
     source = "gemini"
 
-    def __init__(self, *, api_key: str, model_name: str = DEFAULT_GEMINI_MODEL) -> None:
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        model_name: str = DEFAULT_GEMINI_MODEL,
+        request_timeout_seconds: int | None = None,
+    ) -> None:
         self._api_key = api_key
         self._model_name = model_name
+        self._request_timeout_seconds = (
+            request_timeout_seconds
+            if request_timeout_seconds is not None
+            else gemini_request_timeout_seconds()
+        )
         self._history: list[dict[str, Any]] = []
 
     def decide(
@@ -131,22 +154,27 @@ class GeminiDecisionMaker:
 
     def _generate(self, prompt: str, frame: ObservationFrame) -> str:
         try:
-            import google.generativeai as genai
+            from google import genai
+            from google.genai import types
         except ImportError as exc:
             raise VlmDecisionError(
-                "google-generativeai is not installed. Run: pip install -r requirements.txt"
+                "google-genai is not installed. Run: pip install -r requirements.txt"
             ) from exc
 
-        genai.configure(api_key=self._api_key)
-        model = genai.GenerativeModel(self._model_name)
+        timeout_ms = max(self._request_timeout_seconds, 1) * 1000
+        client = genai.Client(
+            api_key=self._api_key,
+            http_options=types.HttpOptions(timeout=timeout_ms),
+        )
         image_bytes = frame.image_path.read_bytes()
 
         try:
-            response = model.generate_content(
-                [
+            response = client.models.generate_content(
+                model=self._model_name,
+                contents=[
                     prompt,
-                    {"mime_type": "image/png", "data": image_bytes},
-                ]
+                    types.Part.from_bytes(data=image_bytes, mime_type="image/png"),
+                ],
             )
         except Exception as exc:
             raise VlmDecisionError(str(exc)) from exc

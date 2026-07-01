@@ -78,7 +78,8 @@ cp .env.example .env
 Optional in `.env`:
 
 ```text
-GEMINI_MODEL=gemini-2.0-flash
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_REQUEST_TIMEOUT_SECONDS=90
 URL=
 PERSONA=
 GOAL=
@@ -277,8 +278,9 @@ Mark Phase 1 **Done** in `docs/TASKS.md` only when:
 |---|---|---|
 | `SELECTED_DECISION_MAKER=stub` | No `GOOGLE_API_KEY` | Set key in `.env` or shell; do not pass `--use-stub` |
 | Playwright browser missing | Chromium not installed | `python -m playwright install chromium` |
-| Figma timeout / blank screenshot | Login, slow load, wrong URL | Use public prototype link; increase `--timeout-seconds` |
-| `terminal_state=blocked` + VLM error | API key, quota, model name | Check key; try `GEMINI_MODEL=gemini-2.0-flash` |
+| Figma timeout / blank screenshot | Login, slow load, wrong URL | Use public prototype link (`figma.com/proto/...`); increase `--timeout-seconds`; adapter waits after `domcontentloaded` for canvas render |
+| `terminal_state=blocked` + VLM 404 model | Deprecated model id | `gemini-2.0-flash` shut down 2026-06-01; set `GEMINI_MODEL=gemini-2.5-flash` or `gemini-3.5-flash` |
+| `terminal_state=blocked` + VLM error | API key, quota, network | Check key; confirm `generativelanguage.googleapis.com:443`; adjust `GEMINI_REQUEST_TIMEOUT_SECONDS` |
 | `terminal_state=max_steps` | Goal too hard for `max_steps` | Increase `--max-steps` for test only; note in results |
 | Recording missing | Context closed before finalize | Re-run; check `ux_test_recording.webm` path on stderr |
 

@@ -130,7 +130,7 @@ Phase 1 needs a stable entrypoint and config model before browser adapter and ag
 - Config module: `scripts/core/config.py` with `TargetConfig` dataclass
 - Future loop/writers under `scripts/core/`; platform adapters under `scripts/adapters/` (next slices)
 - CLI defaults: `max_steps=10`, `timeout_seconds=180` (aligned with `.env.example`)
-- Phase 1 dependencies in `requirements.txt`: Playwright + `google-generativeai`
+- Phase 1 dependencies in `requirements.txt`: Playwright + `google-genai` (migrated from deprecated `google-generativeai`)
 
 **Reasoning:**
 Keeps the first vertical slice small: validate inputs and `--help` before Playwright/Gemini wiring.
@@ -260,6 +260,28 @@ Phase 1 output contract requires `ux_test_recording.webm` for human review and O
 **Consequences:**
 - Phase 1 JSON + screenshot + recording output contract is complete
 - Recording quality and codec settings may be tuned later in DECISIONS if needed
+
+---
+
+### 2026-07-01 — Migrate Gemini client to google-genai and update default model
+
+**Status:** Accepted
+
+**Context:**
+Google shut down `gemini-2.0-flash` on 2026-06-01. The deprecated `google-generativeai` package is EOL. Cloud E2E runs returned 404 for the old model id; Figma navigation often timed out waiting for `networkidle`.
+
+**Decision:**
+- Replace `google-generativeai` with `google-genai` in `scripts/core/vlm.py`
+- Default model: `gemini-2.5-flash` (override via `GEMINI_MODEL`)
+- Per-request HTTP timeout via `GEMINI_REQUEST_TIMEOUT_SECONDS` (default 90)
+- Figma opens with `domcontentloaded` plus a fixed post-load wait; drop `networkidle` for figma
+
+**Reasoning:**
+Restores Gemini E2E on current API models; avoids indefinite VLM hangs; fixes Figma prototype loads in headless cloud runners.
+
+**Consequences:**
+- `requirements.txt` and `.env.example` updated
+- `docs/VERIFY.md` troubleshooting reflects new model ids and Figma load behavior
 
 ---
 

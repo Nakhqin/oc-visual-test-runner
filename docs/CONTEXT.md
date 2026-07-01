@@ -30,7 +30,7 @@ Full contract: `SKILL.md`.
 | Language | Python | 1 |
 | CLI | `scripts/ux_testing.py` | 1 |
 | Browser automation | Playwright (visual control) | 1 |
-| VLM | Google Gemini (`GOOGLE_API_KEY`) | 1 |
+| VLM | Google Gemini via `google-genai` (`GOOGLE_API_KEY`, default `gemini-2.5-flash`) | 1 |
 | Skill orchestration | OpenClaw (NL → structured input → user return) | 5 |
 
 ## Phase 1 Targets
