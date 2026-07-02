@@ -8,7 +8,7 @@ The runner implements a **universal visual agent loop** driven by target configu
 
 Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future targets (`android`, `windows`) will add dedicated adapters behind the same loop and Skill model.
 
-> **Phase 2 (complete):** Post-click verification with bounded retry — see `docs/VERIFY.md`. **Current:** Phase 3 — minimal report output.
+**Phase 4 — formal reports and Skill-ready JSON.** Phase 3 persona report (`persona_report.md`) implemented — see `docs/VERIFY.md`.
 
 ## OpenClaw Skill Flow
 
@@ -88,7 +88,7 @@ Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future 
 | Recording capture | `ux_test_recording.webm` | **Partial** (Phase 1) |
 | Cursor/hover observer | Marker overlay, hover-before-click, hover-phase VLM | **Implemented** (Phase 1.5) |
 | Post-click verifier | Confirm UI change; retry policy | **Implemented** (Phase 2) |
-| Report generator (minimal) | Phase 3 human-readable summary | **Planned** (Phase 3) |
+| Report generator (minimal) | `persona_report.md` — trace synthesis + optional Gemini | **Implemented** (Phase 3) |
 | Report generator (formal) | `ux_report.md`, `index.html` | **Planned** (Phase 4) |
 | Skill delivery layer | OpenClaw / Feishu-style end-to-end return | **Planned** (Phase 5) |
 | Android adapter | Device/emulator visual control | **Planned** (Phase 6–7) |

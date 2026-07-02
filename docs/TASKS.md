@@ -6,15 +6,31 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 
 ## Current Priority
 
-**Phase 3 — Minimal report output**
+**Phase 4 — Formal reports and Skill-ready result JSON**
 
 | Status | Task |
 |---|---|
-| Todo | Generate minimal human-readable report from trace |
-| Todo | Optional UX finding tags with explicit criteria |
-| Todo | Document report schema in DECISIONS.md |
+| Todo | Generate formal `ux_report.md` |
+| Todo | Generate formal `index.html` (main human-readable report) |
+| Todo | Improve `ux_result.json` schema for OpenClaw Skill integration |
+| Todo | Align report content with `SKILL.md` (journey, findings, classification, evidence) |
 
-**Exit criteria:** Minimal user-facing report generated alongside `ux_result.json`; no legacy report system.
+**Exit criteria:** User-facing report paths (`index.html`, `ux_report.md`) populated; OpenClaw can build user-facing return from artifacts.
+
+---
+
+## Phase 3 (Complete)
+
+**Minimal persona report output — implemented 2026-07-01**
+
+| Status | Task |
+|---|---|
+| Done | Generate minimal human-readable report from trace |
+| Done | Optional UX finding tags with explicit criteria |
+| Done | Document report schema in DECISIONS.md |
+| Done | Optional Gemini persona report synthesis (`--persona-report-gemini`) |
+
+**Exit criteria (met in code):** `persona_report.md` generated alongside `ux_result.json`; trace synthesis (A) always runs; optional Gemini polish (B) when enabled. See `docs/VERIFY.md` Phase 3.
 
 ---
 
@@ -74,7 +90,7 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 - Default VLM: `gemini-2.5-flash` (`google-genai`); `gemini-2.0-flash` shut down 2026-06-01
 - Gemini API may return **503 UNAVAILABLE** under high demand — re-run; not classified as UX issue
 - Figma loads with `domcontentloaded` + fixed post-load wait (not `networkidle`)
-- Formal reports not yet implemented (Phases 3–4)
+- Formal HTML/Markdown reports not yet implemented (Phase 4)
 
 ---
 
@@ -94,15 +110,7 @@ Moved to **Phase 2 (Complete)** above.
 
 ### Phase 3 — Minimal report output
 
-| Status | Task |
-|---|---|
-| Todo | Generate minimal human-readable report from trace |
-| Todo | Optional UX finding tags with explicit criteria |
-| Todo | Document report schema in DECISIONS.md |
-
-**Exit criteria:** Minimal user-facing report generated alongside `ux_result.json`; no legacy report system.
-
----
+Moved to **Phase 3 (Complete)** above.
 
 ### Phase 4 — Formal reports and Skill-ready result JSON
 

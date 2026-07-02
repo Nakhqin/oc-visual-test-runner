@@ -389,6 +389,54 @@ python3 ./scripts/ux_testing.py \
 
 ---
 
+## Phase 3 — Persona Report
+
+Implemented in the runner. stderr prints `SELECTED_PERSONA_REPORT=trace` (or `trace+gemini` when Gemini polish is enabled).
+
+### Behavior
+
+1. Every run writes **`persona_report.md`** — first-person sections from trace + reviewer appendix.
+2. **Trace synthesis (A)** always runs (works with `--use-stub`).
+3. **Gemini polish (B)** when `--persona-report-gemini` or `PERSONA_REPORT_GEMINI=1` and Gemini decision maker is active; falls back to A on failure.
+4. `ux_result.json` includes `artifacts.persona_report` and `report.synthesis`.
+
+### Quick stub check (no Gemini)
+
+```bash
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "https://example.com" \
+  --persona "first-time visitor" \
+  --goal "persona report smoke" \
+  --output-dir /tmp/ux_persona_stub \
+  --max-steps 2 \
+  --use-stub
+```
+
+**Confirm:**
+
+- [ ] stderr shows `SELECTED_PERSONA_REPORT=trace`
+- [ ] `persona_report.md` exists with persona setup, journey, friction, evidence, reviewer notes
+- [ ] `ux_result.json` has `artifacts.persona_report` and `report.synthesis=trace_only`
+- [ ] Optional findings do not appear from verification telemetry alone
+
+### Optional Gemini polish (cloud runner)
+
+```bash
+export PERSONA_REPORT_GEMINI=1
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "https://example.com" \
+  --persona "first-time visitor" \
+  --goal "persona report gemini" \
+  --output-dir /tmp/ux_persona_gemini \
+  --max-steps 5
+```
+
+**Confirm:** `report.synthesis=trace+gemini` (or `gemini_failed_fallback` with A content preserved).
+
+---
+
 ### Troubleshooting
 
 | Symptom | Likely cause | What to try |
@@ -428,7 +476,9 @@ ruff check .
 ### Verify Phase 3+ Output (Future)
 
 ```bash
-# Phase 3 — minimal report (path TBD in DECISIONS.md)
+# Phase 3 — persona report
+ls /tmp/ux_report_output/persona_report.md
+
 # Phase 4 — formal reports
 ls /tmp/ux_report_output/ux_report.md
 ls /tmp/ux_report_output/index.html

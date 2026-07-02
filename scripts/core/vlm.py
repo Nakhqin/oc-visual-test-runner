@@ -95,6 +95,31 @@ Example:
 {{"type": "click_current", "reason": "The button shows a hover state; confirming click."}}
 """
 
+PERSONA_REPORT_SYNTHESIS_PROMPT = """You are writing a first-person UX test experience report as the participant persona below.
+
+Persona:
+{persona}
+
+Goal:
+{goal}
+
+Terminal state: {terminal_state}
+
+Rewrite the draft report into a cohesive first-person narrative in Markdown.
+
+Rules:
+- Stay in first person as the persona throughout the main sections.
+- Do not invent steps, clicks, or outcomes that are not supported by the draft.
+- Do not classify click verification telemetry as confirmed UX defects.
+- Keep the sections "给审查者的证据" and "审查者备注" (reviewer-facing). You may lightly tidy them but do not remove evidence paths.
+- Preserve factual paths, step references, and reviewer telemetry.
+- Target length: about 300-600 words for the narrative sections; the journey may be longer.
+- Output Markdown only. No JSON.
+
+Draft report:
+{draft}
+"""
+
 
 class VlmDecisionError(RuntimeError):
     """Raised when the VLM client cannot produce a decision."""
@@ -278,3 +303,51 @@ class GeminiDecisionMaker:
         if not text or not text.strip():
             raise VlmDecisionError("empty response from Gemini")
         return text
+
+
+def synthesize_persona_report_with_gemini(
+    *,
+    draft: str,
+    config: TargetConfig,
+    terminal_state: str,
+    api_key: str,
+    model_name: str = DEFAULT_GEMINI_MODEL,
+    request_timeout_seconds: int | None = None,
+) -> str:
+    """Optional Phase 3 Gemini polish for persona_report.md."""
+    prompt = PERSONA_REPORT_SYNTHESIS_PROMPT.format(
+        persona=config.persona,
+        goal=config.goal,
+        terminal_state=terminal_state,
+        draft=draft,
+    )
+    timeout = (
+        request_timeout_seconds
+        if request_timeout_seconds is not None
+        else gemini_request_timeout_seconds()
+    )
+    try:
+        from google import genai
+        from google.genai import types
+    except ImportError as exc:
+        raise VlmDecisionError(
+            "google-genai is not installed. Run: pip install -r requirements.txt"
+        ) from exc
+
+    timeout_ms = max(timeout, 1) * 1000
+    client = genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(timeout=timeout_ms),
+    )
+    try:
+        response = client.models.generate_content(
+            model=model_name,
+            contents=[prompt],
+        )
+    except Exception as exc:
+        raise VlmDecisionError(str(exc)) from exc
+
+    text = getattr(response, "text", None)
+    if not text or not text.strip():
+        raise VlmDecisionError("empty persona report synthesis from Gemini")
+    return text.strip() + "\n"

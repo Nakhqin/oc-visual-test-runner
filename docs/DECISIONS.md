@@ -125,6 +125,30 @@ Cursor marker would invalidate observation-frame diffs; marker-free verify snaps
 
 ---
 
+### 2026-07-01 — Phase 3 persona report (trace synthesis + optional Gemini)
+
+**Status:** Accepted
+
+**Context:**
+Phase 3 needs a minimal user-facing report from trace data, written from the participant persona perspective, without auto-classifying UX defects from click verification.
+
+**Decision:**
+- Output file: **`persona_report.md`** (first-person narrative sections + reviewer appendix).
+- **A (always):** Trace synthesis from `action_trace.json` + `ux_result.json` — persona setup/outcome/journey/friction/evidence/reviewer notes.
+- **B (optional):** Gemini polish via `--persona-report-gemini` or `PERSONA_REPORT_GEMINI=1`; skipped for `--use-stub`; fallback to A on API failure.
+- `ux_result.json` gains `artifacts.persona_report` and `report.synthesis` (`trace_only`, `trace+gemini`, `gemini_failed_fallback`).
+- Optional findings only under explicit criteria; verification `interaction_hint` stays telemetry-only.
+- stderr: `SELECTED_PERSONA_REPORT=trace` or `trace+gemini`.
+
+**Reasoning:**
+Persona voice matches product intent; trace synthesis keeps stub/offline runs usable; optional Gemini improves readability without blocking the runner.
+
+**Consequences:**
+- New module: `scripts/core/report.py`
+- Phase 4 formal `ux_report.md` / `index.html` remain separate deliverables
+
+---
+
 ### 2026-06-24 — Failed clicks must not automatically be classified as UX issues
 
 **Status:** Accepted

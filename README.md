@@ -124,7 +124,7 @@ python3 ./scripts/ux_testing.py \
   --max-steps 10
 ```
 
-> **Phase 2 (complete):** Post-click verification + bounded retry — see `docs/VERIFY.md`. **Current:** Phase 3 — see `docs/TASKS.md`.
+> **Phase 3 (complete):** Persona report (`persona_report.md`) — see `docs/VERIFY.md`. **Current:** Phase 4 — formal reports.
 
 ## Output Contract (by Phase)
 
@@ -138,15 +138,14 @@ python3 ./scripts/ux_testing.py \
 └── screenshots/            # user-facing + raw evidence
 ```
 
-**Phase 3+ (planned):** minimal human-readable report  
-**Phase 4+ (planned):** `ux_report.md`, `index.html`, improved `ux_result.json` for Skill delivery  
+**Phase 3:** `persona_report.md` (implemented). **Phase 4+ (planned):** `ux_report.md`, `index.html`, improved `ux_result.json` for Skill delivery
 **Phase 5 (planned):** OpenClaw / Feishu-style end-to-end Skill delivery
 
 Full file purposes: see `SKILL.md`.
 
 ## Current Phase
 
-**Phase 3 — minimal report output.** Phase 2 post-click verification implemented — see `docs/VERIFY.md`. Phase 1 complete (2026-07-01).
+**Phase 3 — persona report implemented.** `persona_report.md` with optional Gemini polish — see `docs/VERIFY.md`. **Current:** Phase 4 formal reports.
 
 ## Out of Scope (Phase 1)
 

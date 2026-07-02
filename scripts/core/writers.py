@@ -18,7 +18,9 @@ SCHEMA_VERSION = "1"
 class RunArtifacts:
     action_trace_path: Path
     ux_result_path: Path
+    persona_report_path: Path | None
     recording_path: Path | None
+    report_synthesis: str | None = None
 
 
 class TraceBuilder:
@@ -133,5 +135,6 @@ def write_loop_artifacts(
     return RunArtifacts(
         action_trace_path=action_trace_path,
         ux_result_path=ux_result_path,
+        persona_report_path=None,
         recording_path=recording_path if recording_path and recording_path.exists() else None,
     )

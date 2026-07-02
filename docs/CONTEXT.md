@@ -8,7 +8,7 @@ Stable facts for oc-visual-test-runner. Keep this file short.
 
 ## Current Stage
 
-**Phase 2 complete — Phase 3 next.** Post-click verification with bounded retry implemented; formal reports are Phase 3–4.
+**Phase 3 complete — Phase 4 next.** Persona report with optional Gemini polish implemented.
 
 ## Users / Audience
 

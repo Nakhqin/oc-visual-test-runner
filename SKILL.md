@@ -182,7 +182,7 @@ Recording: /tmp/ux_report_output/ux_test_recording.webm
 Result JSON: /tmp/ux_report_output/ux_result.json
 ```
 
-> **Phase 4+:** `index.html` and `ux_report.md` become the primary report paths. Until then, OpenClaw may summarize from `ux_result.json` and link to recording/screenshots.
+> **Phase 3+:** `persona_report.md` is the minimal first-person report. **Phase 4+:** `index.html` and `ux_report.md` become the primary formal report paths. OpenClaw may summarize from `ux_result.json` and link to `persona_report.md`, recording, and screenshots.
 
 ## Output Files
 
@@ -192,6 +192,7 @@ Each run writes to `output_dir`. Full contract by phase — see [Phase Deliverab
 /tmp/ux_report_output/
 ├── ux_result.json
 ├── action_trace.json
+├── persona_report.md     # Phase 3+
 ├── ux_report.md          # Phase 4+
 ├── index.html            # Phase 4+
 ├── ux_test_recording.webm
@@ -202,6 +203,7 @@ Each run writes to `output_dir`. Full contract by phase — see [Phase Deliverab
 
 | File | Purpose | Phase |
 |---|---|---|
+| `persona_report.md` | First-person minimal UX experience report | 3+ |
 | `index.html` | Main human-readable report | 4+ |
 | `ux_report.md` | Markdown report for review and versioning | 4+ |
 | `ux_test_recording.webm` | Recording of the visual test | 1+ |
@@ -241,7 +243,7 @@ Human-readable reports (`ux_report.md`, `index.html`) should eventually include:
 | **1** (current) | `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/` |
 | **1.5** | Adds cursor marker, hover observation frames; VLM decides click / adjust / wait / block after hover feedback |
 | **2** | Adds post-click verification and retry or blocked logic |
-| **3** | Adds minimal human-readable report output |
+| **3** | Adds `persona_report.md` (trace synthesis + optional Gemini polish) |
 | **4** | Adds formal `ux_report.md`, `index.html`; improves `ux_result.json` for OpenClaw Skill integration |
 | **5** | Connects Skill back into OpenClaw / Feishu-style delivery end-to-end |
 | **6–7** | Android / Windows adapter design and exploration (future targets only) |
@@ -289,4 +291,4 @@ The report should explain the **evidence behind the classification**. UX finding
 
 ## Current Phase
 
-**Phase 2 complete; Phase 3 next.** Post-click verification with bounded retry implemented. OpenClaw Skill delivery and formal reports remain **planned** (Phases 4–5). See `docs/TASKS.md`.
+**Phase 3 complete; Phase 4 next.** Persona report (`persona_report.md`) with optional Gemini synthesis. Formal OpenClaw reports remain **planned** (Phase 4–5). See `docs/TASKS.md`.

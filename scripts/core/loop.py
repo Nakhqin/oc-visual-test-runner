@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import time
 from dataclasses import dataclass
 from typing import Any, Protocol
@@ -14,8 +15,9 @@ from core.actions import Action, is_terminal_action
 from core.config import TargetConfig
 from core.decision import StubDecisionMaker
 from core.executor import execute_action
-from core.verification import execute_with_verification
 from core.hover import action_triggers_hover
+from core.report import write_persona_report
+from core.verification import execute_with_verification
 from core.writers import RunArtifacts, TraceBuilder, write_loop_artifacts
 
 
@@ -183,6 +185,9 @@ def run_visual_agent_loop(
     config: TargetConfig,
     *,
     decision_maker: DecisionMaker | None = None,
+    persona_report_gemini: bool = False,
+    gemini_api_key: str | None = None,
+    gemini_model: str | None = None,
 ) -> LoopRunResult:
     """Run observe → decide → hover (when clicking) → act → record until a terminal state."""
     config.output_dir.mkdir(parents=True, exist_ok=True)
@@ -300,6 +305,25 @@ def run_visual_agent_loop(
         classifications=classifications,
         steps_taken=steps_taken,
         recording_path=finalized_recording,
+    )
+
+    ux_result_payload = json.loads(artifacts.ux_result_path.read_text(encoding="utf-8"))
+    use_gemini_synthesis = persona_report_gemini and maker.source != "stub"
+    persona_report_path, report_result = write_persona_report(
+        config,
+        trace_payload=trace.to_dict(),
+        ux_result=ux_result_payload,
+        decision_source=maker.source,
+        use_gemini_synthesis=use_gemini_synthesis,
+        api_key=gemini_api_key,
+        model_name=gemini_model,
+    )
+    artifacts = RunArtifacts(
+        action_trace_path=artifacts.action_trace_path,
+        ux_result_path=artifacts.ux_result_path,
+        persona_report_path=persona_report_path,
+        recording_path=artifacts.recording_path,
+        report_synthesis=report_result.synthesis,
     )
 
     return LoopRunResult(
