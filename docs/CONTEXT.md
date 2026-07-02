@@ -8,7 +8,7 @@ Stable facts for oc-visual-test-runner. Keep this file short.
 
 ## Current Stage
 
-**Phase 1.5 complete — Phase 2 next.** Hover loop and cursor marker on observation frames implemented; post-click verification is Phase 2.
+**Phase 2 complete — Phase 3 next.** Post-click verification with bounded retry implemented; formal reports are Phase 3–4.
 
 ## Users / Audience
 

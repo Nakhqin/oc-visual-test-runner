@@ -92,6 +92,7 @@ def print_selection_metadata(config: TargetConfig) -> None:
     print("SELECTED_ADAPTER=browser")
     print("SELECTED_RUNNER=visual_agent")
     print("SELECTED_HOVER_LOOP=enabled")
+    print("SELECTED_POST_CLICK_VERIFY=enabled")
 
 
 def main(argv: list[str] | None = None) -> int:

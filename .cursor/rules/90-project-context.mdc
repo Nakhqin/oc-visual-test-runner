@@ -13,7 +13,7 @@ oc-visual-test-runner
 
 ## Current Stage
 
-Phase 2 — post-click verification and retry logic. Phase 1.5 hover loop implemented. Phase 1 browser visual runner verified 2026-07-01 on cloud runner.
+Phase 3 — minimal report output. Phase 2 post-click verification implemented. Phase 1 browser visual runner verified 2026-07-01 on cloud runner.
 
 ## Project Purpose
 

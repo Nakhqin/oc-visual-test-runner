@@ -6,15 +6,29 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 
 ## Current Priority
 
-**Phase 2 — Post-click verification and retry logic**
+**Phase 3 — Minimal report output**
 
 | Status | Task |
 |---|---|
-| Todo | Detect whether click produced visible change |
-| Todo | Bounded retry policy |
-| Todo | Classify click miss vs UI no-response (not auto UX issue) |
+| Todo | Generate minimal human-readable report from trace |
+| Todo | Optional UX finding tags with explicit criteria |
+| Todo | Document report schema in DECISIONS.md |
 
-**Exit criteria:** Verification outcomes recorded in trace; retries bounded and logged.
+**Exit criteria:** Minimal user-facing report generated alongside `ux_result.json`; no legacy report system.
+
+---
+
+## Phase 2 (Complete)
+
+**Post-click verification and retry logic — implemented 2026-07-01**
+
+| Status | Task |
+|---|---|
+| Done | Detect whether click produced visible change |
+| Done | Bounded retry policy |
+| Done | Classify click miss vs UI no-response (not auto UX issue) |
+
+**Exit criteria (met in code):** Trace records `verification` on click/`click_current` executions with outcomes, retry attempts, and telemetry-only `interaction_hint`. See `docs/VERIFY.md` Phase 2.
 
 ---
 
@@ -60,7 +74,7 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 - Default VLM: `gemini-2.5-flash` (`google-genai`); `gemini-2.0-flash` shut down 2026-06-01
 - Gemini API may return **503 UNAVAILABLE** under high demand — re-run; not classified as UX issue
 - Figma loads with `domcontentloaded` + fixed post-load wait (not `networkidle`)
-- No post-click verification or formal reports yet (Phases 2–4)
+- Formal reports not yet implemented (Phases 3–4)
 
 ---
 
@@ -74,7 +88,7 @@ Moved to **Current Priority** above — implementation complete; E2E verificatio
 
 ### Phase 2 — Post-click verification and retry logic
 
-Moved to **Current Priority** above.
+Moved to **Phase 2 (Complete)** above.
 
 ---
 

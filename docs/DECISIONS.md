@@ -101,6 +101,30 @@ Trace should record hover/marker steps when enabled.
 
 ---
 
+### 2026-07-01 — Phase 2 post-click verification (telemetry only)
+
+**Status:** Accepted
+
+**Context:**
+After click actions, the runner must detect visible UI change, retry bounded times when unchanged, and distinguish automation telemetry from UX findings.
+
+**Decision:**
+- After `click` / `click_current`, capture **marker-free** before/after screenshots and compare URL + image diff ratio (Pillow).
+- Default **1 retry** (`CLICK_VERIFY_MAX_RETRIES=1` → up to 2 attempts total).
+- Record `verification` on execution payloads in `action_trace.json` with `outcome`, `attempts`, `retry_count`, and optional `interaction_hint`.
+- `interaction_hint` values (`possible_click_miss`, `possible_ui_no_response`, `inconclusive_no_visible_change`) are **telemetry only** — never promoted to `ux_result.json` classifications automatically.
+
+**Reasoning:**
+Cursor marker would invalidate observation-frame diffs; marker-free verify snapshots isolate page content change. Bounded retry reduces flaky single-shot misses without infinite loops.
+
+**Consequences:**
+- New dependency: `Pillow` for screenshot diff
+- Verify snapshots under `screenshots/verify/`
+- stderr prints `SELECTED_POST_CLICK_VERIFY=enabled`
+- Env tuning: `CLICK_VERIFY_MAX_RETRIES`, `CLICK_VERIFY_POST_WAIT_MS`, `CLICK_VERIFY_IMAGE_DIFF_RATIO_THRESHOLD`
+
+---
+
 ### 2026-06-24 — Failed clicks must not automatically be classified as UX issues
 
 **Status:** Accepted

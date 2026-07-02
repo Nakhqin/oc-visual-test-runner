@@ -229,7 +229,7 @@ Human-readable reports (`ux_report.md`, `index.html`) should eventually include:
 - target selected by the VLM
 - reason for each action
 - hover or visual feedback (Phase 1.5+)
-- post-click verification (Phase 2+)
+- post-click verification (Phase 2 — implemented)
 - findings and classification with evidence
 - evidence screenshots and recording link
 - recommendations
@@ -289,4 +289,4 @@ The report should explain the **evidence behind the classification**. UX finding
 
 ## Current Phase
 
-**Phase 1.5 complete; Phase 2 in progress.** Hover loop and cursor marker implemented. OpenClaw Skill delivery and formal reports remain **planned** (Phases 4–5). See `docs/TASKS.md`.
+**Phase 2 complete; Phase 3 next.** Post-click verification with bounded retry implemented. OpenClaw Skill delivery and formal reports remain **planned** (Phases 4–5). See `docs/TASKS.md`.

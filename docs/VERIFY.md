@@ -291,7 +291,7 @@ Phase 1 marked **Done** in `docs/TASKS.md` on **2026-07-01** when:
 
 ---
 
-## Phase 1.5 — Hover Observation Loop (Current)
+## Phase 1.5 — Hover Observation Loop
 
 Implemented in the runner. stderr prints `SELECTED_HOVER_LOOP=enabled`.
 
@@ -327,6 +327,65 @@ python3 ./scripts/ux_testing.py \
 ### Gemini E2E (cloud runner)
 
 Re-run web or figma with Gemini (no `--use-stub`). On steps where the VLM returns `click`, confirm the trace includes a `hover` block and hover screenshot.
+
+---
+
+## Phase 2 — Post-Click Verification
+
+Implemented in the runner. stderr prints `SELECTED_POST_CLICK_VERIFY=enabled`.
+
+### Behavior
+
+1. After **`click`** or **`click_current`**, the runner captures marker-free before/after screenshots under `screenshots/verify/`.
+2. Compares **URL change** and **image diff ratio** (default threshold `0.01`).
+3. On **`no_visible_change`**, retries up to **`CLICK_VERIFY_MAX_RETRIES`** (default `1` → 2 total attempts).
+4. Records **`verification`** on the execution object with `outcome`, `attempts`, `retry_count`, and optional **`interaction_hint`** (telemetry only — not auto UX classification).
+
+### Verification outcomes
+
+| `outcome` | Meaning |
+|---|---|
+| `visible_change` | URL changed or image diff ≥ threshold |
+| `no_visible_change` | Click succeeded but page appears unchanged |
+| `execution_failed` | Browser action failed |
+| `not_applicable` | Non-click action (scroll, wait, move, etc.) |
+
+### Interaction hints (telemetry only)
+
+| `interaction_hint` | When |
+|---|---|
+| `possible_click_miss` | No change and diff ratio exactly `0` |
+| `possible_ui_no_response` | No change after retries exhausted, with sub-threshold diff |
+| `inconclusive_no_visible_change` | No change on first attempt, retry may follow |
+
+### Quick stub check (no Gemini)
+
+```bash
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "https://example.com" \
+  --persona "visitor" \
+  --goal "post-click verify smoke" \
+  --output-dir /tmp/ux_verify_stub \
+  --max-steps 2 \
+  --use-stub
+```
+
+**Confirm:**
+
+- [ ] stderr shows `SELECTED_POST_CLICK_VERIFY=enabled`
+- [ ] `action_trace.json` step 0 `hover.execution.verification.applied` is `true`
+- [ ] `verification.outcome` is recorded (`visible_change` or `no_visible_change`)
+- [ ] `screenshots/verify/step-000-attempt-*-{before,after}.png` exist when click runs
+- [ ] `ux_result.json` **does not** gain automatic UX classifications from verification alone
+
+### Env tuning (optional)
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `CLICK_VERIFY_MAX_RETRIES` | `1` | Extra attempts after `no_visible_change` |
+| `CLICK_VERIFY_POST_WAIT_MS` | `500` | Wait before after screenshot |
+| `CLICK_VERIFY_IMAGE_DIFF_RATIO_THRESHOLD` | `0.01` | Fraction of changed pixels for `visible_change` |
 
 ---
 

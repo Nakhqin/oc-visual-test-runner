@@ -223,6 +223,15 @@ class BrowserPlatformAdapter:
         if target == "figma":
             self.wait(FIGMA_POST_LOAD_WAIT_MS)
 
+    def capture_page_snapshot(self, output_path: Path) -> None:
+        """Capture a page screenshot without the cursor marker for verification diffs."""
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        self.hide_cursor_marker()
+        try:
+            self.page.screenshot(path=str(output_path), full_page=False)
+        except Exception as exc:
+            raise BrowserAdapterError(f"Failed to capture page snapshot: {exc}") from exc
+
     def capture_frame(
         self,
         *,

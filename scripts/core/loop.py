@@ -14,6 +14,7 @@ from core.actions import Action, is_terminal_action
 from core.config import TargetConfig
 from core.decision import StubDecisionMaker
 from core.executor import execute_action
+from core.verification import execute_with_verification
 from core.hover import action_triggers_hover
 from core.writers import RunArtifacts, TraceBuilder, write_loop_artifacts
 
@@ -165,7 +166,12 @@ def _run_hover_confirmation(
             "hover": hover_block,
         }
 
-    hover_execution = execute_action(adapter, hover_action)
+    hover_execution = execute_with_verification(
+        adapter,
+        hover_action,
+        output_dir=config.output_dir,
+        step_index=step_index,
+    )
     hover_block["execution"] = hover_execution
     return hover_action, hover_frame, {
         "move_execution": move_execution,
@@ -253,7 +259,12 @@ def run_visual_agent_loop(
                 adapter.pause_for_feedback()
                 continue
 
-            execution = execute_action(adapter, action)
+            execution = execute_with_verification(
+                adapter,
+                action,
+                output_dir=config.output_dir,
+                step_index=step_index,
+            )
             trace.add_step(
                 {
                     "step": step_index,
