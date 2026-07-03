@@ -12,8 +12,9 @@ Read these files in order before making changes:
 4. `docs/PRD.md` — product scope and requirements
 5. `docs/ARCHITECTURE.md` — system design and data flow
 6. `docs/TASKS.md` — current phase and implementation roadmap
-7. `docs/VERIFY.md` — verification steps for the current phase
-8. `docs/DECISIONS.md` — accepted architecture decisions
+7. `docs/OPENCLAW_INTEGRATION.md` — Phase 5 OpenClaw + Feishu plan (when in Phase 5)
+8. `docs/VERIFY.md` — verification steps for the current phase
+9. `docs/DECISIONS.md` — accepted architecture decisions
 
 ## Project Identity
 

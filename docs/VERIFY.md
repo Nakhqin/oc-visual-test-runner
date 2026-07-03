@@ -538,6 +538,56 @@ python3 ./scripts/ux_testing.py \
 
 ---
 
+## Phase 5 — OpenClaw / Feishu Skill Delivery (Current)
+
+**Not implemented end-to-end yet.** Plan: `docs/OPENCLAW_INTEGRATION.md`. Phase 4.5 publish on VM `170.106.175.128` verified.
+
+### Prerequisites (same VM)
+
+- OpenClaw installed with **Feishu channel** enabled
+- Runner repo + `.venv` + Playwright Chromium
+- Publish env + static host on `:8080` (see Phase 4.5)
+- `GOOGLE_API_KEY` for Gemini runs (no `--use-stub` for E2E)
+
+### Phase 5.2 MVP — pathway smoke (optional, before NL)
+
+Optional internal check — not a Phase 5 milestone. See `docs/OPENCLAW_INTEGRATION.md` **Repo helpers**.
+
+### Phase 5.2 — pathway smoke (optional, ~5 min)
+
+```bash
+chmod +x ./scripts/openclaw/invoke_runner.sh
+./scripts/openclaw/invoke_runner.sh pathway-smoke-001 web https://example.com \
+  "first-time visitor" "pathway smoke" 2 --use-stub
+
+python3 ./scripts/format_skill_reply.py --output-dir /tmp/ux_pathway-smoke-001
+```
+
+**Confirm:** formatted output includes clickable `Report:` URL.
+
+### Phase 5.3 — Feishu NL E2E
+
+Install `docs/openclaw/AGENT_PROMPT.md` in OpenClaw; wire `invoke_runner.sh` + `format_skill_reply.py`.
+
+**Example Feishu input:**
+
+> 用 first-time visitor 测一下 https://example.com ，看看首页主要信息是否清楚。
+
+**Confirm:**
+
+- [ ] OpenClaw extracts `target`, `url`, `persona`, `goal` without runner-side NL parser
+- [ ] `--run-id` correlates to Feishu context when configured
+- [ ] Feishu reply matches `SKILL.md` user-facing format (summary + links, not raw logs)
+- [ ] `terminal_state=blocked` or `max_steps` still returns readable summary + report link
+- [ ] Runner failure (exit `1`/`2`) produces short Feishu error, not full trace
+
+**Failure checks:**
+
+- [ ] Missing publish env → Feishu warns no public link (or ops-only local path)
+- [ ] Missing `GOOGLE_API_KEY` → clear error (stub not used for E2E)
+
+---
+
 ### Troubleshooting
 
 | Symptom | Likely cause | What to try |

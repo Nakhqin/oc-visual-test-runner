@@ -6,19 +6,45 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 
 ## Current Priority
 
-**Phase 5 — OpenClaw / Feishu-style Skill delivery**
+**Phase 5 — OpenClaw / Feishu Skill delivery**
+
+Primary plan: **`docs/OPENCLAW_INTEGRATION.md`**
+
+**Confirmed (2026-07-03):** Same VM deployment (`170.106.175.128`); NL extraction in OpenClaw main agent; existing Feishu channel.
+
+### Phase 5.1 — Integration contract (this repo)
 
 | Status | Task |
 |---|---|
-| Todo | Wire runner into OpenClaw Skill invocation path |
-| Todo | Map NL user input → structured runner input (optional `--run-id` from OpenClaw) |
-| Todo | User-facing summary template using `skill.return_summary` + **`skill.report_url`** |
-| Todo | End-to-end Skill invocation test: NL → run → Feishu reply with clickable report link |
-| Todo | OpenClaw manifest or registration docs |
+| Done | Phase 5 plan doc: `docs/OPENCLAW_INTEGRATION.md` |
+| Done | Feishu reply helper: `scripts/format_skill_reply.py` + `scripts/core/skill_return.py` |
+| Done | OpenClaw invoke wrapper: `scripts/openclaw/invoke_runner.sh` |
+| Done | Agent prompt: `docs/openclaw/AGENT_PROMPT.md` |
+| Done | `skill.recording_url` + `skill.result_json_url` when publish enabled |
+| Done | Link plan doc from `README.md` and `AGENTS.md` |
 
-**Exit criteria:** User asks in natural language; OpenClaw invokes runner and returns concise summary plus **public `report_url`** and evidence links.
+### Phase 5.2 — OpenClaw wiring (OpenClaw side, same VM) — in progress
 
-**Non-goals (Phase 5):** Re-implementing report publish (Phase 4.5).
+| Status | Task |
+|---|---|
+| Todo | Install agent prompt from `docs/openclaw/AGENT_PROMPT.md` |
+| Todo | Register shell tool → `scripts/openclaw/invoke_runner.sh` |
+| Todo | Post-run: `format_skill_reply.py` → Feishu stdout |
+| Todo | Optional pathway smoke (`--use-stub`) before first NL |
+| Todo | NL extraction + missing-field clarifying question in Feishu |
+
+### Phase 5.3 — E2E verification
+
+| Status | Task |
+|---|---|
+| Todo | Feishu NL → run (Gemini) → reply with clickable `report_url` |
+| Todo | Verify `blocked` / `max_steps` still produce readable Feishu summary |
+| Todo | Document failure modes in `docs/VERIFY.md` Phase 5 |
+| Todo | OpenClaw manifest path recorded (OpenClaw config; note in integration doc) |
+
+**Exit criteria:** User asks in natural language via Feishu; OpenClaw on the VM invokes runner and returns concise summary plus **public `report_url`** and evidence links.
+
+**Non-goals (Phase 5):** Re-implementing publish (Phase 4.5); Feishu SDK in this repo; NL parser in this repo.
 
 ---
 
@@ -40,7 +66,7 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 
 ## Phase 5 (Next)
 
-Moved to **Current Priority** above.
+Moved to **Current Priority** above. See **`docs/OPENCLAW_INTEGRATION.md`**.
 
 ---
 
@@ -168,19 +194,9 @@ Moved to **Current Priority** above.
 
 ---
 
-### Phase 5 — OpenClaw / Feishu-style Skill delivery
+### Phase 5 — OpenClaw / Feishu Skill delivery
 
-Moved to **Phase 5 (Next after 4.5)** above. Consumes `skill.report_url` from Phase 4.5; does not implement publish.
-
-| Status | Task |
-|---|---|
-| Todo | Skill entrypoint matching SKILL.md contract |
-| Todo | NL → structured input conversion in OpenClaw layer |
-| Todo | User-facing summary template (not raw logs) |
-| Todo | End-to-end Skill invocation test with **`report_url`** in Feishu/user reply |
-| Todo | OpenClaw manifest or registration docs |
-
-**Exit criteria:** User asks in natural language; OpenClaw invokes runner and returns concise summary plus public report and evidence links.
+Moved to **Current Priority** above. Plan: **`docs/OPENCLAW_INTEGRATION.md`**. Consumes `skill.report_url` from Phase 4.5; does not implement publish.
 
 ---
 

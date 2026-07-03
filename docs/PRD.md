@@ -176,4 +176,4 @@ OpenClaw returns a concise summary (status, target, persona, goal, outcome, main
 - VLM prompt template ownership and versioning
 - Persona report (Phase 3); formal HTML/Markdown reports (Phase 4); public publish URL (Phase 4.5)
 - Screen recording capture method and quality settings (Phase 1)
-- OpenClaw NL → structured input conversion ownership (OpenClaw layer vs this repo)
+- OpenClaw NL → structured input conversion ownership (OpenClaw layer vs this repo) — **resolved:** OpenClaw main agent; see `docs/DECISIONS.md` Phase 5 scope

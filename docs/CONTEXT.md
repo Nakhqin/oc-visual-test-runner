@@ -8,7 +8,7 @@ Stable facts for oc-visual-test-runner. Keep this file short.
 
 ## Current Stage
 
-**Phase 4.5 complete — Phase 5 next.** Public publish implemented; OpenClaw/Feishu delivery is Phase 5.
+**Phase 5 in progress (planned).** OpenClaw + Feishu on same VM; see `docs/OPENCLAW_INTEGRATION.md`.
 
 ## Users / Audience
 

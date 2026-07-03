@@ -124,7 +124,7 @@ python3 ./scripts/ux_testing.py \
   --max-steps 10
 ```
 
-> **Phase 4.5 (complete):** Public report publish (`skill.report_url`) — see `docs/VERIFY.md`. **Current:** Phase 5 — OpenClaw Skill delivery.
+**Phase 4.5 (complete):** Public report publish — see `docs/VERIFY.md`. **Current:** Phase 5 — OpenClaw / Feishu Skill delivery. Plan: **`docs/OPENCLAW_INTEGRATION.md`**.
 
 ## Output Contract (by Phase)
 
@@ -166,6 +166,8 @@ See `docs/VERIFY.md` for full install and smoke-test steps.
 | File | Purpose |
 |---|---|
 | `SKILL.md` | OpenClaw Skill execution contract (primary usage model) |
+| `docs/OPENCLAW_INTEGRATION.md` | Phase 5 OpenClaw + Feishu integration plan (same VM) |
+| `docs/openclaw/AGENT_PROMPT.md` | OpenClaw agent prompt (NL → invoke runner → Feishu reply) |
 | `requirements.txt` | Phase 1 Python dependencies |
 | `AGENTS.md` | Instructions for Cursor agents |
 | `START_HERE.md` | Onboarding checklist |

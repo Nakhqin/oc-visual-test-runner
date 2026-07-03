@@ -140,6 +140,11 @@ def _apply_publish_urls(output_dir: Path, result: PublishFinalizeResult) -> None
     skill = dict(payload.get("skill", {}))
     skill["report_url"] = result.report_url
     skill["report_base_url"] = result.report_base_url
+    if result.report_base_url:
+        recording = payload.get("artifacts", {}).get("recording")
+        if recording:
+            skill["recording_url"] = f"{result.report_base_url}/{recording}"
+        skill["result_json_url"] = f"{result.report_base_url}/ux_result.json"
     payload["skill"] = skill
     payload["run_id"] = result.run_id
     _write_ux_result(output_dir, payload)

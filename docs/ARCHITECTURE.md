@@ -8,7 +8,7 @@ The runner implements a **universal visual agent loop** driven by target configu
 
 Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future targets (`android`, `windows`) will add dedicated adapters behind the same loop and Skill model.
 
-**Phase 5 — OpenClaw delivery.** Phase 4.5 public publish implemented — see `docs/VERIFY.md`.
+**Phase 5 — OpenClaw / Feishu delivery (planned).** Phase 4.5 publish verified on VM. Integration plan: **`docs/OPENCLAW_INTEGRATION.md`**.
 
 ## OpenClaw Skill Flow
 
@@ -91,7 +91,7 @@ Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future 
 | Report generator (minimal) | `persona_report.md` — trace synthesis + optional Gemini | **Implemented** (Phase 3) |
 | Report generator (formal) | `ux_report.md`, `index.html` | **Implemented** (Phase 4) |
 | Report publisher | Copy to public dir; `skill.report_url` | **Implemented** (Phase 4.5) |
-| Skill delivery layer | OpenClaw / Feishu-style end-to-end return | **Planned** (Phase 5) |
+| Skill delivery layer | OpenClaw / Feishu end-to-end return | **Planned** (Phase 5 — see `docs/OPENCLAW_INTEGRATION.md`) |
 | Android adapter | Device/emulator visual control | **Planned** (Phase 6–7) |
 | Windows adapter | Desktop visual control | **Planned** (Phase 6–7) |
 

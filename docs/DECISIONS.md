@@ -172,6 +172,32 @@ Phase 3 `persona_report.md` stays first-person; Phase 4 reports are reviewer-fac
 
 ---
 
+### 2026-07-03 — Phase 5 OpenClaw integration scope
+
+**Status:** Accepted (planned — not implemented)
+
+**Context:**
+Phase 4.5 provides public `skill.report_url` on the cloud VM. Phase 5 connects OpenClaw + Feishu so users trigger runs in natural language and receive summary + clickable report links.
+
+**Decision:**
+- **Deployment:** OpenClaw Skill and runner run on the **same VM** (`170.106.175.128`); OpenClaw invokes `scripts/ux_testing.py` via **local subprocess**.
+- **NL → structured input:** **OpenClaw main agent** extracts Skill fields per `SKILL.md` — **not** a parser in this repo.
+- **Feishu:** Use the **existing OpenClaw Feishu channel** for user-facing replies.
+- **User reply:** Built from `ux_result.json` (`skill.return_summary`, `skill.report_url`, terminal fields) — not raw stderr/trace.
+- **`run_id`:** OpenClaw should pass `--run-id` correlated to Feishu context when possible (e.g. message id).
+- **Publish:** OpenClaw subprocess must inherit `UX_REPORT_PUBLIC_DIR` and `UX_REPORT_PUBLIC_BASE_URL`; Phase 5 does not re-implement publish.
+
+**Reasoning:**
+Keeps runner focused on visual testing; orchestration and NL live in OpenClaw where Feishu channel already exists. Same-VM avoids remote exec complexity.
+
+**Consequences:**
+- Primary plan: `docs/OPENCLAW_INTEGRATION.md`
+- Phase 5 split: 5.1 integration contract (this repo), 5.2 OpenClaw wiring, 5.3 Feishu E2E verification
+- Optional runner helpers: `format_skill_reply.py`, `skill.recording_url`, `invoke_runner.sh` — **implemented** (5.1)
+- PRD open question on NL ownership resolved: OpenClaw layer
+
+---
+
 ### 2026-07-03 — Phase 4.5 public report publish (runner-only)
 
 **Status:** Accepted (implemented 2026-07-03)
