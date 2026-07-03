@@ -19,6 +19,8 @@ class RunArtifacts:
     action_trace_path: Path
     ux_result_path: Path
     persona_report_path: Path | None
+    ux_report_path: Path | None
+    index_html_path: Path | None
     recording_path: Path | None
     report_synthesis: str | None = None
 
@@ -136,5 +138,7 @@ def write_loop_artifacts(
         action_trace_path=action_trace_path,
         ux_result_path=ux_result_path,
         persona_report_path=None,
+        ux_report_path=None,
+        index_html_path=None,
         recording_path=recording_path if recording_path and recording_path.exists() else None,
     )

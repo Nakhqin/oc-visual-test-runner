@@ -149,6 +149,29 @@ Persona voice matches product intent; trace synthesis keeps stub/offline runs us
 
 ---
 
+### 2026-07-03 — Phase 4 formal reports and Skill-ready ux_result.json
+
+**Status:** Accepted
+
+**Context:**
+OpenClaw needs primary user-facing report paths and a structured summary block in `ux_result.json` without reviving legacy report systems.
+
+**Decision:**
+- Generate **`ux_report.md`** (reviewer-facing) and **`index.html`** (primary HTML report) on every run from trace + `ux_result.json`.
+- HTML embeds step/hover screenshots and optional recording; Markdown uses image links.
+- Add **`skill`** block to `ux_result.json`: `return_summary`, `primary_report`, `markdown_report`, `persona_report`, `result_json`, `action_trace`, `evidence`.
+- stderr prints `SELECTED_FORMAL_REPORT=enabled`.
+- Content aligns with `SKILL.md`: setup, journey, verification summary, findings/classification, evidence, recommendations.
+
+**Reasoning:**
+Phase 3 `persona_report.md` stays first-person; Phase 4 reports are reviewer-facing and Skill-ready. Trace-derived only — no extra VLM call.
+
+**Consequences:**
+- New module: `scripts/core/formal_report.py`
+- Phase 5 wires OpenClaw delivery using `skill` block
+
+---
+
 ### 2026-06-24 — Failed clicks must not automatically be classified as UX issues
 
 **Status:** Accepted

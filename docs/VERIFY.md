@@ -415,10 +415,19 @@ python3 ./scripts/ux_testing.py \
 
 **Confirm:**
 
-- [ ] stderr shows `SELECTED_PERSONA_REPORT=trace`
-- [ ] `persona_report.md` exists with persona setup, journey, friction, evidence, reviewer notes
-- [ ] `ux_result.json` has `artifacts.persona_report` and `report.synthesis=trace_only`
-- [ ] Optional findings do not appear from verification telemetry alone
+- [x] stderr shows `SELECTED_PERSONA_REPORT=trace` (stub) or `trace+gemini` (Gemini)
+- [x] `persona_report.md` exists with persona setup, journey, friction, evidence, reviewer notes
+- [x] `ux_result.json` has `artifacts.persona_report` and `report.synthesis`
+- [x] Optional findings do not appear from verification telemetry alone
+
+#### Phase 3 verification record (2026-07-03)
+
+| Run | Target | Host | Terminal state | Report synthesis | Notes |
+|---|---|---|---|---|
+| Stub | web (example.com) | Local Windows | `blocked` (stub) | `trace_only` | persona_report.md OK |
+| Gemini | web (example.com) | Cloud runner (US) | `max_steps` | `trace+gemini` | `SELECTED_DECISION_MAKER=gemini`; 2 steps |
+
+---
 
 ### Optional Gemini polish (cloud runner)
 
@@ -434,6 +443,38 @@ python3 ./scripts/ux_testing.py \
 ```
 
 **Confirm:** `report.synthesis=trace+gemini` (or `gemini_failed_fallback` with A content preserved).
+
+---
+
+## Phase 4 — Formal Reports
+
+Implemented in the runner. stderr prints `SELECTED_FORMAL_REPORT=enabled`.
+
+### Behavior
+
+1. Every run writes **`ux_report.md`** (reviewer-facing Markdown) and **`index.html`** (primary HTML report with embedded screenshots).
+2. `ux_result.json` gains `artifacts.ux_report`, `artifacts.index_html`, and a **`skill`** block for OpenClaw integration.
+3. Reports include setup, journey timeline, verification summary, findings, evidence, and recommendations per `SKILL.md`.
+
+### Quick stub check (no Gemini)
+
+```bash
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "https://example.com" \
+  --persona "first-time visitor" \
+  --goal "formal report smoke" \
+  --output-dir /tmp/ux_formal_stub \
+  --max-steps 2 \
+  --use-stub
+```
+
+**Confirm:**
+
+- [ ] stderr shows `SELECTED_FORMAL_REPORT=enabled`
+- [ ] `ux_report.md` and `index.html` exist
+- [ ] `index.html` renders step screenshots inline
+- [ ] `ux_result.json` has `skill.primary_report=index.html` and `skill.return_summary`
 
 ---
 
@@ -473,15 +514,13 @@ ruff check .
 - [ ] Clicks use visual coordinates, not Figma node IDs or CSS selectors
 - [ ] Failed click logged without automatic UX defect classification
 
-### Verify Phase 3+ Output (Future)
+### Verify Phase 4+ Output
 
 ```bash
-# Phase 3 — persona report
 ls /tmp/ux_report_output/persona_report.md
-
-# Phase 4 — formal reports
 ls /tmp/ux_report_output/ux_report.md
 ls /tmp/ux_report_output/index.html
+python3 -c "import json; r=json.load(open('/tmp/ux_report_output/ux_result.json')); print(r.get('skill',{}).get('primary_report'))"
 ```
 
 ### Documentation: OpenClaw Skill Usage Model

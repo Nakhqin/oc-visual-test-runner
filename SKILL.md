@@ -219,9 +219,9 @@ Each run writes to `output_dir`. Full contract by phase — see [Phase Deliverab
 
 Terminal states: `done`, `blocked`, `max_steps`, `timeout`.
 
-## Report Content (Planned)
+## Report Content
 
-Human-readable reports (`ux_report.md`, `index.html`) should eventually include:
+Human-readable reports (`ux_report.md`, `index.html`, `persona_report.md`) include:
 
 - test setup (target, URL, viewport, limits)
 - persona and goal
@@ -291,4 +291,4 @@ The report should explain the **evidence behind the classification**. UX finding
 
 ## Current Phase
 
-**Phase 3 complete; Phase 4 next.** Persona report (`persona_report.md`) with optional Gemini synthesis. Formal OpenClaw reports remain **planned** (Phase 4–5). See `docs/TASKS.md`.
+**Phase 4 complete; Phase 5 next.** Formal reports (`ux_report.md`, `index.html`) and `ux_result.json` `skill` block implemented. OpenClaw end-to-end delivery is **planned** (Phase 5). See `docs/TASKS.md`.

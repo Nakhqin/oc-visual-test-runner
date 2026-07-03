@@ -502,6 +502,22 @@ def write_persona_report(
     return report_path, report
 
 
+def verification_stats(steps: list[dict[str, Any]]) -> dict[str, int]:
+    return _verification_stats(steps)
+
+
+def collect_evidence_paths(
+    output_dir: Path,
+    ux_result: dict[str, Any],
+    steps: list[dict[str, Any]],
+) -> list[str]:
+    return _collect_evidence_paths(output_dir, ux_result, steps)
+
+
+def terminal_reason_from_trace(steps: list[dict[str, Any]]) -> tuple[str | None, dict[str, Any] | None]:
+    return _terminal_reason_from_trace(steps)
+
+
 def selected_persona_report_mode(*, use_gemini_synthesis: bool, decision_source: str) -> str:
     if use_gemini_synthesis and decision_source != "stub":
         return "trace+gemini"

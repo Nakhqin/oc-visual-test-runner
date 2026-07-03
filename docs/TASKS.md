@@ -6,16 +6,31 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 
 ## Current Priority
 
-**Phase 4 — Formal reports and Skill-ready result JSON**
+**Phase 5 — OpenClaw / Feishu-style Skill delivery**
 
 | Status | Task |
 |---|---|
-| Todo | Generate formal `ux_report.md` |
-| Todo | Generate formal `index.html` (main human-readable report) |
-| Todo | Improve `ux_result.json` schema for OpenClaw Skill integration |
-| Todo | Align report content with `SKILL.md` (journey, findings, classification, evidence) |
+| Todo | Wire runner into OpenClaw Skill invocation path |
+| Todo | Map NL user input → structured runner input |
+| Todo | Return concise summary + report/evidence links to user |
+| Todo | End-to-end Skill invocation test with report/evidence links |
 
-**Exit criteria:** User-facing report paths (`index.html`, `ux_report.md`) populated; OpenClaw can build user-facing return from artifacts.
+**Exit criteria:** User asks in natural language; OpenClaw invokes runner and returns concise summary plus report/recording/result paths.
+
+---
+
+## Phase 4 (Complete)
+
+**Formal reports and Skill-ready result JSON — implemented 2026-07-03**
+
+| Status | Task |
+|---|---|
+| Done | Generate formal `ux_report.md` |
+| Done | Generate formal `index.html` (main human-readable report) |
+| Done | Improve `ux_result.json` schema for OpenClaw Skill integration |
+| Done | Align report content with `SKILL.md` (journey, findings, classification, evidence) |
+
+**Exit criteria (met in code):** `ux_report.md` and `index.html` generated on every run; `ux_result.json` includes `skill` block and formal report artifact paths. See `docs/VERIFY.md` Phase 4.
 
 ---
 
@@ -31,6 +46,8 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 | Done | Optional Gemini persona report synthesis (`--persona-report-gemini`) |
 
 **Exit criteria (met in code):** `persona_report.md` generated alongside `ux_result.json`; trace synthesis (A) always runs; optional Gemini polish (B) when enabled. See `docs/VERIFY.md` Phase 3.
+
+**E2E verification (2026-07-03):** Cloud runner Gemini run with `PERSONA_REPORT_GEMINI=1` — `trace+gemini` confirmed. See `docs/VERIFY.md` Phase 3 verification record.
 
 ---
 
@@ -90,7 +107,7 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 - Default VLM: `gemini-2.5-flash` (`google-genai`); `gemini-2.0-flash` shut down 2026-06-01
 - Gemini API may return **503 UNAVAILABLE** under high demand — re-run; not classified as UX issue
 - Figma loads with `domcontentloaded` + fixed post-load wait (not `networkidle`)
-- Formal HTML/Markdown reports not yet implemented (Phase 4)
+- Formal HTML/Markdown reports generated from Phase 4 onward (`ux_report.md`, `index.html`)
 
 ---
 
@@ -114,14 +131,7 @@ Moved to **Phase 3 (Complete)** above.
 
 ### Phase 4 — Formal reports and Skill-ready result JSON
 
-| Status | Task |
-|---|---|
-| Todo | Generate formal `ux_report.md` |
-| Todo | Generate formal `index.html` (main human-readable report) |
-| Todo | Improve `ux_result.json` schema for OpenClaw Skill integration |
-| Todo | Align report content with `SKILL.md` (journey, findings, classification, evidence) |
-
-**Exit criteria:** User-facing report paths (`index.html`, `ux_report.md`) populated; OpenClaw can build user-facing return from artifacts.
+Moved to **Phase 4 (Complete)** above.
 
 ---
 

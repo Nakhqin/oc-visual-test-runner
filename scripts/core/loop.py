@@ -16,6 +16,7 @@ from core.config import TargetConfig
 from core.decision import StubDecisionMaker
 from core.executor import execute_action
 from core.hover import action_triggers_hover
+from core.formal_report import write_formal_reports
 from core.report import write_persona_report
 from core.verification import execute_with_verification
 from core.writers import RunArtifacts, TraceBuilder, write_loop_artifacts
@@ -318,10 +319,19 @@ def run_visual_agent_loop(
         api_key=gemini_api_key,
         model_name=gemini_model,
     )
+    ux_result_payload = json.loads(artifacts.ux_result_path.read_text(encoding="utf-8"))
+    formal_result = write_formal_reports(
+        config,
+        trace_payload=trace.to_dict(),
+        ux_result=ux_result_payload,
+        decision_source=maker.source,
+    )
     artifacts = RunArtifacts(
         action_trace_path=artifacts.action_trace_path,
         ux_result_path=artifacts.ux_result_path,
         persona_report_path=persona_report_path,
+        ux_report_path=formal_result.ux_report_path,
+        index_html_path=formal_result.index_html_path,
         recording_path=artifacts.recording_path,
         report_synthesis=report_result.synthesis,
     )

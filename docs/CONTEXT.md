@@ -8,7 +8,7 @@ Stable facts for oc-visual-test-runner. Keep this file short.
 
 ## Current Stage
 
-**Phase 3 complete — Phase 4 next.** Persona report with optional Gemini polish implemented.
+**Phase 4 complete — Phase 5 next.** Formal reports (`ux_report.md`, `index.html`) and Skill block in `ux_result.json`.
 
 ## Users / Audience
 

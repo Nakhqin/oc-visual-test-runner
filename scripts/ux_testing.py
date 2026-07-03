@@ -109,6 +109,7 @@ def print_selection_metadata(config: TargetConfig, *, persona_report_mode: str) 
     print("SELECTED_HOVER_LOOP=enabled")
     print("SELECTED_POST_CLICK_VERIFY=enabled")
     print(f"SELECTED_PERSONA_REPORT={persona_report_mode}")
+    print("SELECTED_FORMAL_REPORT=enabled")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -147,6 +148,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"ux_result={result.artifacts.ux_result_path}", file=sys.stderr)
     if result.artifacts.persona_report_path is not None:
         print(f"persona_report={result.artifacts.persona_report_path}", file=sys.stderr)
+    if result.artifacts.ux_report_path is not None:
+        print(f"ux_report={result.artifacts.ux_report_path}", file=sys.stderr)
+    if result.artifacts.index_html_path is not None:
+        print(f"index_html={result.artifacts.index_html_path}", file=sys.stderr)
     if result.artifacts.report_synthesis is not None:
         print(f"persona_report_synthesis={result.artifacts.report_synthesis}", file=sys.stderr)
     if result.artifacts.recording_path is not None:
