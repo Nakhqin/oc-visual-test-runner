@@ -8,7 +8,7 @@ The runner implements a **universal visual agent loop** driven by target configu
 
 Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future targets (`android`, `windows`) will add dedicated adapters behind the same loop and Skill model.
 
-**Phase 5 — OpenClaw Skill delivery.** Phase 4 formal reports implemented — see `docs/VERIFY.md`.
+**Phase 5 — OpenClaw delivery.** Phase 4.5 public publish implemented — see `docs/VERIFY.md`.
 
 ## OpenClaw Skill Flow
 
@@ -90,6 +90,7 @@ Phase 1 targets (`figma`, `web`) share one **browser platform adapter**. Future 
 | Post-click verifier | Confirm UI change; retry policy | **Implemented** (Phase 2) |
 | Report generator (minimal) | `persona_report.md` — trace synthesis + optional Gemini | **Implemented** (Phase 3) |
 | Report generator (formal) | `ux_report.md`, `index.html` | **Implemented** (Phase 4) |
+| Report publisher | Copy to public dir; `skill.report_url` | **Implemented** (Phase 4.5) |
 | Skill delivery layer | OpenClaw / Feishu-style end-to-end return | **Planned** (Phase 5) |
 | Android adapter | Device/emulator visual control | **Planned** (Phase 6–7) |
 | Windows adapter | Desktop visual control | **Planned** (Phase 6–7) |
@@ -115,7 +116,7 @@ Exact package layout will be decided at Phase 1 start and recorded in `docs/DECI
 2. **OpenClaw** — derives structured Skill input per `SKILL.md`.
 3. **CLI invocation** — `scripts/ux_testing.py` with structured parameters; runner prints `SELECTED_*` metadata.
 4. **Runner loop** — see below.
-5. **OpenClaw return** — concise summary + report/evidence paths (not raw logs).
+5. **OpenClaw return** — concise summary + **`skill.report_url`** and evidence links (Phase 5; URL from Phase 4.5 publish).
 
 ### Runner loop (execution)
 1. **Load target config** — `target=figma|web`, URL, persona, goal, output_dir, limits, optional viewport, `run_id`.
@@ -127,7 +128,7 @@ Exact package layout will be decided at Phase 1 start and recorded in `docs/DECI
    - **Feedback observation** — capture post-action frame or hover state.
    - **Trace writer** appends to `action_trace.json`; save screenshot.
    - Exit if action is `done` or `blocked`, or limits exceeded.
-4. **Finalize** — Write `ux_result.json`; stop recording → `ux_test_recording.webm`. Phase 3+ adds reports; Phase 4 adds `ux_report.md` and `index.html`.
+4. **Finalize** — Write `ux_result.json`; stop recording → `ux_test_recording.webm`. Phase 3+ adds reports; Phase 4 adds `ux_report.md` and `index.html`. Phase 4.5 optionally **publishes** the full output directory and writes `skill.report_url`.
 
 ## Output Artifacts
 
@@ -137,8 +138,9 @@ Exact package layout will be decided at Phase 1 start and recorded in `docs/DECI
 | `action_trace.json` | System — debug, audit | 1+ |
 | `screenshots/` | Both — evidence | 1+ |
 | `ux_test_recording.webm` | User-facing evidence | 1+ |
-| Minimal report | User-facing | 3+ |
+| `persona_report.md` | User-facing (persona voice) | 3+ |
 | `ux_report.md`, `index.html` | User-facing primary report | 4+ |
+| Published run at `{BASE_URL}/{run_id}/` | User-facing public report + evidence | 4.5+ |
 
 See `SKILL.md` for report content expectations and user-facing return format.
 

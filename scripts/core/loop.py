@@ -17,6 +17,7 @@ from core.decision import StubDecisionMaker
 from core.executor import execute_action
 from core.hover import action_triggers_hover
 from core.formal_report import write_formal_reports
+from core.publish import finalize_report_publish
 from core.report import write_persona_report
 from core.verification import execute_with_verification
 from core.writers import RunArtifacts, TraceBuilder, write_loop_artifacts
@@ -189,6 +190,7 @@ def run_visual_agent_loop(
     persona_report_gemini: bool = False,
     gemini_api_key: str | None = None,
     gemini_model: str | None = None,
+    run_id: str | None = None,
 ) -> LoopRunResult:
     """Run observe → decide → hover (when clicking) → act → record until a terminal state."""
     config.output_dir.mkdir(parents=True, exist_ok=True)
@@ -326,6 +328,7 @@ def run_visual_agent_loop(
         ux_result=ux_result_payload,
         decision_source=maker.source,
     )
+    publish_result = finalize_report_publish(config.output_dir, run_id=run_id)
     artifacts = RunArtifacts(
         action_trace_path=artifacts.action_trace_path,
         ux_result_path=artifacts.ux_result_path,
@@ -334,6 +337,10 @@ def run_visual_agent_loop(
         index_html_path=formal_result.index_html_path,
         recording_path=artifacts.recording_path,
         report_synthesis=report_result.synthesis,
+        run_id=publish_result.run_id,
+        report_url=publish_result.report_url,
+        report_base_url=publish_result.report_base_url,
+        published_dir=publish_result.published_dir,
     )
 
     return LoopRunResult(

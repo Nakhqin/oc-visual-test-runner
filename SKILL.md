@@ -71,7 +71,7 @@ Example structured input:
 
 ## CLI Inputs (Runner Layer)
 
-The CLI accepts the core fields below. Optional viewport and `run_id` fields are planned for Phase 1+ CLI flags or OpenClaw-side injection — see `docs/TASKS.md`.
+The CLI accepts the core fields below. Optional viewport fields are planned for Phase 1+ CLI flags or OpenClaw-side injection — see `docs/TASKS.md`.
 
 | Input | Required | Description |
 |---|---|---|
@@ -82,6 +82,7 @@ The CLI accepts the core fields below. Optional viewport and `run_id` fields are
 | `output_dir` | Yes | Directory for run artifacts |
 | `max_steps` | No | Maximum agent loop iterations (default: 10) |
 | `timeout_seconds` | No | Overall run timeout (default: 180 seconds) |
+| `run_id` | No | Correlation id (`--run-id` or `RUN_ID`; default auto-generated) |
 
 ## Supported Targets (Phase 1)
 
@@ -177,12 +178,12 @@ Outcome: blocked
 Main finding: the persona identified the primary action but the prototype did not visibly progress after clicking.
 Classification: Prototype limitation / Automation limitation, not confirmed UX issue
 
-Report: /tmp/ux_report_output/index.html
-Recording: /tmp/ux_report_output/ux_test_recording.webm
-Result JSON: /tmp/ux_report_output/ux_result.json
+Report: http://170.106.175.128:8080/example-run-id/index.html
+Recording: http://170.106.175.128:8080/example-run-id/ux_test_recording.webm
+Result JSON: http://170.106.175.128:8080/example-run-id/ux_result.json
 ```
 
-> **Phase 3+:** `persona_report.md` is the minimal first-person report. **Phase 4+:** `index.html` and `ux_report.md` become the primary formal report paths. OpenClaw may summarize from `ux_result.json` and link to `persona_report.md`, recording, and screenshots.
+> **Phase 3+:** `persona_report.md` is the minimal first-person report. **Phase 4+:** `index.html` and `ux_report.md` are generated locally each run. **Phase 4.5+:** when publish env is set, `skill.report_url` points to the public copy under `{UX_REPORT_PUBLIC_BASE_URL}/{run_id}/`. **Phase 5+:** OpenClaw/Feishu returns `report_url` to the user.
 
 ## Output Files
 
@@ -244,8 +245,9 @@ Human-readable reports (`ux_report.md`, `index.html`, `persona_report.md`) inclu
 | **1.5** | Adds cursor marker, hover observation frames; VLM decides click / adjust / wait / block after hover feedback |
 | **2** | Adds post-click verification and retry or blocked logic |
 | **3** | Adds `persona_report.md` (trace synthesis + optional Gemini polish) |
-| **4** | Adds formal `ux_report.md`, `index.html`; improves `ux_result.json` for OpenClaw Skill integration |
-| **5** | Connects Skill back into OpenClaw / Feishu-style delivery end-to-end |
+| **4** | Adds formal `ux_report.md`, `index.html`; `skill` block in `ux_result.json` |
+| **4.5** | Adds optional public publish: `skill.report_url`, `skill.report_base_url` (no OpenClaw required) |
+| **5** | OpenClaw / Feishu invokes runner and returns summary + **`report_url`** to user |
 | **6–7** | Android / Windows adapter design and exploration (future targets only) |
 
 ## Action Protocol (planned)
@@ -291,4 +293,4 @@ The report should explain the **evidence behind the classification**. UX finding
 
 ## Current Phase
 
-**Phase 4 complete; Phase 5 next.** Formal reports (`ux_report.md`, `index.html`) and `ux_result.json` `skill` block implemented. OpenClaw end-to-end delivery is **planned** (Phase 5). See `docs/TASKS.md`.
+**Phase 4.5 complete; Phase 5 next.** Public report publish implemented. Phase 5 OpenClaw/Feishu delivery consumes `skill.report_url`. See `docs/TASKS.md`.

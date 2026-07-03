@@ -124,7 +124,7 @@ python3 ./scripts/ux_testing.py \
   --max-steps 10
 ```
 
-> **Phase 4 (complete):** Formal reports (`ux_report.md`, `index.html`) + Skill block — see `docs/VERIFY.md`. **Current:** Phase 5 — OpenClaw Skill delivery.
+> **Phase 4.5 (complete):** Public report publish (`skill.report_url`) — see `docs/VERIFY.md`. **Current:** Phase 5 — OpenClaw Skill delivery.
 
 ## Output Contract (by Phase)
 
@@ -138,19 +138,17 @@ python3 ./scripts/ux_testing.py \
 └── screenshots/            # user-facing + raw evidence
 ```
 
-**Phase 4:** `ux_report.md`, `index.html`, `skill` block in `ux_result.json` (implemented). **Phase 5+ (planned):** OpenClaw Skill delivery
-**Phase 5 (planned):** OpenClaw / Feishu-style end-to-end Skill delivery
+**Phase 4.5:** public `report_url` via publish (implemented). **Phase 5 (planned):** OpenClaw / Feishu Skill delivery (consumes `report_url`).
 
 Full file purposes: see `SKILL.md`.
 
 ## Current Phase
 
-**Phase 4 complete — Phase 5 next.** Formal reports and Skill-ready `ux_result.json` implemented.
+**Phase 4.5 complete — Phase 5 next.** Public report publish implemented. OpenClaw/Feishu delivery follows.
 
 ## Out of Scope (Phase 1)
 
 - No Android or Windows adapters yet
-- No formal `ux_report.md` / `index.html` yet (Phase 4)
 - No OpenClaw / Feishu end-to-end Skill delivery yet (Phase 5)
 - No Figma API grounding or DOM-selector-first automation
 

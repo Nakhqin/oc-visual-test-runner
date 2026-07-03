@@ -11,11 +11,36 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 | Status | Task |
 |---|---|
 | Todo | Wire runner into OpenClaw Skill invocation path |
-| Todo | Map NL user input → structured runner input |
-| Todo | Return concise summary + report/evidence links to user |
-| Todo | End-to-end Skill invocation test with report/evidence links |
+| Todo | Map NL user input → structured runner input (optional `--run-id` from OpenClaw) |
+| Todo | User-facing summary template using `skill.return_summary` + **`skill.report_url`** |
+| Todo | End-to-end Skill invocation test: NL → run → Feishu reply with clickable report link |
+| Todo | OpenClaw manifest or registration docs |
 
-**Exit criteria:** User asks in natural language; OpenClaw invokes runner and returns concise summary plus report/recording/result paths.
+**Exit criteria:** User asks in natural language; OpenClaw invokes runner and returns concise summary plus **public `report_url`** and evidence links.
+
+**Non-goals (Phase 5):** Re-implementing report publish (Phase 4.5).
+
+---
+
+## Phase 4.5 (Complete)
+
+**Public report publish (no OpenClaw required) — implemented 2026-07-03**
+
+| Status | Task |
+|---|---|
+| Done | `run_id` resolution (optional `--run-id` / `RUN_ID`; default auto-generated slug) |
+| Done | `publish()` copy full `output_dir` → `UX_REPORT_PUBLIC_DIR/<run_id>/` |
+| Done | Write `skill.report_url` and `skill.report_base_url` in `ux_result.json` when publish env is set |
+| Done | stderr `report_url=...` and publish metadata |
+| Done | Document ops: static host (`http.server` or nginx) + security/retention notes in `docs/VERIFY.md` |
+
+**Exit criteria (met in code):** With `UX_REPORT_PUBLIC_DIR` and `UX_REPORT_PUBLIC_BASE_URL` set, a run publishes artifacts and `report_url` is written to `ux_result.json`. Without publish env, run completes with `SELECTED_REPORT_PUBLISH=disabled`. See `docs/VERIFY.md` Phase 4.5.
+
+---
+
+## Phase 5 (Next)
+
+Moved to **Current Priority** above.
 
 ---
 
@@ -31,6 +56,8 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 | Done | Align report content with `SKILL.md` (journey, findings, classification, evidence) |
 
 **Exit criteria (met in code):** `ux_report.md` and `index.html` generated on every run; `ux_result.json` includes `skill` block and formal report artifact paths. See `docs/VERIFY.md` Phase 4.
+
+**E2E verification (2026-07-03):** Cloud runner Gemini run — `SELECTED_FORMAL_REPORT=enabled`, `ux_report.md` + `index.html` generated. Public URL publish deferred to Phase 4.5. See `docs/VERIFY.md` Phase 4 verification record.
 
 ---
 
@@ -107,7 +134,7 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 - Default VLM: `gemini-2.5-flash` (`google-genai`); `gemini-2.0-flash` shut down 2026-06-01
 - Gemini API may return **503 UNAVAILABLE** under high demand — re-run; not classified as UX issue
 - Figma loads with `domcontentloaded` + fixed post-load wait (not `networkidle`)
-- Formal HTML/Markdown reports generated from Phase 4 onward (`ux_report.md`, `index.html`)
+- Formal HTML/Markdown reports generated from Phase 4 onward (`ux_report.md`, `index.html`); public URL publish is Phase 4.5
 
 ---
 
@@ -135,17 +162,25 @@ Moved to **Phase 4 (Complete)** above.
 
 ---
 
+### Phase 4.5 — Public report publish
+
+Moved to **Current Priority** above.
+
+---
+
 ### Phase 5 — OpenClaw / Feishu-style Skill delivery
+
+Moved to **Phase 5 (Next after 4.5)** above. Consumes `skill.report_url` from Phase 4.5; does not implement publish.
 
 | Status | Task |
 |---|---|
 | Todo | Skill entrypoint matching SKILL.md contract |
 | Todo | NL → structured input conversion in OpenClaw layer |
 | Todo | User-facing summary template (not raw logs) |
-| Todo | End-to-end Skill invocation test with report/evidence links |
+| Todo | End-to-end Skill invocation test with **`report_url`** in Feishu/user reply |
 | Todo | OpenClaw manifest or registration docs |
 
-**Exit criteria:** User asks in natural language; OpenClaw invokes runner and returns concise summary plus report/recording/result paths.
+**Exit criteria:** User asks in natural language; OpenClaw invokes runner and returns concise summary plus public report and evidence links.
 
 ---
 

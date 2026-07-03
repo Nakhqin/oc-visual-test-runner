@@ -23,6 +23,10 @@ class RunArtifacts:
     index_html_path: Path | None
     recording_path: Path | None
     report_synthesis: str | None = None
+    run_id: str | None = None
+    report_url: str | None = None
+    report_base_url: str | None = None
+    published_dir: Path | None = None
 
 
 class TraceBuilder:

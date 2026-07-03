@@ -476,6 +476,66 @@ python3 ./scripts/ux_testing.py \
 - [ ] `index.html` renders step screenshots inline
 - [ ] `ux_result.json` has `skill.primary_report=index.html` and `skill.return_summary`
 
+#### Phase 4 verification record (2026-07-03)
+
+| Run | Target | Host | Terminal state | Notes |
+|---|---|---|---|---|
+| Stub | web (example.com) | Local Windows | `blocked` (stub) | `ux_report.md` + `index.html` OK |
+| Gemini | web (example.com) | Cloud runner (US) | `max_steps` | Full formal report + `trace+gemini` persona report; **no public URL yet** (Phase 4.5) |
+
+---
+
+## Phase 4.5 — Public Report Publish (Current)
+
+**Implemented in runner.** See `docs/DECISIONS.md` and `scripts/core/publish.py`.
+
+### Intended behavior
+
+1. After Phase 4 artifacts are written, **`publish()`** copies the full `output_dir` to `$UX_REPORT_PUBLIC_DIR/<run_id>/` when publish env is configured.
+2. **`run_id`:** optional `--run-id` / `RUN_ID`; default auto-generated `{timestamp}-{short_uuid}`.
+3. **`ux_result.json`:** `skill.report_url`, `skill.report_base_url`.
+4. **Static host (ops):** separate long-running service, e.g.:
+
+```bash
+export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
+export UX_REPORT_PUBLIC_BASE_URL=http://170.106.175.128:8080
+
+python3 -m http.server 8080 \
+  --bind 0.0.0.0 \
+  --directory /var/www/ux-reports
+```
+
+4. **Public URL pattern:** `{UX_REPORT_PUBLIC_BASE_URL}/{run_id}/index.html`
+
+### Planned verification (after implementation)
+
+```bash
+export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
+export UX_REPORT_PUBLIC_BASE_URL=http://<public-ip>:8080
+
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "https://example.com" \
+  --persona "first-time visitor" \
+  --goal "publish smoke" \
+  --output-dir /tmp/ux_publish_smoke \
+  --max-steps 2
+```
+
+**Confirm:**
+
+- [ ] stderr shows `SELECTED_REPORT_PUBLISH=enabled` and `report_url=http://.../<run_id>/index.html`
+- [ ] `/var/www/ux-reports/<run_id>/index.html` exists with `screenshots/`
+- [ ] Opening `report_url` in a browser (public network) renders screenshots and recording
+- [ ] Without publish env, run completes with `SELECTED_REPORT_PUBLISH=disabled` and no `report_url`
+
+**Ops notes:** Open security group port for the static host; plan retention/cleanup for `/var/www/ux-reports/`; MVP uses HTTP without auth.
+
+**Gotchas:**
+
+- Both `UX_REPORT_PUBLIC_DIR` and `UX_REPORT_PUBLIC_BASE_URL` are required; if only one is set, publish is disabled (stderr warning).
+- Reusing the same `run_id` overwrites the existing published directory.
+
 ---
 
 ### Troubleshooting
@@ -521,6 +581,13 @@ ls /tmp/ux_report_output/persona_report.md
 ls /tmp/ux_report_output/ux_report.md
 ls /tmp/ux_report_output/index.html
 python3 -c "import json; r=json.load(open('/tmp/ux_report_output/ux_result.json')); print(r.get('skill',{}).get('primary_report'))"
+```
+
+### Verify Phase 4.5 Output (after implementation)
+
+```bash
+python3 -c "import json; r=json.load(open('/tmp/ux_publish_smoke/ux_result.json')); print(r.get('skill',{}).get('report_url'))"
+curl -I "$(python3 -c "import json; print(json.load(open('/tmp/ux_publish_smoke/ux_result.json'))['skill']['report_url'])")"
 ```
 
 ### Documentation: OpenClaw Skill Usage Model

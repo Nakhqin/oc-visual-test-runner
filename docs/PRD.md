@@ -84,9 +84,10 @@ Future targets may include **Android** and **Windows**. The same Skill model app
 | 1 | Browser visual runner for `figma` and `web`; Phase 1 output contract |
 | 1.5 | Cursor marker + hover observation loop |
 | 2 | Post-click verification and retry logic |
-| 3 | Minimal human-readable report output |
-| 4 | Formal `ux_report.md`, `index.html`; improved `ux_result.json` for OpenClaw Skill |
-| 5 | OpenClaw / Feishu-style Skill delivery end-to-end |
+| 3 | Persona report (`persona_report.md`) |
+| 4 | Formal `ux_report.md`, `index.html`; `skill` block in `ux_result.json` |
+| 4.5 | Public report publish: `skill.report_url` (runner-only; no OpenClaw) |
+| 5 | OpenClaw / Feishu-style Skill delivery end-to-end (returns `report_url`) |
 | 6 | Android/Windows adapter design |
 | 7 | Android/Windows implementation exploration |
 
@@ -136,8 +137,10 @@ Structured actions per `SKILL.md`: `move_to`, `move_by_delta`, `click`, `click_c
 | Phase | Artifacts |
 |---|---|
 | 1 | `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/` |
-| 3 | Minimal human-readable report |
-| 4 | `ux_report.md`, `index.html`; improved `ux_result.json` for Skill integration |
+| 3 | `persona_report.md` |
+| 4 | `ux_report.md`, `index.html`; `skill` block in `ux_result.json` |
+| 4.5 | Public publish: `skill.report_url`, `skill.report_base_url` |
+| 5 | OpenClaw user return with clickable `report_url` |
 
 User-facing vs system-facing file roles: see `SKILL.md`.
 
@@ -147,7 +150,7 @@ Use defined categories. Failed clicks alone shall not imply a UX issue. Reports 
 
 ### FR-9 User-facing Skill return
 
-OpenClaw returns a concise summary (status, target, persona, goal, outcome, main finding, classification) plus report/recording/result paths — not raw runner logs.
+OpenClaw returns a concise summary (status, target, persona, goal, outcome, main finding, classification) plus **`skill.report_url`** and evidence links — not raw runner logs. Phase 4.5 provides the public URL; Phase 5 delivers it to the user (e.g. Feishu).
 
 ## Non-Functional Requirements
 
@@ -164,13 +167,13 @@ OpenClaw returns a concise summary (status, target, persona, goal, outcome, main
 - Persona reaches `done` or `blocked` with auditable steps
 - No Figma API or CSS selectors for primary interaction
 - OpenClaw converts NL request to structured input and invokes CLI (Phase 5 end-to-end)
-- User receives concise summary plus evidence paths (Phase 4–5)
+- User receives concise summary plus public **`report_url`** (Phase 4.5 publish + Phase 5 delivery)
 
 ## Open Questions
 
 - Normalized vs pixel coordinates for pointer actions (Phase 1)
 - CLI flags for `viewport_width`, `viewport_height`, `run_id` (Phase 1+)
 - VLM prompt template ownership and versioning
-- Minimal report schema (Phase 3); formal HTML/Markdown reports (Phase 4)
+- Persona report (Phase 3); formal HTML/Markdown reports (Phase 4); public publish URL (Phase 4.5)
 - Screen recording capture method and quality settings (Phase 1)
 - OpenClaw NL → structured input conversion ownership (OpenClaw layer vs this repo)

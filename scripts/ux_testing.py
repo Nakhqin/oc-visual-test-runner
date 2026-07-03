@@ -22,6 +22,7 @@ from core.config import (  # noqa: E402
 )
 from core.decision import create_decision_maker  # noqa: E402
 from core.loop import run_visual_agent_loop  # noqa: E402
+from core.publish import selected_report_publish_mode  # noqa: E402
 from core.report import selected_persona_report_mode  # noqa: E402
 from core.vlm import DEFAULT_GEMINI_MODEL, ENV_GEMINI_MODEL, ENV_GOOGLE_API_KEY  # noqa: E402
 
@@ -79,6 +80,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Polish persona_report.md with a final Gemini synthesis pass (requires API key)",
     )
+    parser.add_argument(
+        "--run-id",
+        default=None,
+        help="Correlation id for this run (default: RUN_ID env or auto-generated slug)",
+    )
     return parser
 
 
@@ -86,7 +92,7 @@ def _env_flag(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes"}
 
 
-def parse_args(argv: list[str] | None = None) -> tuple[TargetConfig, bool, bool]:
+def parse_args(argv: list[str] | None = None) -> tuple[TargetConfig, bool, bool, str | None]:
     parser = build_parser()
     args = parser.parse_args(argv)
     config = build_target_config(
@@ -99,10 +105,15 @@ def parse_args(argv: list[str] | None = None) -> tuple[TargetConfig, bool, bool]
         timeout_seconds=args.timeout_seconds,
     )
     persona_report_gemini = args.persona_report_gemini or _env_flag(ENV_PERSONA_REPORT_GEMINI)
-    return config, args.use_stub, persona_report_gemini
+    return config, args.use_stub, persona_report_gemini, args.run_id
 
 
-def print_selection_metadata(config: TargetConfig, *, persona_report_mode: str) -> None:
+def print_selection_metadata(
+    config: TargetConfig,
+    *,
+    persona_report_mode: str,
+    report_publish_mode: str,
+) -> None:
     print(f"SELECTED_TARGET={config.target}")
     print("SELECTED_ADAPTER=browser")
     print("SELECTED_RUNNER=visual_agent")
@@ -110,11 +121,12 @@ def print_selection_metadata(config: TargetConfig, *, persona_report_mode: str) 
     print("SELECTED_POST_CLICK_VERIFY=enabled")
     print(f"SELECTED_PERSONA_REPORT={persona_report_mode}")
     print("SELECTED_FORMAL_REPORT=enabled")
+    print(f"SELECTED_REPORT_PUBLISH={report_publish_mode}")
 
 
 def main(argv: list[str] | None = None) -> int:
     try:
-        config, use_stub, persona_report_gemini = parse_args(argv)
+        config, use_stub, persona_report_gemini, run_id = parse_args(argv)
     except ConfigError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
@@ -124,7 +136,12 @@ def main(argv: list[str] | None = None) -> int:
         use_gemini_synthesis=persona_report_gemini,
         decision_source=decision_maker.source,
     )
-    print_selection_metadata(config, persona_report_mode=persona_report_mode)
+    report_publish_mode = selected_report_publish_mode()
+    print_selection_metadata(
+        config,
+        persona_report_mode=persona_report_mode,
+        report_publish_mode=report_publish_mode,
+    )
     print(f"SELECTED_DECISION_MAKER={decision_maker.source}", file=sys.stderr)
 
     gemini_api_key = None if use_stub else os.environ.get(ENV_GOOGLE_API_KEY, "").strip() or None
@@ -137,10 +154,14 @@ def main(argv: list[str] | None = None) -> int:
             persona_report_gemini=persona_report_gemini,
             gemini_api_key=gemini_api_key,
             gemini_model=gemini_model or DEFAULT_GEMINI_MODEL,
+            run_id=run_id,
         )
     except BrowserAdapterError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
 
     print(f"terminal_state={result.terminal_state}", file=sys.stderr)
     print(f"steps_taken={result.steps_taken}", file=sys.stderr)
@@ -156,6 +177,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"persona_report_synthesis={result.artifacts.report_synthesis}", file=sys.stderr)
     if result.artifacts.recording_path is not None:
         print(f"recording={result.artifacts.recording_path}", file=sys.stderr)
+    if result.artifacts.run_id is not None:
+        print(f"run_id={result.artifacts.run_id}", file=sys.stderr)
+    if result.artifacts.report_url is not None:
+        print(f"report_url={result.artifacts.report_url}", file=sys.stderr)
+    if result.artifacts.published_dir is not None:
+        print(f"published_dir={result.artifacts.published_dir}", file=sys.stderr)
     return 0
 
 

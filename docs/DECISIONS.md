@@ -168,7 +168,36 @@ Phase 3 `persona_report.md` stays first-person; Phase 4 reports are reviewer-fac
 
 **Consequences:**
 - New module: `scripts/core/formal_report.py`
-- Phase 5 wires OpenClaw delivery using `skill` block
+- Phase 4.5 adds public publish + `report_url`; Phase 5 wires OpenClaw/Feishu to return that URL
+
+---
+
+### 2026-07-03 — Phase 4.5 public report publish (runner-only)
+
+**Status:** Accepted (implemented 2026-07-03)
+
+**Context:**
+Phase 4 writes `index.html` under local `output_dir` (e.g. `/tmp/...`). Users need a **public HTTP URL** to open the report in a browser **before** OpenClaw/Feishu integration. Publishing must copy the **entire** output directory so relative screenshot/recording paths work.
+
+**Decision:**
+- **Optional publish** when **both** env vars are set:
+  - `UX_REPORT_PUBLIC_DIR` — e.g. `/var/www/ux-reports`
+  - `UX_REPORT_PUBLIC_BASE_URL` — e.g. `http://170.106.175.128:8080` (no trailing slash)
+- **`run_id`:** optional CLI `--run-id` or env `RUN_ID`; if omitted, runner generates `{UTC_timestamp}-{short_uuid}` (e.g. `20260703-154812-a1b2c3d4`).
+- **`publish()`:** atomically copy full run `output_dir` → `$UX_REPORT_PUBLIC_DIR/<run_id>/`.
+- **`ux_result.json` → `skill`:** add `report_url` (`{BASE_URL}/{run_id}/index.html`) and `report_base_url` (`{BASE_URL}/{run_id}/`). Omit when publish env not set.
+- **stderr:** `report_url=...`, `run_id=...`, `SELECTED_REPORT_PUBLISH=enabled|disabled`.
+- **Static host is ops, not runner:** e.g. `python3 -m http.server 8080 --bind 0.0.0.0 --directory /var/www/ux-reports` or nginx. Document in `docs/VERIFY.md`.
+
+**Reasoning:**
+Separates report generation (Phase 4) from public delivery. OpenClaw Phase 5 only reads `skill.report_url` — no duplicate publish logic.
+
+**Consequences:**
+- Implemented in `scripts/core/publish.py`; wired from `scripts/core/loop.py` and `scripts/ux_testing.py`
+- Security/retention (HTTP, no auth, disk cleanup) documented; HTTPS/auth out of scope for 4.5
+- Publish requires **both** env vars; setting only one disables publish with a stderr warning
+- Reusing the same `run_id` replaces the prior published directory (no merge)
+- Phase 5 exit criteria updated to use public `report_url` in user/Feishu reply
 
 ---
 

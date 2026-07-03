@@ -8,7 +8,7 @@ Stable facts for oc-visual-test-runner. Keep this file short.
 
 ## Current Stage
 
-**Phase 4 complete — Phase 5 next.** Formal reports (`ux_report.md`, `index.html`) and Skill block in `ux_result.json`.
+**Phase 4.5 complete — Phase 5 next.** Public publish implemented; OpenClaw/Feishu delivery is Phase 5.
 
 ## Users / Audience
 
@@ -48,9 +48,10 @@ Full contract: `SKILL.md`.
 | Phase | Artifacts |
 |---|---|
 | 1 | `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/` |
-| 3 | Minimal human-readable report |
-| 4 | `ux_report.md`, `index.html`; improved `ux_result.json` |
-| 5 | OpenClaw / Feishu-style end-to-end Skill delivery |
+| 3 | `persona_report.md` |
+| 4 | `ux_report.md`, `index.html`; `skill` block in `ux_result.json` |
+| 4.5 | Public publish: `skill.report_url`, `skill.report_base_url` (when env set) |
+| 5 | OpenClaw / Feishu-style end-to-end Skill delivery (uses `report_url`) |
 
 User-facing vs system-facing roles: see `SKILL.md`.
 
@@ -72,7 +73,8 @@ User-facing vs system-facing roles: see `SKILL.md`.
 ## Things Cursor Agent Should Not Assume
 
 - Full visual agent loop works for Phase 1 targets — see `docs/TASKS.md` and `docs/VERIFY.md` verification record
-- `ux_report.md` or `index.html` exist in Phase 1 — Phase 4
-- OpenClaw NL → user return works end-to-end — Phase 5
+- `ux_report.md` or `index.html` exist — Phase 4 (done)
+- Public `report_url` works without OpenClaw — Phase 4.5
+- OpenClaw NL → user return with clickable report link — Phase 5
 - Legacy `figma_runner.py` / `web_runner.py` exist in this repo
 - Failed clicks imply UX bugs

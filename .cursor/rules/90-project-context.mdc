@@ -13,7 +13,7 @@ oc-visual-test-runner
 
 ## Current Stage
 
-Phase 5 — OpenClaw Skill delivery. Phase 4 formal reports implemented. Phase 1 browser visual runner verified 2026-07-01 on cloud runner.
+Phase 5 — OpenClaw/Feishu Skill delivery. Phase 4.5 public publish implemented. Phase 1 browser visual runner verified 2026-07-01 on cloud runner.
 
 ## Project Purpose
 
@@ -37,7 +37,7 @@ OpenClaw (NL → structured input)
   → scripts/ux_testing.py
   → target config → platform adapter → observation frame
   → VLM action decision → action execution → feedback observation
-  → trace/result output → OpenClaw user-facing return
+  → trace/result output → publish (Phase 4.5) → OpenClaw user-facing return (Phase 5)
 ```
 
 Organized around a **universal visual agent loop** behind an OpenClaw Skill layer.
@@ -45,13 +45,15 @@ Organized around a **universal visual agent loop** behind an OpenClaw Skill laye
 ## Phase 1 Output (Implemented Target)
 
 - `ux_result.json`, `action_trace.json`, `ux_test_recording.webm`, `screenshots/`
-- **Not yet:** `ux_report.md`, `index.html` (Phase 4), OpenClaw end-to-end delivery (Phase 5)
+- Phase 3–4 reports: `persona_report.md`, `ux_report.md`, `index.html`
+- Phase 4.5: optional public `skill.report_url` when publish env is set
+- **Not yet:** OpenClaw end-to-end delivery (Phase 5)
 
 ## Current Non-Goals
 
 - No Android or Windows adapters
-- No formal HTML/Markdown reports in Phase 1 (Phase 4)
 - No OpenClaw / Feishu end-to-end Skill delivery yet (Phase 5)
+- No HTTPS/auth/object-storage publish in Phase 4.5 MVP
 - No Figma API grounding or DOM-selector-first automation
 - No legacy runner migration
 - No automatic retry on Gemini 503 yet (future hardening)
@@ -59,7 +61,7 @@ Organized around a **universal visual agent loop** behind an OpenClaw Skill laye
 ## Cursor Agent Must Not Assume
 
 - Phase 1 E2E verified on cloud runner — local Gemini may require VPN; use `--use-stub` for browser-only local checks
-- `ux_report.md` or `index.html` exist — Phase 4
+- Public `report_url` works when publish env is configured (Phase 4.5)
 - OpenClaw user-facing return is implemented — Phase 5
 - Failed clicks automatically mean UX issues
 - Legacy `figma_runner.py` / `web_runner.py` exist in this repo
