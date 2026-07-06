@@ -10,14 +10,12 @@ No custom exec tool, MCP shell server, or named Tool registration required — t
 | Item | Value |
 |---|---|
 | OS | OpenCloudOS 9.4 |
-| Workspace | `/root/ux-test-runner` |
+| Workspace | `/root/oc-visual-test-runner` |
 | Python | `python3` |
 | CLI | `python3 scripts/ux_testing.py` |
-| OpenClaw Skill file | `~/.openclaw/skills/visual-test-runner/SKILL.md` |
+| OpenClaw Skill file | `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` |
 | Publish dir | `/var/www/ux-reports` |
 | Public base URL | `http://170.106.175.128:8080` |
-
-If your clone path differs, replace `/root/ux-test-runner` consistently below.
 
 ---
 
@@ -69,7 +67,7 @@ Every run:
 ## Option A — Direct CLI (recommended for Skill)
 
 ```bash
-cd /root/ux-test-runner
+cd /root/oc-visual-test-runner
 
 export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
 export UX_REPORT_PUBLIC_BASE_URL=http://170.106.175.128:8080
@@ -95,7 +93,7 @@ Replace `web`, URL, persona, goal, `RUN_ID`, and limits with values extracted fr
 **Format Feishu reply after exit 0:**
 
 ```bash
-cd /root/ux-test-runner
+cd /root/oc-visual-test-runner
 python3 scripts/format_skill_reply.py --output-dir "${OUTPUT_DIR}"
 ```
 
@@ -104,7 +102,7 @@ Send the command’s **stdout** to the user in Feishu.
 **On failure** (non-zero exit or missing `ux_result.json`):
 
 ```bash
-cd /root/ux-test-runner
+cd /root/oc-visual-test-runner
 python3 scripts/format_skill_reply.py \
   --error "brief reason from stderr" \
   --run-id "${RUN_ID}"
@@ -115,7 +113,7 @@ python3 scripts/format_skill_reply.py \
 ## Option B — Wrapper script (same behavior, fewer flags)
 
 ```bash
-cd /root/ux-test-runner
+cd /root/oc-visual-test-runner
 chmod +x ./scripts/openclaw/invoke_runner.sh   # once
 
 export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
@@ -163,7 +161,7 @@ Append `--use-stub` as the **7th** argument only for internal smoke tests.
 **Commands (bash):**
 
 ```bash
-cd /root/ux-test-runner
+cd /root/oc-visual-test-runner
 export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
 export UX_REPORT_PUBLIC_BASE_URL=http://170.106.175.128:8080
 

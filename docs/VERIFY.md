@@ -567,7 +567,7 @@ python3 ./scripts/format_skill_reply.py --output-dir /tmp/ux_pathway-smoke-001
 
 ### Phase 5.3 — Feishu NL E2E
 
-Install `docs/openclaw/AGENT_PROMPT.md` in OpenClaw; sync `docs/openclaw/OPENCLAW_SKILL.md` to `~/.openclaw/skills/visual-test-runner/SKILL.md`; agent runs bash CLI + `format_skill_reply.py`.
+Install `docs/openclaw/AGENT_PROMPT.md` in OpenClaw; sync `docs/openclaw/OPENCLAW_SKILL.md` to `~/.openclaw/skills/oc-visual-test-runner/SKILL.md`; agent runs bash CLI + `format_skill_reply.py`.
 
 **Example Feishu input:**
 

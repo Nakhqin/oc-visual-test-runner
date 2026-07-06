@@ -114,7 +114,7 @@ OpenClaw subprocess **must** inherit publish env vars (see [Environment](#enviro
 | Task | Status |
 |---|---|
 | Install prompt from `docs/openclaw/AGENT_PROMPT.md` | Todo |
-| Sync `docs/openclaw/OPENCLAW_SKILL.md` → `~/.openclaw/skills/visual-test-runner/SKILL.md` | Todo |
+| Sync `docs/openclaw/OPENCLAW_SKILL.md` → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` | Todo |
 | Agent runs bash: `ux_testing.py` then `format_skill_reply.py` (no custom exec tool) | Todo |
 | Post-run `format_skill_reply.py` → Feishu stdout | Todo |
 | Optional pathway smoke (`--use-stub`) before first NL | Todo |
@@ -163,7 +163,7 @@ Python: `~/oc-visual-test-runner/.venv/bin/python3` (recommended) or activated v
 OpenClaw invokes the runner via **local subprocess** on the same VM:
 
 ```bash
-cd /root/ux-test-runner   # VM workspace
+cd /root/oc-visual-test-runner   # VM workspace
 source .venv/bin/activate
 
 export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
@@ -313,11 +313,11 @@ Exact manifest format depends on your OpenClaw version — adjust paths to match
 
 | Property | Value |
 |---|---|
-| Name | `oc-visual-test-runner` / `ux-visual-test` |
+| Name | `oc-visual-test-runner` |
 | Description | Persona-based visual UX testing for web and Figma prototypes |
-| Working directory | `/root/ux-test-runner` (VM) |
+| Working directory | `/root/oc-visual-test-runner` (VM) |
 | Entry | Agent runs **bash**: `python3 scripts/ux_testing.py` … then `format_skill_reply.py` |
-| OpenClaw Skill file | `~/.openclaw/skills/visual-test-runner/SKILL.md` (template: `docs/openclaw/OPENCLAW_SKILL.md`) |
+| OpenClaw Skill file | `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` (template: `docs/openclaw/OPENCLAW_SKILL.md`) |
 | Custom exec tool / MCP shell | **Not used** — default shell command execution only |
 | Required secrets | `GOOGLE_API_KEY` |
 | Required env | `UX_REPORT_PUBLIC_DIR`, `UX_REPORT_PUBLIC_BASE_URL` |
@@ -353,7 +353,7 @@ Expect clickable `Report:` URL in the formatted output.
 
 1. User message in Feishu → OpenClaw agent (`docs/openclaw/AGENT_PROMPT.md`)
 2. Agent extracts fields; asks if `url` or `goal` missing
-3. **Bash:** `cd /root/ux-test-runner` → `python3 scripts/ux_testing.py` with `--target`, `--url`, `--persona`, `--goal`, `--output-dir`, `--run-id`
+3. **Bash:** `cd /root/oc-visual-test-runner` → `python3 scripts/ux_testing.py` with `--target`, `--url`, `--persona`, `--goal`, `--output-dir`, `--run-id`
 4. **Bash:** `python3 scripts/format_skill_reply.py --output-dir /tmp/ux_{run_id}`
 5. Send formatter stdout to Feishu channel
 
@@ -362,9 +362,9 @@ Optional wrapper: `scripts/openclaw/invoke_runner.sh` (same VM, same publish env
 **Install Skill file on VM:**
 
 ```bash
-mkdir -p ~/.openclaw/skills/visual-test-runner
-cp /root/ux-test-runner/docs/openclaw/OPENCLAW_SKILL.md \
-   ~/.openclaw/skills/visual-test-runner/SKILL.md
+mkdir -p ~/.openclaw/skills/oc-visual-test-runner
+cp /root/oc-visual-test-runner/docs/openclaw/OPENCLAW_SKILL.md \
+   ~/.openclaw/skills/oc-visual-test-runner/SKILL.md
 ```
 
 ---

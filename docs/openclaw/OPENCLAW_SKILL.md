@@ -1,4 +1,4 @@
-# visual-test-runner — OpenClaw Skill
+# oc-visual-test-runner — OpenClaw Skill
 
 Persona-based visual UX testing for **web** and **Figma** prototypes on this VM.  
 Invoke via **bash** only — no custom exec tool or MCP shell server required.
@@ -6,7 +6,7 @@ Invoke via **bash** only — no custom exec tool or MCP shell server required.
 ## Workspace
 
 ```text
-/root/ux-test-runner
+/root/oc-visual-test-runner
 ```
 
 ## When to use
@@ -28,7 +28,7 @@ Ask **one** clarifying question if `url` or `goal` is missing.
 ## How to run (shell)
 
 ```bash
-cd /root/ux-test-runner
+cd /root/oc-visual-test-runner
 
 export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
 export UX_REPORT_PUBLIC_BASE_URL=http://170.106.175.128:8080
@@ -53,7 +53,7 @@ Replace `TARGET`, `URL`, `PERSONA`, `GOAL`, and `RUN_ID`.
 After a successful run:
 
 ```bash
-cd /root/ux-test-runner
+cd /root/oc-visual-test-runner
 python3 scripts/format_skill_reply.py --output-dir "${OUTPUT_DIR}"
 ```
 
@@ -67,8 +67,8 @@ python3 scripts/format_skill_reply.py --error "reason" --run-id "${RUN_ID}"
 
 ## Full agent instructions
 
-See `/root/ux-test-runner/docs/openclaw/AGENT_PROMPT.md` (or repo `docs/openclaw/AGENT_PROMPT.md`).
+See `/root/oc-visual-test-runner/docs/openclaw/AGENT_PROMPT.md` (or repo `docs/openclaw/AGENT_PROMPT.md`).
 
 ## Contract
 
-Runner protocol and artifacts: `/root/ux-test-runner/SKILL.md`.
+Runner protocol and artifacts: `/root/oc-visual-test-runner/SKILL.md`.

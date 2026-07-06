@@ -28,7 +28,7 @@ Primary plan: **`docs/OPENCLAW_INTEGRATION.md`**
 | Status | Task |
 |---|---|
 | Todo | Install `docs/openclaw/AGENT_PROMPT.md` into OpenClaw agent instructions |
-| Todo | Copy `docs/openclaw/OPENCLAW_SKILL.md` → `~/.openclaw/skills/visual-test-runner/SKILL.md` |
+| Todo | Copy `docs/openclaw/OPENCLAW_SKILL.md` → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` |
 | Todo | Agent bash: `python3 scripts/ux_testing.py` then `format_skill_reply.py` |
 | Todo | Optional pathway smoke (`--use-stub`) before first NL |
 | Todo | NL extraction + missing-field clarifying question in Feishu |

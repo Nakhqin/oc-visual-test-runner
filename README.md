@@ -168,7 +168,7 @@ See `docs/VERIFY.md` for full install and smoke-test steps.
 | `SKILL.md` | OpenClaw Skill execution contract (primary usage model) |
 | `docs/OPENCLAW_INTEGRATION.md` | Phase 5 OpenClaw + Feishu integration plan (same VM) |
 | `docs/openclaw/AGENT_PROMPT.md` | OpenClaw agent prompt (bash / default shell, no custom tool) |
-| `docs/openclaw/OPENCLAW_SKILL.md` | Template for `~/.openclaw/skills/visual-test-runner/SKILL.md` |
+| `docs/openclaw/OPENCLAW_SKILL.md` | Template for `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` |
 | `requirements.txt` | Phase 1 Python dependencies |
 | `AGENTS.md` | Instructions for Cursor agents |
 | `START_HERE.md` | Onboarding checklist |
