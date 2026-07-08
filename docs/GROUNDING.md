@@ -210,7 +210,7 @@ Alignment applies to **any tappable control** — not text-only:
 
 - [x] Updated `HOVER_ACTION_PROMPT` and observe prompt in `vlm.py` (text + icon + composite rules).
 - [x] Hover sub-loop: up to 3 alignment passes with per-pass screenshots and trace metadata.
-- [ ] **Scenario A (text):** Figma language-list — after hover, marker on **English** row in ≥2/3 runs.
+- [ ] **Scenario A (setup flow):** Figma tablet setup — Chinese persona reaches home (`done`) in ≥2/3 runs; language step marker on **简体中文** when that row is clicked.
 - [ ] **Scenario B (icon-only):** Proto with a distinct icon target (e.g. close, menu) — marker **inside icon bounds** in ≥2/3 runs.
 - [ ] **Scenario C (icon+label):** Proto with icon+text button — marker on **whole control** in ≥2/3 runs.
 - [ ] Tier 2 regression A–C: ≥2/3 final-hover on target (**insufficient with G2 alone** — see `grounding-A-test-1`).
@@ -348,11 +348,12 @@ Phase 5.2/5.3 OpenClaw wiring **may proceed in parallel** with UVG; Feishu E2E q
 
 **Formal acceptance:** **`docs/fixtures/GROUNDING_REGRESSION.md`** (Tier 2 — Gemini E2E, 3× per scenario). Stub smoke alone is **not** sufficient.
 
-### Regression scenario A — Text / list row (Figma)
+### Regression scenario A — Tablet setup flow (Figma)
 
-- **Proto:** Language selection screen (e.g. 简体中文 / 繁體中文 / **English**).
-- **Goal:** “Select English.”
-- **Pass:** Hover screenshot shows marker on **English** text row; post-click screen changes or verification `visible_change`.
+- **Proto:** First-time tablet setup (welcome → language list → … → home). Entry URL may start before the language screen.
+- **Persona:** Cautious first-time **Chinese** tablet user (reads Chinese; expects Chinese UI).
+- **Goal:** “Complete the first-time tablet setup and reach the home screen.” (per `docs/PRD.md` — **not** a micro-goal like “Select English.”)
+- **Pass:** `terminal_state: done`; on language step, persona reasonably selects **简体中文** with hover marker on that row; other clicks land on controls named in step `reason`.
 
 ### Regression scenario B — Icon-only
 

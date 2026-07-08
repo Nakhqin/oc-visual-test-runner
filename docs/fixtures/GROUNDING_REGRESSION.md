@@ -27,19 +27,28 @@ Record the **canonical URL** used for each scenario. Update this file when proto
 
 | ID | Scenario | Target | Fixture URL | Goal (exact) | Persona (suggested) |
 |---|---|---|---|---|---|
-| **A** | Text / list row | `figma` | `FIGMA_LANGUAGE_LIST_URL` below | `Select English.` | `A first-time tablet user who is cautious and not familiar with this device.` |
-| **B** | Icon-only | `figma` | `FIGMA_ICON_ONLY_URL` — **TBD** | `Open the menu.` (or close/back — match screen) | Same as A |
-| **C** | Icon + label button | `figma` or `web` | `FIGMA_COMPOSITE_URL` or web fallback — **TBD** | `Tap the Continue button.` | Same as A |
+| **A** | Tablet setup flow (Figma) | `figma` | `FIGMA_SETUP_PROTO_URL` below | `Complete the first-time tablet setup and reach the home screen.` | `FIGMA_PERSONA` below (Chinese first-time tablet user) |
+| **B** | Icon-only | `figma` | `FIGMA_ICON_ONLY_URL` — **TBD** | `Open the menu.` (or close/back — match screen) | `FIGMA_PERSONA` below |
+| **C** | Icon + label button | `figma` or `web` | `FIGMA_COMPOSITE_URL` or web fallback — **TBD** | `Tap the Continue button.` | `FIGMA_PERSONA` below |
 | **D** | Web sanity | `web` | `https://example.com` | `Click the More information link.` | `A cautious first-time visitor.` |
-| **E** | Non-click (G2 out of scope) | `web` | `https://www.wikipedia.org` | `Scroll down to find the language list; do not click unless necessary.` | Same as A |
+| **E** | Non-click (G2 out of scope) | `web` | `https://www.wikipedia.org` | `Scroll down to find the language list; do not click unless necessary.` | `FIGMA_PERSONA` below |
 
-### Scenario A — language list (confirmed project proto)
+### Scenario A — tablet setup proto (confirmed project proto)
+
+Aligns with **`docs/PRD.md`** scenario 2: first-time tablet setup to home — **not** a single-step “Select English” micro-goal.
 
 ```bash
-export FIGMA_LANGUAGE_LIST_URL='https://www.figma.com/proto/rqLUySVeWpFeu8E9sAwkrW/Test-test?page-id=0%3A1&node-id=10-10157&p=f&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=10%3A10157'
+export FIGMA_SETUP_PROTO_URL='https://www.figma.com/proto/rqLUySVeWpFeu8E9sAwkrW/Test-test?page-id=0%3A1&node-id=10-10157&p=f&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=10%3A10157'
+
+export FIGMA_PERSONA='A cautious first-time Chinese tablet user who is not familiar with this device. They normally read Chinese and expect the device to use Chinese.'
+
+export FIGMA_GOAL='Complete the first-time tablet setup and reach the home screen.'
+
+# Legacy alias (same URL):
+export FIGMA_LANGUAGE_LIST_URL="$FIGMA_SETUP_PROTO_URL"
 ```
 
-> If the starting frame is not the language screen, adjust `starting-point-node-id` / `node-id` in the Figma share link until the run opens on 简体中文 / 繁體中文 / **English**.
+> Proto may open **before** the language screen (e.g. welcome / Next). That is expected — the persona should progress through setup. On the language screen, a Chinese persona should reasonably choose **简体中文** (not English unless the goal says otherwise).
 
 ### Scenarios B & C — fill before formal run
 
@@ -73,13 +82,14 @@ source ~/.bashrc   # or: set -a && source .env && set +a
 RUN=grounding-A-$(date +%Y%m%d-%H%M%S)
 python3 scripts/ux_testing.py \
   --target figma \
-  --url "$FIGMA_LANGUAGE_LIST_URL" \
-  --persona "A first-time tablet user who is cautious and not familiar with this device." \
-  --goal "Select English." \
+  --url "$FIGMA_SETUP_PROTO_URL" \
+  --persona "$FIGMA_PERSONA" \
+  --goal "$FIGMA_GOAL" \
   --output-dir "/tmp/ux_grounding/${RUN}" \
-  --max-steps 10 \
-  --timeout-seconds 180 \
-  --run-id "$RUN"
+  --max-steps 15 \
+  --timeout-seconds 300 \
+  --run-id "$RUN" \
+  2>&1 | tee "/tmp/ux_grounding/${RUN}.log"
 ```
 
 ### Scenario B — template
@@ -89,7 +99,7 @@ RUN=grounding-B-$(date +%Y%m%d-%H%M%S)
 python3 scripts/ux_testing.py \
   --target figma \
   --url "$FIGMA_ICON_ONLY_URL" \
-  --persona "A first-time tablet user who is cautious and not familiar with this device." \
+  --persona "$FIGMA_PERSONA" \
   --goal "Open the menu." \
   --output-dir "/tmp/ux_grounding/${RUN}" \
   --max-steps 10 \
@@ -104,7 +114,7 @@ RUN=grounding-C-$(date +%Y%m%d-%H%M%S)
 python3 scripts/ux_testing.py \
   --target figma \
   --url "$FIGMA_COMPOSITE_URL" \
-  --persona "A first-time tablet user who is cautious and not familiar with this device." \
+  --persona "$FIGMA_PERSONA" \
   --goal "Tap the Continue button." \
   --output-dir "/tmp/ux_grounding/${RUN}" \
   --max-steps 10 \
@@ -119,7 +129,7 @@ RUN=grounding-E-$(date +%Y%m%d-%H%M%S)
 python3 scripts/ux_testing.py \
   --target web \
   --url "https://www.wikipedia.org" \
-  --persona "A first-time tablet user who is cautious and not familiar with this device." \
+  --persona "$FIGMA_PERSONA" \
   --goal "Scroll down to find the language list; do not click unless necessary." \
   --output-dir "/tmp/ux_grounding/${RUN}" \
   --max-steps 8 \
@@ -149,18 +159,25 @@ ls -la /tmp/ux_grounding/<RUN>/screenshots/*hover*
 
 ## Result log (copy per formal test session)
 
-| Run ID | Scenario | Marker on target at final hover? (Y/N) | `alignment` | `alignment_passes` | Screen changed / `visible_change` | Notes |
-|---|---|:---:|:---:|---|:---:|---|
-| | A-1 | | | | | |
-| | A-2 | | | | | |
-| | A-3 | | | | | |
-| | B-1 | | | | | |
-| | B-2 | | | | | |
-| | B-3 | | | | | |
-| | C-1 | | | | | |
-| | C-2 | | | | | |
-| | C-3 | | | | | |
-| | E-1 | | | | | trace used scroll/type? |
+### Scenario A — setup flow
+
+| Run ID | `terminal_state` done? | Language step: **简体中文** hover OK? | Other clicks on stated target? | Notes |
+|---|---|:---:|:---:|:---:|
+| A-1 | | | | |
+| A-2 | | | | |
+| A-3 | | | | |
+
+### Scenarios B / C / E
+
+| Run ID | Scenario | Marker on target at final hover? (Y/N) | `alignment` / passes | Notes |
+|---|---|:---:|:---:|---|
+| B-1 | icon-only | | | |
+| B-2 | | | | |
+| B-3 | | | | |
+| C-1 | composite | | | |
+| C-2 | | | | |
+| C-3 | | | | |
+| E-1 | scroll/type | — | — | trace used scroll/type? |
 
 ---
 
@@ -168,7 +185,7 @@ ls -la /tmp/ux_grounding/<RUN>/screenshots/*hover*
 
 | Rule | Threshold |
 |---|---|
-| **A — text row** | ≥ **2 / 3** runs: marker on **English** row at final hover |
+| **A — setup flow** | ≥ **2 / 3** runs: `terminal_state: done` (home / setup complete per VLM); on language step, Chinese persona clicks **简体中文** with marker on that row at final hover; other clicks land on controls named in step `reason` |
 | **B — icon-only** | ≥ **2 / 3** runs: marker **inside** target icon bounds |
 | **C — composite** | ≥ **2 / 3** runs: marker on **whole button** hit area |
 | **E — non-click** | ≥ **1 / 1** spot-check: appropriate `scroll`/`type`; no spurious click-only path |

@@ -495,6 +495,28 @@ Restores Gemini E2E on current API models; avoids indefinite VLM hangs; fixes Fi
 
 ---
 
+## 2026-07-08 — Scenario A fixture: setup flow goal (not “Select English”)
+
+**Status:** Accepted
+
+**Context:**
+Tier 2 grounding regression initially used goal `Select English.` on the language list — a micro-goal for text-row click testing. Product scope (`docs/PRD.md`, `SKILL.md`) is **first-time tablet setup to home screen**. A Chinese persona with goal “select English” is unrealistic; persona + goal must align so the VLM exercises the real setup path.
+
+**Decision:**
+- Scenario A fixture goal: **`Complete the first-time tablet setup and reach the home screen.`**
+- Scenario A persona: **cautious first-time Chinese tablet user** (expects Chinese UI).
+- Pass criteria: `terminal_state: done` in ≥2/3 runs; on language step, **简体中文** row when clicked; per-step hover on stated target.
+- Env: `FIGMA_SETUP_PROTO_URL` (primary); `FIGMA_LANGUAGE_LIST_URL` retained as alias for same proto URL.
+
+**Reasoning:**
+Goal drives task completion; persona drives realistic choices. Grounding is still verified per click (hover screenshots + trace), but acceptance is tied to the PRD setup scenario, not a forced English pick.
+
+**Consequences:**
+- `docs/fixtures/GROUNDING_REGRESSION.md`, `docs/GROUNDING.md`, `docs/VERIFY.md` updated.
+- Prior runs with `Select English.` (e.g. `grounding-A-uvg-1`) are UVG pipeline references only — not formal Scenario A sign-off.
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

@@ -212,8 +212,8 @@ Use a **prototype** URL (often `figma.com/proto/...` or `figma.com/design/...` w
 
 ```bash
 FIGMA_URL="https://www.figma.com/proto/your-prototype-link"
-FIGMA_PERSONA="A first-time tablet user who is cautious and not familiar with this device."
-FIGMA_GOAL="Complete the first-time setup flow shown in the prototype."
+FIGMA_PERSONA="A cautious first-time Chinese tablet user who is not familiar with this device. They normally read Chinese and expect the device to use Chinese."
+FIGMA_GOAL="Complete the first-time tablet setup and reach the home screen."
 FIGMA_OUTPUT="/tmp/ux_report_figma"
 
 python3 ./scripts/ux_testing.py \
@@ -230,8 +230,8 @@ python3 ./scripts/ux_testing.py \
 
 ```powershell
 $FIGMA_URL = "https://www.figma.com/proto/your-prototype-link"
-$FIGMA_PERSONA = "A first-time tablet user who is cautious and not familiar with this device."
-$FIGMA_GOAL = "Complete the first-time setup flow shown in the prototype."
+$FIGMA_PERSONA = "A cautious first-time Chinese tablet user who is not familiar with this device. They normally read Chinese and expect the device to use Chinese."
+$FIGMA_GOAL = "Complete the first-time tablet setup and reach the home screen."
 $FIGMA_OUTPUT = "C:\temp\ux_report_figma"
 
 python scripts/ux_testing.py `
@@ -744,7 +744,7 @@ Run on cloud VM with `GOOGLE_API_KEY` set. **No `--use-stub`.** Required **after
 
 | Scenario | Fixture | Runs | Pass |
 |---|---|---:|---|
-| A — text / list row | `FIGMA_LANGUAGE_LIST_URL` | 3 | ≥2 marker on **English** row at final hover |
+| A — tablet setup flow | `FIGMA_SETUP_PROTO_URL` | 3 | ≥2 `done` + language step marker on **简体中文** when selected |
 | B — icon-only | `FIGMA_ICON_ONLY_URL` (fill in fixtures doc) | 3 | ≥2 marker inside icon bounds |
 | C — icon + label | `FIGMA_COMPOSITE_URL` (fill in fixtures doc) | 3 | ≥2 marker on whole button |
 | E — scroll/type (spot) | wikipedia.org | 1 | trace uses `scroll`/`type` appropriately |
