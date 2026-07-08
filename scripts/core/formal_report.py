@@ -108,6 +108,18 @@ def _journey_markdown(steps: list[dict[str, Any]]) -> str:
         if screenshot:
             lines.append(f"- **Screenshot:** ![step {step_index}]({screenshot})")
 
+        refine = step.get("refine")
+        if isinstance(refine, dict):
+            coarse = refine.get("coarse", {})
+            fine = refine.get("fine", {})
+            crop = refine.get("crop", {})
+            lines.append(
+                f"- **UVG refine:** {_action_summary(coarse)} → {_action_summary(fine)}"
+            )
+            crop_shot = crop.get("screenshot")
+            if crop_shot:
+                lines.append(f"- **Refine crop:** ![step {step_index} refine]({crop_shot})")
+
         hover = step.get("hover")
         if isinstance(hover, dict):
             hover_action = hover.get("decision", {}).get("action", {})
@@ -262,6 +274,23 @@ def _journey_html(steps: list[dict[str, Any]]) -> str:
             parts.append(
                 f'<li><strong>Screenshot:</strong><br><img src="{html.escape(screenshot)}" alt="step {step_index}"></li>'
             )
+
+        refine = step.get("refine")
+        if isinstance(refine, dict):
+            coarse = refine.get("coarse", {})
+            fine = refine.get("fine", {})
+            crop = refine.get("crop", {})
+            parts.append(
+                "<li><strong>UVG refine:</strong> "
+                f"{html.escape(_action_summary(coarse))} → "
+                f"{html.escape(_action_summary(fine))}</li>"
+            )
+            crop_shot = crop.get("screenshot")
+            if crop_shot:
+                parts.append(
+                    f'<li><strong>Refine crop:</strong><br>'
+                    f'<img src="{html.escape(crop_shot)}" alt="step {step_index} refine"></li>'
+                )
 
         hover = step.get("hover")
         if isinstance(hover, dict):

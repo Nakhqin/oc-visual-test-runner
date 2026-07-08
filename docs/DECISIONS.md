@@ -172,6 +172,88 @@ Phase 3 `persona_report.md` stays first-person; Phase 4 reports are reviewer-fac
 
 ---
 
+### 2026-07-06 — Phase 5.5 visual click grounding (structural)
+
+**Status:** Accepted — **G1 + G2 implemented**; **UVG (5.5b) accepted, not implemented** — G1+G2 failed Tier 2 scenario A
+
+**Context:**
+Figma E2E on cloud VM confirmed the visual agent loop works end-to-end, but clicks often miss controls. Screenshots show the red cursor marker beside list items (e.g. left of **English**) while the persona intent is correct. Playwright executes the coordinates returned by the VLM; Figma viewport scaling is **not** a separate coordinate space — the failure is **VLM visual grounding**, not runner mapping.
+
+**Decision:**
+- **Keep** visual-first architecture (screenshot → VLM action → browser click). No Figma API or DOM-selector-first primary path.
+- **G1 — Normalized coordinates:** VLM outputs **0–1000** grid; runner maps to viewport pixels at execution boundary. Replaces raw pixel coordinates in prompts and trace (with schema/version update at implementation).
+- **G2 — Hover as alignment:** Phase 1.5 hover loop remains but hover phase must **align** the marker on the target before `click_current` — for **text, icon-only, icon+label, and button** controls on the **point-click path only** (`click` with coordinates → hover → `click_current`). Scroll, `type`, `wait`, and other actions do not use G2. Off-target blank-area clicks are forbidden by prompt policy on that path.
+- **G3 / UVG L1 — ROI refine:** **Mandatory** on every coordinate `click` under UVG (Phase 5.5b); not optional after Tier 2 failure.
+- **G4 / UVG L3 — Dedicated grounding model:** After L1+L2 measured; optional fallback.
+- Primary plan document: `docs/GROUNDING.md`.
+
+**Reasoning:**
+Prompt-only tweaks do not fix systematic coordinate estimation errors. Normalized coords address a long-standing PRD open question; hover alignment uses existing loop structure for a second visual correction pass without new adapters.
+
+**Consequences:**
+- Phase 5.5 tasks in `docs/TASKS.md`; verification in `docs/VERIFY.md` (when implemented).
+- `SKILL.md` action protocol will update when G1 ships (breaking change to coordinate semantics — document in VERIFY).
+- Phase 5 OpenClaw delivery may proceed in parallel; click quality expected to improve after 5.5.
+
+---
+
+### 2026-07-07 — G1 normalized coordinate mapping (implemented)
+
+**Status:** Accepted (implemented)
+
+**Context:** Phase 5.5 G1 replaces raw viewport pixels in VLM I/O with a 0–1000 grid.
+
+**Decision:**
+- VLM `x` / `y` on `move_to` and `click` are **integers 0–1000** inclusive (`coordinate_space`: `norm_1000`).
+- Runner maps at execution: `x_px = round(x / 1000 * (viewport_width - 1))` (same for `y`).
+- `move_by_delta` remains **pixel offsets** (not normalized).
+- `action_trace.json` `schema_version` **2**; step actions record `x`, `y`, `x_px`, `y_px`, `coordinate_space`.
+- Module: `scripts/core/coordinates.py`; mapping used in `scripts/core/executor.py` and trace writers.
+
+**Reasoning:** Bounded integer grid improves VLM pointing; pixel mapping stays at adapter boundary; trace retains both spaces for audit.
+
+**Consequences:** Breaking change for VLM prompts (no pixel coords > 1000). Stub smoke uses norm `(500, 500)` for viewport center. G2 hover alignment implemented — see G2 decision below.
+
+---
+
+### 2026-07-07 — G2 hover alignment phase (implemented)
+
+**Status:** Accepted (implemented)
+
+**Context:** G1 normalized coordinates; clicks still missed when VLM confirmed at wrong marker position. G2 makes hover an **alignment** step, not confirm-only.
+
+**Decision:**
+- **Prompts:** Observe `click` rules target control center (text / icon / composite / button). Hover phase forbids `click_current` when marker is off-target; requires `move_to` / `move_by_delta` to align first. Observe phase must not use `click_current`.
+- **Sub-loop:** Up to `MAX_HOVER_ALIGNMENT_PASSES` (3) reposition passes after initial `move_to`; each pass captures a hover screenshot (`step-NNN-hover.png`, then `-hover-2`, …).
+- **Optional VLM fields:** `target_kind` (`text`|`icon`|`composite`|`button`); `alignment` on `click_current` (`aligned`|`adjusted`|`clicked_off_target`).
+- **Trace:** `hover.alignment`, `hover.alignment_passes`, `hover.target_kind`, optional `hover.adjustments` for earlier passes.
+
+**Reasoning:** Prompt-only G2 insufficient when single hover pass executes `move_to` without re-capture; sub-loop matches structural plan in `docs/GROUNDING.md`.
+
+**Consequences:** Figma/web regression scenarios A–C in `docs/GROUNDING.md` / `docs/VERIFY.md` for manual validation. Tier 2 scenario A (`grounding-A-test-1`) **failed** — superseded by **UVG** decision below.
+
+---
+
+### 2026-07-08 — UVG universal visual grounding stack (accepted, not implemented)
+
+**Status:** Accepted — **UVG L1+L2 implemented (2026-07-08)**; Tier 2 re-validation pending; L3 if needed
+
+**Context:** G1+G2 shipped; formal regression on Figma language list still shows large norm errors and `max_steps` exhaustion from observe-only `move_to` loops. Root cause is **single-shot full-viewport VLM coordinate estimation**, not runner mapping. Per-UI hacks (e.g. list row index) are out of scope.
+
+**Decision:**
+- **UVG** — one mandatory pipeline for **all** coordinate `click` paths (text, icon, composite, button):
+  - **L1 — ROI refine:** crop ~25% viewport centered on coarse point; second VLM norm in crop → global coords (**mandatory**, not optional G3).
+  - **L2 — Convergence hover:** multi-pass hover until `aligned` or `blocked`; hover budget **separate from** `max_steps`; no alignment via repeated observe `move_to`.
+  - **L3 — Spatial model:** bbox / dedicated pointing — only after L1+L2 measured; requires separate DECISIONS for dependency.
+- **Sign-off:** Tier 2 fixtures A–C each ≥2/3 final-hover on target; see `docs/GROUNDING.md` UVG sign-off table.
+- Primary plan: `docs/GROUNDING.md` (UVG section).
+
+**Reasoning:** Format (G1) and alignment policy (G2) do not remove estimation variance; universal fix requires smaller reference frame (L1) + closed-loop convergence (L2).
+
+**Consequences:** Phase 5.5b tasks in `docs/TASKS.md`; G3 reframed as mandatory L1; G4 as optional L3. **Implementation:** `scripts/core/refine.py`, loop integration, `grounding: uvg` in trace.
+
+---
+
 ### 2026-07-03 — Phase 5 OpenClaw integration scope
 
 **Status:** Accepted (planned — not implemented)

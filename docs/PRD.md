@@ -171,8 +171,8 @@ OpenClaw returns a concise summary (status, target, persona, goal, outcome, main
 
 ## Open Questions
 
-- Normalized vs pixel coordinates for pointer actions (Phase 1)
-- CLI flags for `viewport_width`, `viewport_height`, `run_id` (Phase 1+)
+- ~~Normalized vs pixel coordinates for pointer actions~~ — **resolved (planned):** 0–1000 normalized protocol in Phase 5.5; see `docs/GROUNDING.md` and `docs/DECISIONS.md`
+- CLI flags for `viewport_width`, `viewport_height` (Phase 1+; `run_id` implemented)
 - VLM prompt template ownership and versioning
 - Persona report (Phase 3); formal HTML/Markdown reports (Phase 4); public publish URL (Phase 4.5)
 - Screen recording capture method and quality settings (Phase 1)

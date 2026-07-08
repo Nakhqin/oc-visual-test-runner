@@ -48,6 +48,31 @@ Primary plan: **`docs/OPENCLAW_INTEGRATION.md`**
 
 ---
 
+## Next Priority (after Phase 5.3)
+
+**Phase 5.5 — Visual click grounding (G1 + G2 foundation)**
+
+Primary plan: **`docs/GROUNDING.md`**
+
+**Phase 5.5b — UVG (Universal Visual Grounding)** — **current implementation priority** after G1+G2 formal regression failed scenario A.
+
+| Status | Task |
+|---|---|
+| Done | G1: Normalized 0–1000 coordinate protocol + pixel mapping + tests |
+| Done | G2: Hover alignment prompts + multi-pass sub-loop + trace metadata |
+| Done | Trace: `schema_version` 2; norm + pixel; hover `alignment` / `adjustments` |
+| Blocked | Tier 2 regression A–C — **failed scenario A** (`grounding-A-test-1`); G1+G2 insufficient |
+| Done | **UVG L2'** — convergence hover (`MAX_HOVER_ALIGNMENT_PASSES=5`; `blocked` on exhaust) |
+| Done | **UVG L1** — mandatory ROI refine (`scripts/core/refine.py`) on every coordinate `click` |
+| Todo | Tier 2 re-run after UVG; sign-off per `docs/GROUNDING.md` UVG criteria |
+| Todo | **UVG L3** — spatial / bbox model only if L1+L2 below bar |
+
+**Exit criteria (UVG):** Tier 2 A–C each ≥2/3 final-hover on target; no off-target `click_current`; no `max_steps` wasted on alignment. See **`docs/GROUNDING.md`** UVG sign-off table.
+
+**Non-goals:** Per-UI row hacks; Figma API; DOM-selector-first; L3 before L1+L2 measured.
+
+---
+
 ## Phase 4.5 (Complete)
 
 **Public report publish (no OpenClaw required) — implemented 2026-07-03**
@@ -197,6 +222,12 @@ Moved to **Current Priority** above.
 ### Phase 5 — OpenClaw / Feishu Skill delivery
 
 Moved to **Current Priority** above. Plan: **`docs/OPENCLAW_INTEGRATION.md`**. Consumes `skill.report_url` from Phase 4.5; does not implement publish.
+
+---
+
+### Phase 5.5 — Visual click grounding (G1 + G2 + UVG)
+
+Moved to **Next Priority (after Phase 5.3)** above. Plan: **`docs/GROUNDING.md`**. Formal regression: **`docs/fixtures/GROUNDING_REGRESSION.md`**. **UVG (5.5b)** is current work after Tier 2 scenario A failure.
 
 ---
 

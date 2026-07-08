@@ -250,21 +250,27 @@ Human-readable reports (`ux_report.md`, `index.html`, `persona_report.md`) inclu
 | **5** | OpenClaw / Feishu invokes runner and returns summary + **`report_url`** to user |
 | **6–7** | Android / Windows adapter design and exploration (future targets only) |
 
-## Action Protocol (planned)
+## Action Protocol
 
-Future supported actions:
+Supported actions (`scripts/core/actions.py`):
 
 | Action | Description |
 |---|---|
-| `move_to` | Move cursor/pointer to coordinates |
-| `move_by_delta` | Move cursor by relative offset |
-| `click` | Click at coordinates |
-| `click_current` | Click at current cursor position |
+| `move_to` | Move cursor to normalized coordinates (`x`, `y` in **0–1000**) |
+| `move_by_delta` | Move cursor by **pixel** offsets (`delta_x`, `delta_y`) |
+| `click` | Click at normalized coordinates (`x`, `y` in **0–1000**); triggers hover alignment loop |
+| `click_current` | Click at current cursor position (**hover phase only** — after alignment) |
 | `scroll` | Scroll the viewport |
 | `wait` | Pause for UI feedback |
 | `type` | Enter text |
 | `done` | Task completed successfully |
 | `blocked` | Persona cannot proceed; explain why |
+
+**Coordinate space (G1):** `0,0` = top-left of viewport screenshot; `1000,1000` = bottom-right. Runner maps to viewport pixels at execution. See `docs/DECISIONS.md` G1 mapping formula and `action_trace.json` `schema_version` 2.
+
+**Hover alignment (G2):** `click` triggers hover sub-loop; VLM may include optional `target_kind` and `alignment`. Do not use `click_current` in the observe phase.
+
+**UVG (Phase 5.5b):** Every coordinate `click` runs **L1 ROI refine** then **L2 convergence hover** before `click_current`. See `docs/GROUNDING.md`.
 
 ## Classification Categories
 

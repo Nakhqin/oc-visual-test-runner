@@ -118,6 +118,7 @@ def print_selection_metadata(
     print("SELECTED_ADAPTER=browser")
     print("SELECTED_RUNNER=visual_agent")
     print("SELECTED_HOVER_LOOP=enabled")
+    print("SELECTED_GROUNDING=uvg")
     print("SELECTED_POST_CLICK_VERIFY=enabled")
     print(f"SELECTED_PERSONA_REPORT={persona_report_mode}")
     print("SELECTED_FORMAL_REPORT=enabled")

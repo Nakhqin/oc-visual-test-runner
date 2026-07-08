@@ -11,7 +11,9 @@ from typing import Any
 from adapters.browser import ObservationFrame
 from core.config import TargetConfig
 
-SCHEMA_VERSION = "1"
+SCHEMA_VERSION = "2"
+COORDINATE_SPACE_NORM_1000 = "norm_1000"
+GROUNDING_MODE_UVG = "uvg"
 
 
 @dataclass(frozen=True)
@@ -44,6 +46,8 @@ class TraceBuilder:
     def to_dict(self) -> dict[str, Any]:
         return {
             "schema_version": SCHEMA_VERSION,
+            "coordinate_space": COORDINATE_SPACE_NORM_1000,
+            "grounding": GROUNDING_MODE_UVG,
             "created_at": _utc_now_iso(),
             "target": self._config.target,
             "url": self._config.url,

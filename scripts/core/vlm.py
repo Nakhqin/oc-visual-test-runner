@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any
 
 from adapters.browser import ObservationFrame
 from core.actions import Action, ActionParseError, extract_json_object, parse_action_payload
 from core.config import TargetConfig
 from core.hover import validate_hover_action
+from core.refine import (
+    CropRegion,
+    crop_norm_to_global_norm,
+    parse_refine_payload,
+)
 
 DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
 ENV_GOOGLE_API_KEY = "GOOGLE_API_KEY"
@@ -32,13 +38,12 @@ Previous steps:
 Look at the screenshot and choose the single next action as a JSON object only.
 The screenshot includes a red circular cursor marker showing the participant pointer.
 
-- When you intend to click a target, use click with x,y — the runner will move there, capture hover feedback, and ask you to confirm before clicking.
+- When you intend to click a target, use click with x,y — the runner will move there, show a hover screenshot with the red marker, and ask you to align the pointer before clicking.
 
 Allowed action types:
 - move_to (requires x, y)
 - move_by_delta (requires delta_x, delta_y)
-- click (requires x, y)
-- click_current
+- click (requires x, y; optional target_kind — see click rules below)
 - scroll (optional delta_y)
 - wait (optional wait_ms)
 - type (requires text)
@@ -48,13 +53,24 @@ Allowed action types:
 Rules:
 - Respond with JSON only. No markdown unless wrapping a single JSON object.
 - Include "reason" explaining why the persona would take this action or stop.
-- Use pixel coordinates relative to the screenshot viewport.
+- Use normalized coordinates: x and y are integers from 0 to 1000 inclusive, relative to the screenshot viewport (0,0 = top-left; 1000,1000 = bottom-right).
+- move_by_delta uses pixel offsets (delta_x, delta_y), not normalized values.
+- Do not use click_current in this phase — the runner handles confirmation after hover.
 - Do not assume DOM selectors or Figma node IDs.
 - A failed or unproductive click is not automatically a UX issue.
 - Prefer done or blocked when the goal is clearly achieved or impossible.
+- Prefer scroll, type, or wait when that fits the goal — do not choose click when scrolling or typing is correct.
+- Do not use move_to on observe to fine-tune an upcoming click — use click with your best center estimate; the runner applies ROI refine and hover alignment automatically.
+
+When choosing click (coarse target selection):
+- Aim at the center of the intended tappable control (text row, icon, icon+label button, or button chrome) — not card margin or gutter whitespace.
+- Optional target_kind on click: "text" | "icon" | "composite" | "button" — describes the control type you are targeting.
+- Text / list rows: center on the label or row hit area.
+- Icon-only: name the icon in reason (e.g. "close X", "menu hamburger"); center on the icon graphic.
+- Icon + label: center on the combined control, not only the text side.
 
 Example:
-{{"type": "click", "x": 420, "y": 180, "reason": "The primary call-to-action looks tappable."}}
+{{"type": "click", "x": 500, "y": 350, "target_kind": "button", "reason": "The primary call-to-action looks tappable."}}
 """
 
 HOVER_ACTION_PROMPT = """You are simulating a human participant in a visual UX test.
@@ -75,24 +91,67 @@ Previous steps:
 The participant moved the pointer to ({hover_x}, {hover_y}) intending to click there.
 The screenshot shows the UI with a red circular cursor marker at the pointer position.
 
-Review hover / visual feedback at the pointer and choose the single next action as JSON only.
+This is the **alignment phase**: align the red marker onto the intended tappable control, then click. Do not treat this as a weak confirm-only step.
+
+Review the marker position and choose the single next action as JSON only.
 
 Allowed action types:
-- click_current (confirm click at the marked pointer position)
-- move_to (requires x, y — adjust pointer before clicking)
-- move_by_delta (requires delta_x, delta_y — nudge pointer)
+- click_current (confirm click at the marked pointer position — only when marker is on target)
+- move_to (requires x, y — move pointer onto the control center)
+- move_by_delta (requires delta_x, delta_y — nudge pointer in pixels)
 - wait (optional wait_ms — let UI finish loading or animating)
 - done (requires reason — goal achieved from persona perspective)
 - blocked (requires reason — persona cannot proceed)
 
+Alignment rules (all control types — text, icon-only, icon+label, button):
+- The red marker must overlap the intended **tappable control** before click_current.
+- Do **not** use click_current if the marker is on blank whitespace, padding beside a list item, or a neighboring control.
+- Text / list rows: if marker is beside a label, move_to the **label or row center**.
+- Icon-only: move_to the **center of the icon graphic** (name the icon in reason); not adjacent padding or a neighboring icon.
+- Icon + label: move_to the **center of the combined hit area**, not only the text side.
+- Small icons: partial overlap with whitespace is not enough — center on the glyph.
+
 Rules:
 - Respond with JSON only. No markdown unless wrapping a single JSON object.
-- Include "reason" referencing what you see at the pointer (tooltip, hover state, ambiguity).
-- Do not use click with x,y here — use click_current to confirm the marked position.
+- Include "reason" referencing what you see at the pointer and whether the marker is on target.
+- Coordinates (x, y) use the same 0–1000 normalized grid. move_by_delta uses pixel offsets.
+- Do not use click with x,y here — use click_current only after alignment.
+- Optional on click_current: alignment "aligned" | "adjusted" | "clicked_off_target" (use clicked_off_target only if you must click despite visible misalignment).
+- Optional target_kind on adjustments: "text" | "icon" | "composite" | "button".
 - A failed or unproductive click is not automatically a UX issue.
 
-Example:
-{{"type": "click_current", "reason": "The button shows a hover state; confirming click."}}
+Examples:
+{{"type": "move_to", "x": 520, "y": 360, "target_kind": "text", "reason": "Marker is left of the English row; moving onto the label center."}}
+{{"type": "click_current", "alignment": "aligned", "reason": "Marker is on the Settings button; confirming click."}}
+"""
+
+REFINE_ACTION_PROMPT = """You are refining a click target on a cropped region of a UX test screenshot.
+
+Persona:
+{persona}
+
+Goal:
+{goal}
+
+Target type: {target}
+Step index: {step_index}
+
+The full screenshot was cropped around a coarse click estimate. You see ONLY this crop.
+Coordinates are normalized 0–1000 relative to **this crop image** (0,0 = top-left of crop; 1000,1000 = bottom-right of crop).
+
+Coarse intent from the previous step:
+- target_kind: {target_kind}
+- reason: {coarse_reason}
+
+Point at the **center** of the intended tappable control (text, icon, icon+label, or button) visible in this crop.
+
+Respond with JSON only:
+{{"x": <int 0-1000>, "y": <int 0-1000>, "reason": "<why this point is the control center>"}}
+
+Rules:
+- x and y must be integers from 0 to 1000 inclusive.
+- If the control is not visible in this crop, still return your best point toward it and explain in reason.
+- Do not output markdown.
 """
 
 PERSONA_REPORT_SYNTHESIS_PROMPT = """You are writing a first-person UX test experience report as the participant persona below.
@@ -173,6 +232,21 @@ def build_hover_vlm_prompt(
         history=_format_history(history),
         hover_x=hover_x,
         hover_y=hover_y,
+    )
+
+
+def build_refine_vlm_prompt(
+    config: TargetConfig,
+    coarse: Action,
+    step_index: int,
+) -> str:
+    return REFINE_ACTION_PROMPT.format(
+        persona=config.persona,
+        goal=config.goal,
+        target=config.target,
+        step_index=step_index,
+        target_kind=coarse.target_kind or "(not specified)",
+        coarse_reason=coarse.reason or "(no reason recorded)",
     )
 
 
@@ -272,7 +346,64 @@ class GeminiDecisionMaker:
         )
         return action
 
+    def refine_click_coordinates(
+        self,
+        config: TargetConfig,
+        frame: ObservationFrame,
+        coarse: Action,
+        step_index: int,
+        *,
+        crop_image_path: Path,
+        crop_region: CropRegion,
+    ) -> Action:
+        _ = frame
+        if coarse.x is None or coarse.y is None:
+            return coarse
+
+        prompt = build_refine_vlm_prompt(config, coarse, step_index)
+        try:
+            response_text = self._generate_from_path(prompt, crop_image_path)
+            payload = extract_json_object(response_text)
+            local_x, local_y, reason = parse_refine_payload(payload)
+            global_x, global_y = crop_norm_to_global_norm(
+                local_x,
+                local_y,
+                crop_region,
+                frame.viewport_width,
+                frame.viewport_height,
+            )
+        except (ActionParseError, VlmDecisionError) as exc:
+            return Action(
+                type="click",
+                x=coarse.x,
+                y=coarse.y,
+                reason=f"refine fallback: {exc}",
+                target_kind=coarse.target_kind,
+            )
+        except Exception as exc:
+            return Action(
+                type="click",
+                x=coarse.x,
+                y=coarse.y,
+                reason=f"refine fallback: {exc}",
+                target_kind=coarse.target_kind,
+            )
+
+        return Action(
+            type="click",
+            x=global_x,
+            y=global_y,
+            reason=reason or coarse.reason,
+            target_kind=coarse.target_kind,
+        )
+
     def _generate(self, prompt: str, frame: ObservationFrame) -> str:
+        return self._generate_from_path(prompt, frame.image_path)
+
+    def _generate_from_path(self, prompt: str, image_path: Path) -> str:
+        return self._generate_from_bytes(prompt, image_path.read_bytes())
+
+    def _generate_from_bytes(self, prompt: str, image_bytes: bytes) -> str:
         try:
             from google import genai
             from google.genai import types
@@ -286,7 +417,6 @@ class GeminiDecisionMaker:
             api_key=self._api_key,
             http_options=types.HttpOptions(timeout=timeout_ms),
         )
-        image_bytes = frame.image_path.read_bytes()
 
         try:
             response = client.models.generate_content(

@@ -124,7 +124,7 @@ python3 ./scripts/ux_testing.py \
   --max-steps 10
 ```
 
-**Phase 4.5 (complete):** Public report publish — see `docs/VERIFY.md`. **Current:** Phase 5 — OpenClaw / Feishu Skill delivery. Plan: **`docs/OPENCLAW_INTEGRATION.md`**.
+**Phase 4.5 (complete):** Public report publish — see `docs/VERIFY.md`. **Current:** Phase 5 — OpenClaw / Feishu. **Next:** Phase 5.5b — **UVG** universal visual grounding (`docs/GROUNDING.md`). G1+G2 foundation shipped.
 
 ## Output Contract (by Phase)
 
@@ -167,6 +167,8 @@ See `docs/VERIFY.md` for full install and smoke-test steps.
 |---|---|
 | `SKILL.md` | OpenClaw Skill execution contract (primary usage model) |
 | `docs/OPENCLAW_INTEGRATION.md` | Phase 5 OpenClaw + Feishu integration plan (same VM) |
+| `docs/GROUNDING.md` | Phase 5.5 visual click grounding (normalized coords + hover alignment) |
+| `docs/fixtures/GROUNDING_REGRESSION.md` | Phase 5.5 formal regression fixtures + result log (Tier 2) |
 | `docs/openclaw/AGENT_PROMPT.md` | OpenClaw agent prompt (bash / default shell, no custom tool) |
 | `docs/openclaw/OPENCLAW_SKILL.md` | Template for `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` |
 | `requirements.txt` | Phase 1 Python dependencies |

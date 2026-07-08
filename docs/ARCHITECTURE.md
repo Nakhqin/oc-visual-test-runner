@@ -128,6 +128,9 @@ Exact package layout will be decided at Phase 1 start and recorded in `docs/DECI
    - **Feedback observation** — capture post-action frame or hover state.
    - **Trace writer** appends to `action_trace.json`; save screenshot.
    - Exit if action is `done` or `blocked`, or limits exceeded.
+
+**UVG (Phase 5.5b — implemented):** Every coordinate `click` runs **L1 ROI refine** then **L2 convergence hover** (`scripts/core/refine.py`, `scripts/core/loop.py`). Optional **L3** spatial model if Tier 2 still below bar.
+
 4. **Finalize** — Write `ux_result.json`; stop recording → `ux_test_recording.webm`. Phase 3+ adds reports; Phase 4 adds `ux_report.md` and `index.html`. Phase 4.5 optionally **publishes** the full output directory and writes `skill.report_url`.
 
 ## Output Artifacts

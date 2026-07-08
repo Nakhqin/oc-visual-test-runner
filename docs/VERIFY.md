@@ -621,7 +621,7 @@ ruff check .
 - [ ] Screenshots exist for each step
 - [ ] `ux_test_recording.webm` captures the session
 - [ ] Runner prints `SELECTED_TARGET`, `SELECTED_ADAPTER`, `SELECTED_RUNNER` metadata
-- [ ] Clicks use visual coordinates, not Figma node IDs or CSS selectors
+- [ ] Clicks use normalized visual coordinates (0–1000 in VLM; pixels in trace as `x_px`/`y_px`), not Figma node IDs or CSS selectors
 - [ ] Failed click logged without automatic UX defect classification
 
 ### Verify Phase 4+ Output
@@ -649,6 +649,109 @@ After Skill documentation updates, confirm:
 - [ ] User-facing vs system-facing output files are distinguished
 - [ ] Phase 1 output does **not** claim `ux_report.md` or `index.html` exist yet
 - [ ] Android / Windows described as planned only
+
+---
+
+## Phase 5.5 — Visual click grounding (G1 + G2)
+
+Plan: **`docs/GROUNDING.md`**. Formal acceptance fixtures: **`docs/fixtures/GROUNDING_REGRESSION.md`**.
+
+### Verification tiers
+
+| Tier | Scope | Validates grounding? | 5.5 sign-off |
+|---|---|:---:|:---:|
+| **0 — Unit** | Coordinate + hover helpers | No | Required |
+| **1 — Smoke** | `--use-stub` pipeline | **No** | Pre-merge only |
+| **2 — Formal regression** | Gemini E2E, fixtures A–C (+ E spot-check) | **Yes** | **Required** |
+
+> **Stub smoke does not prove marker alignment.** Tier 2 is mandatory before calling Phase 5.5 complete.
+
+### Tier 0 — Unit tests (no browser)
+
+```bash
+python3 .tmp/test_coordinates.py
+python3 .tmp/test_hover_alignment.py
+python3 .tmp/test_refine.py
+```
+
+**Confirm:**
+
+- [ ] All three exit 0 (`coordinates`, `hover alignment`, `refine` unit tests OK)
+
+### Tier 1 — Smoke (stub — pipeline only)
+
+**G1 wiring:**
+
+```bash
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "https://example.com" \
+  --persona "visitor" \
+  --goal "G1 coordinate smoke" \
+  --output-dir /tmp/ux_g1_stub \
+  --max-steps 2 \
+  --use-stub
+```
+
+**Confirm:**
+
+- [ ] `schema_version` **2**, `coordinate_space` **norm_1000**
+- [ ] Step 0 action has `x`/`y`, `x_px`/`y_px`
+
+**G2 wiring:**
+
+```bash
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "https://example.com" \
+  --persona "visitor" \
+  --goal "G2 hover alignment smoke" \
+  --output-dir /tmp/ux_g2_stub \
+  --max-steps 2 \
+  --use-stub
+```
+
+**Confirm:**
+
+- [ ] `hover.alignment` present; stub uses `aligned`, `alignment_passes` **1**
+- [ ] **Do not** use this tier to judge click accuracy on real UIs
+
+**UVG wiring (stub):**
+
+```bash
+python3 ./scripts/ux_testing.py \
+  --target web \
+  --url "https://example.com" \
+  --persona "visitor" \
+  --goal "UVG smoke" \
+  --output-dir /tmp/ux_uvg_stub \
+  --max-steps 2 \
+  --use-stub
+```
+
+**Confirm:**
+
+- [ ] stderr: `SELECTED_GROUNDING=uvg`
+- [ ] `action_trace.json`: `"grounding": "uvg"`
+- [ ] Step 0 click has `refine` with `coarse`, `fine`, `crop.screenshot`
+- [ ] `screenshots/step-000-refine-crop.png` exists
+
+### Tier 2 — Formal regression (Gemini E2E — required for UVG sign-off)
+
+Run on cloud VM with `GOOGLE_API_KEY` set. **No `--use-stub`.** Required **after UVG L1+L2 implementation** for Phase 5.5 completion (G1+G2 alone insufficient — see `grounding-A-test-1`).
+
+**Full procedure:** **`docs/fixtures/GROUNDING_REGRESSION.md`**
+
+| Scenario | Fixture | Runs | Pass |
+|---|---|---:|---|
+| A — text / list row | `FIGMA_LANGUAGE_LIST_URL` | 3 | ≥2 marker on **English** row at final hover |
+| B — icon-only | `FIGMA_ICON_ONLY_URL` (fill in fixtures doc) | 3 | ≥2 marker inside icon bounds |
+| C — icon + label | `FIGMA_COMPOSITE_URL` (fill in fixtures doc) | 3 | ≥2 marker on whole button |
+| E — scroll/type (spot) | wikipedia.org | 1 | trace uses `scroll`/`type` appropriately |
+
+**Per run, review:** `screenshots/step-*-refine-crop.png`, `screenshots/step-*-hover*.png`, `action_trace.json` (`refine`, `hover.alignment`, `alignment_passes`, `target_kind`).
+
+**Record results** in the table in `docs/fixtures/GROUNDING_REGRESSION.md`.
 
 ---
 

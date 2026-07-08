@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import os
 
+from pathlib import Path
+
 from adapters.browser import ObservationFrame
 from core.actions import Action
 from core.config import TargetConfig
+from core.refine import CropRegion
 from core.vlm import ENV_GEMINI_MODEL, ENV_GOOGLE_API_KEY, DEFAULT_GEMINI_MODEL, GeminiDecisionMaker
 
 STUB_BLOCKED_REASON = (
@@ -33,16 +36,39 @@ class StubDecisionMaker:
         if phase == "hover":
             return Action(
                 type="click_current",
+                alignment="aligned",
                 reason="Stub confirms hover target at marked pointer.",
             )
         if step_index == 0:
             return Action(
                 type="click",
-                x=frame.viewport_width // 2,
-                y=frame.viewport_height // 2,
+                x=500,
+                y=500,
+                target_kind="button",
                 reason="Stub moves to viewport center for hover-loop smoke test.",
             )
         return Action(type="blocked", reason=self._reason)
+
+    def refine_click_coordinates(
+        self,
+        config: TargetConfig,
+        frame: ObservationFrame,
+        coarse: Action,
+        step_index: int,
+        *,
+        crop_image_path: Path,
+        crop_region: CropRegion,
+    ) -> Action:
+        _ = config, frame, step_index, crop_image_path, crop_region
+        if coarse.x is None or coarse.y is None:
+            return coarse
+        return Action(
+            type="click",
+            x=coarse.x,
+            y=coarse.y,
+            reason=coarse.reason,
+            target_kind=coarse.target_kind,
+        )
 
 
 def create_decision_maker(*, use_stub: bool = False) -> StubDecisionMaker | GeminiDecisionMaker:
