@@ -503,9 +503,9 @@ Restores Gemini E2E on current API models; avoids indefinite VLM hangs; fixes Fi
 Tier 2 grounding regression initially used goal `Select English.` on the language list — a micro-goal for text-row click testing. Product scope (`docs/PRD.md`, `SKILL.md`) is **first-time tablet setup to home screen**. A Chinese persona with goal “select English” is unrealistic; persona + goal must align so the VLM exercises the real setup path.
 
 **Decision:**
-- Scenario A fixture goal: **`Complete the first-time tablet setup and reach the home screen.`**
+- Scenario A fixture goal: **`Complete the first-time tablet setup: set a 4-digit lock screen PIN, enable the Tianxi intelligent agent (天喜智能体), including recording the wake word, and reach the home screen (desktop).`**
 - Scenario A persona: **cautious first-time Chinese tablet user** (expects Chinese UI).
-- Pass criteria: `terminal_state: done` in ≥2/3 runs; on language step, **简体中文** row when clicked; per-step hover on stated target.
+- Pass criteria: `terminal_state: done` on desktop in ≥2/3 runs; trace shows **简体中文**, **4-digit PIN**, **Tianxi + wake word**; per-step hover on stated target.
 - Env: `FIGMA_SETUP_PROTO_URL` (primary); `FIGMA_LANGUAGE_LIST_URL` retained as alias for same proto URL.
 
 **Reasoning:**

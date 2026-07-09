@@ -27,7 +27,7 @@ Record the **canonical URL** used for each scenario. Update this file when proto
 
 | ID | Scenario | Target | Fixture URL | Goal (exact) | Persona (suggested) |
 |---|---|---|---|---|---|
-| **A** | Tablet setup flow (Figma) | `figma` | `FIGMA_SETUP_PROTO_URL` below | `Complete the first-time tablet setup and reach the home screen.` | `FIGMA_PERSONA` below (Chinese first-time tablet user) |
+| **A** | Tablet setup flow (Figma) | `figma` | `FIGMA_SETUP_PROTO_URL` below | See `FIGMA_GOAL` below (full setup to desktop) | `FIGMA_PERSONA` below (Chinese first-time tablet user) |
 | **B** | Icon-only | `figma` | `FIGMA_ICON_ONLY_URL` — **TBD** | `Open the menu.` (or close/back — match screen) | `FIGMA_PERSONA` below |
 | **C** | Icon + label button | `figma` or `web` | `FIGMA_COMPOSITE_URL` or web fallback — **TBD** | `Tap the Continue button.` | `FIGMA_PERSONA` below |
 | **D** | Web sanity | `web` | `https://example.com` | `Click the More information link.` | `A cautious first-time visitor.` |
@@ -42,13 +42,20 @@ export FIGMA_SETUP_PROTO_URL='https://www.figma.com/proto/rqLUySVeWpFeu8E9sAwkrW
 
 export FIGMA_PERSONA='A cautious first-time Chinese tablet user who is not familiar with this device. They normally read Chinese and expect the device to use Chinese.'
 
-export FIGMA_GOAL='Complete the first-time tablet setup and reach the home screen.'
+export FIGMA_GOAL='Complete the first-time tablet setup: set a 4-digit lock screen PIN, enable the Tianxi intelligent agent (天喜智能体), including recording the wake word, and reach the home screen (desktop).'
 
 # Legacy alias (same URL):
 export FIGMA_LANGUAGE_LIST_URL="$FIGMA_SETUP_PROTO_URL"
 ```
 
-> Proto may open **before** the language screen (e.g. welcome / Next). That is expected — the persona should progress through setup. On the language screen, a Chinese persona should reasonably choose **简体中文** (not English unless the goal says otherwise).
+**Setup milestones the persona must complete (in proto order when shown):**
+
+1. Progress through welcome / language — Chinese persona selects **简体中文** when offered.
+2. **Lock screen PIN** — set a **4-digit** tablet lock screen password (use `type` or on-screen keypad as the UI requires).
+3. **Tianxi agent** — enable **天喜智能体** and complete **wake word recording** when prompted.
+4. **Desktop** — finish setup and reach the **home screen / desktop**; then `done`.
+
+> Proto may open **before** the language screen (e.g. welcome / Next). That is expected. Use `--max-steps 25` and `--timeout-seconds 600` for the full flow.
 
 ### Scenarios B & C — fill before formal run
 
@@ -86,8 +93,8 @@ python3 scripts/ux_testing.py \
   --persona "$FIGMA_PERSONA" \
   --goal "$FIGMA_GOAL" \
   --output-dir "/tmp/ux_grounding/${RUN}" \
-  --max-steps 15 \
-  --timeout-seconds 300 \
+  --max-steps 25 \
+  --timeout-seconds 600 \
   --run-id "$RUN" \
   2>&1 | tee "/tmp/ux_grounding/${RUN}.log"
 ```
@@ -161,11 +168,11 @@ ls -la /tmp/ux_grounding/<RUN>/screenshots/*hover*
 
 ### Scenario A — setup flow
 
-| Run ID | `terminal_state` done? | Language step: **简体中文** hover OK? | Other clicks on stated target? | Notes |
-|---|---|:---:|:---:|:---:|
-| A-1 | | | | |
-| A-2 | | | | |
-| A-3 | | | | |
+| Run ID | `terminal_state` done? | Language: **简体中文**? | 4-digit PIN set? | Tianxi + wake word? | On desktop? | Notes |
+|---|---|:---:|:---:|:---:|:---:|:---:|
+| A-1 | | | | | | |
+| A-2 | | | | | | |
+| A-3 | | | | | | |
 
 ### Scenarios B / C / E
 
@@ -185,7 +192,7 @@ ls -la /tmp/ux_grounding/<RUN>/screenshots/*hover*
 
 | Rule | Threshold |
 |---|---|
-| **A — setup flow** | ≥ **2 / 3** runs: `terminal_state: done` (home / setup complete per VLM); on language step, Chinese persona clicks **简体中文** with marker on that row at final hover; other clicks land on controls named in step `reason` |
+| **A — setup flow** | ≥ **2 / 3** runs: `terminal_state: done` on **desktop**; trace shows language (**简体中文**), **4-digit PIN**, **Tianxi (天喜智能体) + wake word recording**, and prior steps; click hovers land on controls named in step `reason` |
 | **B — icon-only** | ≥ **2 / 3** runs: marker **inside** target icon bounds |
 | **C — composite** | ≥ **2 / 3** runs: marker on **whole button** hit area |
 | **E — non-click** | ≥ **1 / 1** spot-check: appropriate `scroll`/`type`; no spurious click-only path |

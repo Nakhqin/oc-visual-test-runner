@@ -213,7 +213,7 @@ Use a **prototype** URL (often `figma.com/proto/...` or `figma.com/design/...` w
 ```bash
 FIGMA_URL="https://www.figma.com/proto/your-prototype-link"
 FIGMA_PERSONA="A cautious first-time Chinese tablet user who is not familiar with this device. They normally read Chinese and expect the device to use Chinese."
-FIGMA_GOAL="Complete the first-time tablet setup and reach the home screen."
+FIGMA_GOAL="Complete the first-time tablet setup: set a 4-digit lock screen PIN, enable the Tianxi intelligent agent (天喜智能体), including recording the wake word, and reach the home screen (desktop)."
 FIGMA_OUTPUT="/tmp/ux_report_figma"
 
 python3 ./scripts/ux_testing.py \
@@ -231,7 +231,7 @@ python3 ./scripts/ux_testing.py \
 ```powershell
 $FIGMA_URL = "https://www.figma.com/proto/your-prototype-link"
 $FIGMA_PERSONA = "A cautious first-time Chinese tablet user who is not familiar with this device. They normally read Chinese and expect the device to use Chinese."
-$FIGMA_GOAL = "Complete the first-time tablet setup and reach the home screen."
+$FIGMA_GOAL = "Complete the first-time tablet setup: set a 4-digit lock screen PIN, enable the Tianxi intelligent agent (天喜智能体), including recording the wake word, and reach the home screen (desktop)."
 $FIGMA_OUTPUT = "C:\temp\ux_report_figma"
 
 python scripts/ux_testing.py `
@@ -744,7 +744,7 @@ Run on cloud VM with `GOOGLE_API_KEY` set. **No `--use-stub`.** Required **after
 
 | Scenario | Fixture | Runs | Pass |
 |---|---|---:|---|
-| A — tablet setup flow | `FIGMA_SETUP_PROTO_URL` | 3 | ≥2 `done` + language step marker on **简体中文** when selected |
+| A — tablet setup flow | `FIGMA_SETUP_PROTO_URL` | 3 | ≥2 `done` on desktop; PIN + Tianxi wake word + 简体中文 in trace |
 | B — icon-only | `FIGMA_ICON_ONLY_URL` (fill in fixtures doc) | 3 | ≥2 marker inside icon bounds |
 | C — icon + label | `FIGMA_COMPOSITE_URL` (fill in fixtures doc) | 3 | ≥2 marker on whole button |
 | E — scroll/type (spot) | wikipedia.org | 1 | trace uses `scroll`/`type` appropriately |
