@@ -20,7 +20,9 @@ from core.hover import (
     MAX_HOVER_ALIGNMENT_PASSES,
     action_triggers_hover,
     alignment_exhausted_blocked_action,
+    coerce_hover_to_click,
     derive_hover_alignment,
+    should_force_hover_click,
 )
 from core.refine import run_roi_refine
 from core.formal_report import write_formal_reports
@@ -41,6 +43,7 @@ class DecisionMaker(Protocol):
         *,
         phase: str = "observe",
         pending_action: Action | None = None,
+        alignment_pass: int | None = None,
     ) -> Action: ...
 
 
@@ -196,7 +199,17 @@ def _run_hover_confirmation(
             step_index,
             phase="hover",
             pending_action=pending_click,
+            alignment_pass=pass_index,
         )
+        if should_force_hover_click(
+            pass_index=pass_index,
+            passes=passes,
+            hover_action=hover_action,
+        ):
+            hover_action = coerce_hover_to_click(
+                hover_action,
+                prefix="UVG L2 convergence (adjusted click at pointer):",
+            )
         final_hover_action = hover_action
         final_hover_frame = hover_frame
 

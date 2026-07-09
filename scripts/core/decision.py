@@ -31,8 +31,9 @@ class StubDecisionMaker:
         *,
         phase: str = "observe",
         pending_action: Action | None = None,
+        alignment_pass: int | None = None,
     ) -> Action:
-        _ = config, frame, pending_action
+        _ = config, frame, pending_action, alignment_pass
         if phase == "hover":
             return Action(
                 type="click_current",

@@ -517,6 +517,23 @@ Goal drives task completion; persona drives realistic choices. Grounding is stil
 
 ---
 
+## 2026-07-09 — UVG L2 convergence: stall detection + adjusted click
+
+**Status:** Accepted
+
+**Context:**
+Real-web runs (e.g. Lenovo `web-lenovo-gaming-1`) could `blocked` after 6 hover passes when VLM kept issuing tiny `move_to` adjustments on small composite chips without ever `click_current`. Prompt-only strict center alignment was insufficient.
+
+**Decision:**
+- Hover prompt includes **alignment pass** / **max passes** and convergence rules (prefer `click_current` with `adjusted` after pass 2+ when marker overlaps target).
+- Runner **`should_force_hover_click`**: on **final pass** or when **stall/oscillation** detected (≥3 micro-moves), coerce `move_to` → `click_current` with `alignment: adjusted`.
+- `blocked` after hover exhaust reserved for truly off-target final state — not endless micro-nudge failure.
+
+**Consequences:**
+- `scripts/core/hover.py`, `loop.py`, `vlm.py`; tests in `.tmp/test_hover_alignment.py`.
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

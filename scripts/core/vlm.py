@@ -7,7 +7,7 @@ from typing import Any
 from adapters.browser import ObservationFrame
 from core.actions import Action, ActionParseError, extract_json_object, parse_action_payload
 from core.config import TargetConfig
-from core.hover import validate_hover_action
+from core.hover import MAX_HOVER_ALIGNMENT_PASSES, validate_hover_action
 from core.refine import (
     CropRegion,
     crop_norm_to_global_norm,
@@ -91,6 +91,9 @@ Previous steps:
 The participant moved the pointer to ({hover_x}, {hover_y}) intending to click there.
 The screenshot shows the UI with a red circular cursor marker at the pointer position.
 
+**Alignment pass:** {alignment_pass} of {max_alignment_passes} (0 = first hover check after move_to).
+**Intended click:** {intended_target_kind} — {intended_reason}
+
 This is the **alignment phase**: align the red marker onto the intended tappable control, then click. Do not treat this as a weak confirm-only step.
 
 Review the marker position and choose the single next action as JSON only.
@@ -109,7 +112,12 @@ Alignment rules (all control types — text, icon-only, icon+label, button):
 - Text / list rows: if marker is beside a label, move_to the **label or row center**.
 - Icon-only: move_to the **center of the icon graphic** (name the icon in reason); not adjacent padding or a neighboring icon.
 - Icon + label: move_to the **center of the combined hit area**, not only the text side.
-- Small icons: partial overlap with whitespace is not enough — center on the glyph.
+- Small icons / filter chips: partial overlap on the chip or icon is enough after 1–2 adjustments — do not chase sub-pixel perfection.
+
+Convergence (avoid endless micro-moves):
+- Pass 0–1: use move_to when the marker is clearly off the intended control.
+- Pass 2+: if the marker **overlaps** the intended tappable area (text, icon, or composite chip), prefer **click_current** with alignment **"adjusted"** rather than another tiny move_to.
+- Pass {max_alignment_passes} (final): use **click_current** with alignment **"adjusted"** if the marker overlaps the target at all; use **blocked** only if the marker is completely off the intended control.
 
 Rules:
 - Respond with JSON only. No markdown unless wrapping a single JSON object.
@@ -221,6 +229,9 @@ def build_hover_vlm_prompt(
     *,
     hover_x: int,
     hover_y: int,
+    alignment_pass: int,
+    max_alignment_passes: int,
+    intended_click: Action,
 ) -> str:
     return HOVER_ACTION_PROMPT.format(
         persona=config.persona,
@@ -232,6 +243,10 @@ def build_hover_vlm_prompt(
         history=_format_history(history),
         hover_x=hover_x,
         hover_y=hover_y,
+        alignment_pass=alignment_pass,
+        max_alignment_passes=max_alignment_passes,
+        intended_target_kind=intended_click.target_kind or "unspecified",
+        intended_reason=intended_click.reason or "(no reason recorded)",
     )
 
 
@@ -303,6 +318,7 @@ class GeminiDecisionMaker:
         *,
         phase: str = "observe",
         pending_action: Action | None = None,
+        alignment_pass: int | None = None,
     ) -> Action:
         if phase == "hover":
             if pending_action is None or pending_action.x is None or pending_action.y is None:
@@ -317,6 +333,9 @@ class GeminiDecisionMaker:
                 self._history,
                 hover_x=pending_action.x,
                 hover_y=pending_action.y,
+                alignment_pass=alignment_pass if alignment_pass is not None else 0,
+                max_alignment_passes=MAX_HOVER_ALIGNMENT_PASSES,
+                intended_click=pending_action,
             )
             parse_response = parse_hover_vlm_response
         else:

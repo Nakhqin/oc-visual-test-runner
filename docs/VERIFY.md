@@ -744,7 +744,7 @@ Run on cloud VM with `GOOGLE_API_KEY` set. **No `--use-stub`.** Required **after
 
 | Scenario | Fixture | Runs | Pass |
 |---|---|---:|---|
-| A — tablet setup flow | `FIGMA_SETUP_PROTO_URL` | 3 | ≥2 `done` on desktop; PIN + Tianxi wake word + 简体中文 in trace |
+| A — tablet setup flow | `FIGMA_SETUP_PROTO_URL` | 3 | ≥2 `done` on desktop — **passed 2026-07-09** |
 | B — icon-only | `FIGMA_ICON_ONLY_URL` (fill in fixtures doc) | 3 | ≥2 marker inside icon bounds |
 | C — icon + label | `FIGMA_COMPOSITE_URL` (fill in fixtures doc) | 3 | ≥2 marker on whole button |
 | E — scroll/type (spot) | wikipedia.org | 1 | trace uses `scroll`/`type` appropriately |

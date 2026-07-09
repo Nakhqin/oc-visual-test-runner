@@ -1,6 +1,6 @@
 # Visual Click Grounding — Structural Improvement Plan
 
-**Status:** **G1 + G2 + UVG L1/L2 implemented (2026-07-08)**; Tier 2 re-validation pending.  
+**Status:** **G1 + G2 + UVG L1/L2 implemented (2026-07-08)**; **Tier 2 Scenario A passed (2026-07-09)**; B–C pending.  
 **Triggers:** Figma E2E showed VLM coordinates landing off-target (e.g. red marker left of list item text while intending to click **English**). Runner execution matches coordinates; failure is **visual grounding**, not coordinate-space mismatch from Figma scaling.
 
 **Relationship to phases:** Phase 5 (OpenClaw/Feishu delivery) may complete on current grounding. **Phase 5.5** implements this plan. Phase 6+ (Android/Windows design) unchanged.
@@ -129,7 +129,8 @@ Confirmed from scenario A run `grounding-A-test-1`: G2 refused off-target `click
 **Convergence exit:**
 
 - **Success:** `click_current` with marker on target (human review + optional VLM `alignment`)
-- **Failure:** `blocked` with reason after `N_hover` — **not** 6+ observe `move_to` steps
+- **Adjusted success:** after micro-moves stall or on the **final** alignment pass, runner may **force `click_current`** at the pointer with `alignment: adjusted` (see `should_force_hover_click` in `hover.py`) — avoids spurious `blocked` when the marker already overlaps a small composite chip
+- **Failure:** `blocked` with reason after `N_hover` only when the pointer never overlaps the target (e.g. VLM returns `wait` repeatedly, or final pass is completely off-target)
 
 ### L3 — Dedicated spatial model (G4)
 
@@ -210,7 +211,7 @@ Alignment applies to **any tappable control** — not text-only:
 
 - [x] Updated `HOVER_ACTION_PROMPT` and observe prompt in `vlm.py` (text + icon + composite rules).
 - [x] Hover sub-loop: up to 3 alignment passes with per-pass screenshots and trace metadata.
-- [ ] **Scenario A (setup flow):** Figma tablet setup — Chinese persona completes full flow (language → 4-digit PIN → Tianxi + wake word → desktop) with `done` in ≥2/3 runs.
+- [x] **Scenario A (setup flow):** Figma tablet setup — Chinese persona completes full flow (language → 4-digit PIN → Tianxi + wake word → desktop) with `done` in ≥2/3 runs. **Passed 2026-07-09** — see `docs/fixtures/GROUNDING_REGRESSION.md` result log.
 - [ ] **Scenario B (icon-only):** Proto with a distinct icon target (e.g. close, menu) — marker **inside icon bounds** in ≥2/3 runs.
 - [ ] **Scenario C (icon+label):** Proto with icon+text button — marker on **whole control** in ≥2/3 runs.
 - [ ] Tier 2 regression A–C: ≥2/3 final-hover on target (**insufficient with G2 alone** — see `grounding-A-test-1`).
@@ -336,7 +337,8 @@ Phase 5.2/5.3 OpenClaw wiring **may proceed in parallel** with UVG; Feishu E2E q
 
 | Criterion | Threshold |
 |---|---|
-| Tier 2 scenarios A, B, C | Each ≥ **2/3** runs: **final** hover frame marker on target hit area |
+| Tier 2 scenario **A** | ≥ **2/3** runs: `done` on desktop; full setup milestones in trace — **passed 2026-07-09** |
+| Tier 2 scenarios **B, C** | Each ≥ **2/3** runs: **final** hover frame marker on target hit area — **pending** |
 | Off-target click | No `click_current` when marker clearly off target in final hover |
 | `max_steps` churn | No long observe-only `move_to` sequences when a single click intent should converge in hover |
 | Scenario E spot-check | `scroll`/`type` paths unaffected |

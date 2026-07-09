@@ -61,13 +61,14 @@ Primary plan: **`docs/GROUNDING.md`**
 | Done | G1: Normalized 0–1000 coordinate protocol + pixel mapping + tests |
 | Done | G2: Hover alignment prompts + multi-pass sub-loop + trace metadata |
 | Done | Trace: `schema_version` 2; norm + pixel; hover `alignment` / `adjustments` |
-| Blocked | Tier 2 regression A–C — **failed scenario A** (`grounding-A-test-1`); G1+G2 insufficient |
+| Blocked | Tier 2 regression B–C — fixture URLs **TBD** |
+| Done | Tier 2 **Scenario A** — ≥2/3 pass (`grounding-A-setup-1` + additional runs, 2026-07-09) |
 | Done | **UVG L2'** — convergence hover (`MAX_HOVER_ALIGNMENT_PASSES=5`; `blocked` on exhaust) |
 | Done | **UVG L1** — mandatory ROI refine (`scripts/core/refine.py`) on every coordinate `click` |
-| Todo | Tier 2 re-run after UVG; sign-off per `docs/GROUNDING.md` UVG criteria |
+| Todo | Tier 2 scenarios **B–C**; full Phase 5.5 sign-off when B–C pass |
 | Todo | **UVG L3** — spatial / bbox model only if L1+L2 below bar |
 
-**Exit criteria (UVG):** Tier 2 A–C each ≥2/3 final-hover on target; no off-target `click_current`; no `max_steps` wasted on alignment. See **`docs/GROUNDING.md`** UVG sign-off table.
+**Exit criteria (UVG):** Tier 2 **A** done (2026-07-09); **B–C** each ≥2/3 final-hover on target; no off-target `click_current`; no `max_steps` wasted on alignment. See **`docs/GROUNDING.md`** UVG sign-off table.
 
 **Non-goals:** Per-UI row hacks; Figma API; DOM-selector-first; L3 before L1+L2 measured.
 

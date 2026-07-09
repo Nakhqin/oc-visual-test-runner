@@ -170,9 +170,10 @@ ls -la /tmp/ux_grounding/<RUN>/screenshots/*hover*
 
 | Run ID | `terminal_state` done? | Language: **简体中文**? | 4-digit PIN set? | Tianxi + wake word? | On desktop? | Notes |
 |---|---|:---:|:---:|:---:|:---:|:---:|
-| A-1 | | | | | | |
-| A-2 | | | | | | |
-| A-3 | | | | | | |
+| `grounding-A-setup-1` | Y | Y (step 1) | Y (steps 6–10) | Y (steps 13–14) | Y (step 17) | 18 steps; [report](http://170.106.175.128:8080/grounding-A-setup-1/index.html) |
+| *(additional run(s))* | Y | — | — | — | — | Nana confirmed ≥2/3 total pass (2026-07-09) |
+
+**Scenario A sign-off: PASSED** (≥2/3 runs, 2026-07-09). Canonical evidence: [grounding-A-setup-1](http://170.106.175.128:8080/grounding-A-setup-1/index.html) — `done`, UVG refine + hover on all click steps, 简体中文 @ step 1, 4-digit PIN path @ steps 6–10, 录制唤醒词 @ steps 13–14, desktop @ step 17.
 
 ### Scenarios B / C / E
 
