@@ -1,14 +1,28 @@
 ---
 name: oc-visual-test-runner
-description: Persona-based visual UX testing for web and Figma prototypes via scripts/ux_testing.py on this VM. Use for Feishu NL walkthrough requests; not the legacy ux_test_runner skill.
+description: Run UX tests via exec only — invoke_runner.sh then format_skill_reply.py on this VM. Never use legacy ux_test_runner or --report-file tools.
 ---
 
 # oc-visual-test-runner
 
-Persona-based visual UX testing for **web** and **Figma** prototypes on this VM.  
-Invoke via **bash** only — no custom exec tool or MCP shell server required.
+Persona-based visual UX testing for **web** and **Figma** prototypes on this VM.
 
-**Not the same skill as** `ux_test_runner` / `~/.openclaw/skills/ux-test-skill/` (legacy). This skill always uses workspace `/root/oc-visual-test-runner`.
+**Not** the legacy skill `ux_test_runner` (`~/.openclaw/skills/ux-test-skill/`). Never call that skill for these requests.
+
+## Hard rules (must follow)
+
+1. You **MUST** call the **exec** tool. Do **not** only say you will run the test.
+2. Do **NOT** use skill `ux_test_runner` or any CLI that takes `--report-file`, JSON report on stdin, or similar legacy report parsers.
+3. Do **NOT** invent another Python entrypoint. Allowed only:
+   - `./scripts/openclaw/invoke_runner.sh ...` **or** `.venv/bin/python3 scripts/ux_testing.py ...`
+   - then `.venv/bin/python3 scripts/format_skill_reply.py --output-dir ...`
+4. The Feishu reply body **MUST** be exactly the **stdout** of `format_skill_reply.py` (Status/Summary/Full report, or 状态/测试摘要/完整报告). Do not rewrite, translate, or wrap it in other JSON errors.
+5. If the runner fails, run `format_skill_reply.py --error "..."` and send **that** stdout.
+6. Every exec block **MUST** set:
+   - `PATH="/root/oc-visual-test-runner/.venv/bin:$PATH"`
+   - `LANG=C.UTF-8` `PYTHONUTF8=1` `PYTHONIOENCODING=utf-8`
+   - `UX_REPORT_PUBLIC_DIR` and `UX_REPORT_PUBLIC_BASE_URL`
+7. Success check: directory `/tmp/ux_<run_id>` must exist after the runner. If it does not, you did not run the correct commands — retry with the canonical block below.
 
 ## Workspace
 
@@ -18,9 +32,9 @@ Invoke via **bash** only — no custom exec tool or MCP shell server required.
 
 | Item | Value |
 |---|---|
-| CLI | `python3 scripts/ux_testing.py` |
-| Reply formatter | `python3 scripts/format_skill_reply.py` |
-| Optional wrapper | `./scripts/openclaw/invoke_runner.sh` |
+| Venv Python | `/root/oc-visual-test-runner/.venv/bin/python3` |
+| Wrapper | `./scripts/openclaw/invoke_runner.sh` |
+| Formatter | `.venv/bin/python3 scripts/format_skill_reply.py` |
 | Publish dir | `/var/www/ux-reports` |
 | Public base URL | `http://170.106.175.128:8080` |
 
@@ -43,27 +57,45 @@ Explicit invoke: `/oc-visual-test-runner` or `/skill oc-visual-test-runner`.
 
 **If `url` or `goal` is missing, ask ONE clarifying question before running any command.** Do not invent a goal.
 
-## How to run (bash)
+## Canonical exec block (prefer this exact pattern)
 
-Every production run:
-
-1. `cd` to workspace  
-2. `export` publish env (and ensure `GOOGLE_API_KEY` is set for Gemini)  
-3. Run `ux_testing.py`  
-4. Run `format_skill_reply.py`  
-5. Send formatter **stdout** as the Feishu reply — not raw logs or `action_trace.json`
+Replace `RUN_ID`, `TARGET`, `URL`, `PERSONA`, `GOAL`, and `MAX_STEPS`. Prefer this block; do not substitute other report tools.
 
 ```bash
-cd /root/oc-visual-test-runner
-
+export LANG=C.UTF-8
+export PYTHONUTF8=1
+export PYTHONIOENCODING=utf-8
+export PATH="/root/oc-visual-test-runner/.venv/bin:$PATH"
 export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
 export UX_REPORT_PUBLIC_BASE_URL=http://170.106.175.128:8080
-# GOOGLE_API_KEY must be in the shell environment for Gemini runs
+# For Gemini runs (not --use-stub): ensure GOOGLE_API_KEY is set, e.g. source ~/.bashrc or the repo .env
+
+cd /root/oc-visual-test-runner
+
+RUN_ID="feishu-REPLACE_ME"
+./scripts/openclaw/invoke_runner.sh \
+  "${RUN_ID}" "TARGET" "URL" "PERSONA" "GOAL" MAX_STEPS
+# Smoke only: append --use-stub as the 7th argument
+
+/root/oc-visual-test-runner/.venv/bin/python3 scripts/format_skill_reply.py \
+  --output-dir "/tmp/ux_${RUN_ID}"
+```
+
+**Pathway / smoke only** (no Gemini): pass `--use-stub` as the 7th argument to `invoke_runner.sh`.
+
+### Direct CLI alternative (same venv rules)
+
+```bash
+export LANG=C.UTF-8 PYTHONUTF8=1 PYTHONIOENCODING=utf-8
+export PATH="/root/oc-visual-test-runner/.venv/bin:$PATH"
+export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
+export UX_REPORT_PUBLIC_BASE_URL=http://170.106.175.128:8080
+cd /root/oc-visual-test-runner
 
 RUN_ID="feishu-REPLACE_ME"
 OUTPUT_DIR="/tmp/ux_${RUN_ID}"
 
-python3 scripts/ux_testing.py \
+/root/oc-visual-test-runner/.venv/bin/python3 scripts/ux_testing.py \
   --target TARGET \
   --url "URL" \
   --persona "PERSONA" \
@@ -71,41 +103,24 @@ python3 scripts/ux_testing.py \
   --output-dir "${OUTPUT_DIR}" \
   --run-id "${RUN_ID}" \
   --max-steps 10
-```
 
-Replace `TARGET`, `URL`, `PERSONA`, `GOAL`, and `RUN_ID` with values from the user message.
-
-**Pathway / smoke only** (no Gemini): add `--use-stub`.
-
-### Optional wrapper
-
-```bash
-cd /root/oc-visual-test-runner
-./scripts/openclaw/invoke_runner.sh \
-  "${RUN_ID}" "TARGET" "URL" "PERSONA" "GOAL" 10
+/root/oc-visual-test-runner/.venv/bin/python3 scripts/format_skill_reply.py \
+  --output-dir "${OUTPUT_DIR}"
 ```
 
 ## Feishu reply
 
-After exit 0:
-
-```bash
-cd /root/oc-visual-test-runner
-python3 scripts/format_skill_reply.py --output-dir "${OUTPUT_DIR}"
-```
-
-Send that command’s **stdout** to the user **unchanged**. Do not rewrite or translate the block yourself — the formatter already matches the user language (Chinese vs English) from `goal`/`persona` (or `--lang zh|en`).
+Send **only** the stdout of `format_skill_reply.py` to the user. Do not rewrite.
 
 On failure (non-zero exit or missing `ux_result.json`):
 
 ```bash
-cd /root/oc-visual-test-runner
-python3 scripts/format_skill_reply.py \
+/root/oc-visual-test-runner/.venv/bin/python3 scripts/format_skill_reply.py \
   --error "brief reason from stderr" \
   --run-id "${RUN_ID}"
 ```
 
-If the user wrote in Chinese, pass `--lang zh` on error replies when `ux_result.json` is missing.
+If the user wrote in Chinese and there is no `ux_result.json`, add `--lang zh`.
 
 ### Reply shape (required)
 
@@ -127,30 +142,30 @@ If the user wrote in Chinese, pass `--lang zh` on error replies when `ux_result.
 
 **Extracted:** `web` / `https://example.com` / `first-time visitor` / `Check whether the homepage main information is clear` / `run_id=feishu-om_xxx`
 
-**Commands:**
+**Exec (exact pattern):**
 
 ```bash
-cd /root/oc-visual-test-runner
+export LANG=C.UTF-8 PYTHONUTF8=1 PYTHONIOENCODING=utf-8
+export PATH="/root/oc-visual-test-runner/.venv/bin:$PATH"
 export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
 export UX_REPORT_PUBLIC_BASE_URL=http://170.106.175.128:8080
+cd /root/oc-visual-test-runner
 
-python3 scripts/ux_testing.py \
-  --target web \
-  --url "https://example.com" \
-  --persona "first-time visitor" \
-  --goal "Check whether the homepage main information is clear" \
-  --output-dir /tmp/ux_feishu-om_xxx \
-  --run-id feishu-om_xxx \
-  --max-steps 10
+./scripts/openclaw/invoke_runner.sh \
+  "feishu-om_xxx" "web" "https://example.com" \
+  "first-time visitor" "Check whether the homepage main information is clear" 10
 
-python3 scripts/format_skill_reply.py --output-dir /tmp/ux_feishu-om_xxx
+/root/oc-visual-test-runner/.venv/bin/python3 scripts/format_skill_reply.py \
+  --output-dir /tmp/ux_feishu-om_xxx
 ```
 
 ## Prerequisites
 
+- OpenClaw `tools.allow` includes **`exec`**
 - Static host on `:8080` serving `/var/www/ux-reports` (Phase 4.5)
-- Playwright Chromium available for the runner
+- Project `.venv` with Playwright Chromium
 - `GOOGLE_API_KEY` for production NL runs (not `--use-stub`)
+- Prefer disabling legacy `ux-test-skill` on this VM to avoid tool confusion
 
 ## Contract
 

@@ -567,7 +567,7 @@ python3 ./scripts/format_skill_reply.py --output-dir /tmp/ux_pathway-smoke-001
 
 ### Phase 5.3 — Feishu NL E2E
 
-Install skill only: sync `docs/openclaw/OPENCLAW_SKILL.md` → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md`, then confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready**. Agent runs bash CLI + `format_skill_reply.py`. Do **not** use legacy `ux_test_runner`.
+Install skill only: sync `docs/openclaw/OPENCLAW_SKILL.md` → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md`, then confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready**. Agent must **exec** the canonical block (venv PATH + `invoke_runner.sh` + `format_skill_reply.py`). Do **not** use legacy `ux_test_runner` / `--report-file`. Prefer temporarily disabling `~/.openclaw/skills/ux-test-skill`. `tools.allow` must include `exec`. After Feishu run, `/tmp/ux_<run_id>` must exist.
 
 **Example Feishu input:**
 
@@ -578,10 +578,11 @@ Or explicit: `/oc-visual-test-runner` with the same request.
 **Confirm:**
 
 - [ ] OpenClaw extracts `target`, `url`, `persona`, `goal` without runner-side NL parser
+- [ ] Agent actually execs (not verbal-only); `/tmp/ux_<run_id>` exists
 - [ ] `--run-id` correlates to Feishu context when configured
-- [ ] Feishu reply matches `SKILL.md` user-facing format (summary + links, not raw logs)
+- [ ] Feishu reply is formatter stdout: Status/Summary/Full report (or 状态/测试摘要/完整报告)
 - [ ] `terminal_state=blocked` or `max_steps` still returns readable summary + report link
-- [ ] Runner failure (exit `1`/`2`) produces short Feishu error, not full trace
+- [ ] Runner failure (exit `1`/`2`) produces short Feishu error via `format_skill_reply.py --error`, not legacy JSON/`--report-file` errors
 
 **Failure checks:**
 

@@ -375,13 +375,18 @@ mkdir -p ~/.openclaw/skills/oc-visual-test-runner
 cp /root/oc-visual-test-runner/docs/openclaw/OPENCLAW_SKILL.md \
    ~/.openclaw/skills/oc-visual-test-runner/SKILL.md
 
+# Strongly recommended while validating Phase 5.3 — avoid legacy skill stealing the turn:
+# mv ~/.openclaw/skills/ux-test-skill ~/.openclaw/skills/ux-test-skill.disabled
+
 # Must show frontmatter name and ready status:
-head -5 ~/.openclaw/skills/oc-visual-test-runner/SKILL.md
-openclaw skills list | grep -i oc-visual
+head -8 ~/.openclaw/skills/oc-visual-test-runner/SKILL.md
+openclaw skills list | grep -iE 'oc-visual|ux_test'
 
 # New session so the agent picks up the skill:
 # Feishu: /new   or: openclaw gateway restart
 ```
+
+OpenClaw `tools.allow` **must** include `exec`. Skill body includes **Hard rules** (exec required; ban `ux_test_runner` / `--report-file`; venv PATH required).
 
 ---
 

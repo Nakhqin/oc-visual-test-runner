@@ -26,8 +26,16 @@ export UX_REPORT_PUBLIC_BASE_URL="${UX_REPORT_PUBLIC_BASE_URL:-http://170.106.17
 
 PYTHON="${REPO_ROOT}/.venv/bin/python3"
 if [[ ! -x "$PYTHON" ]]; then
-  PYTHON="python3"
+  echo "error: project venv python not found or not executable: ${PYTHON}" >&2
+  echo "error: refuse to fall back to system python3 (missing playwright risk)" >&2
+  exit 2
 fi
+
+# Ensure venv bin is first on PATH for child tools
+export PATH="$(dirname "$PYTHON"):${PATH}"
+export LANG="${LANG:-C.UTF-8}"
+export PYTHONUTF8="${PYTHONUTF8:-1}"
+export PYTHONIOENCODING="${PYTHONIOENCODING:-utf-8}"
 
 ARGS=(
   "$PYTHON" ./scripts/ux_testing.py

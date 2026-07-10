@@ -571,6 +571,24 @@ Operators want a short Feishu reply after each run: completion vs blocked (with 
 
 ---
 
+## 2026-07-10 — Harden OpenClaw SKILL.md against legacy tool confusion
+
+**Status:** Accepted
+
+**Context:**
+Feishu Agent often acknowledged UX test requests without running `invoke_runner.sh`, or invoked legacy `ux_test_runner` / `--report-file` flows (ascii codec JSON errors) while SSH runs succeeded. OpenClaw `tools.allow` needed `exec`; project `.venv` must be used (system python3 lacks playwright site-packages when not via venv).
+
+**Decision:**
+- Strengthen `docs/openclaw/OPENCLAW_SKILL.md` with **Hard rules**, canonical exec block (venv PATH + UTF-8 + publish env), and ban on `ux_test_runner` / `--report-file`.
+- `invoke_runner.sh` **refuses** fallback to system `python3` if `.venv/bin/python3` is missing.
+- Operators should temporarily disable `ux-test-skill` during Phase 5.3 validation.
+
+**Consequences:**
+- After `cp` skill + gateway restart / `/new`, Feishu diag must create `/tmp/ux_<run_id>`.
+- Skill text is still advisory to the LLM; disabling the legacy skill remains recommended.
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

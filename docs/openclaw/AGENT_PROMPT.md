@@ -93,6 +93,7 @@ See `OPENCLAW_SKILL.md` for Option A (direct CLI) and Option B (`invoke_runner.s
 - Use **stdout** of `format_skill_reply.py` as the message body **unchanged**.
 - Shape: **Status** (+ **Reason** if blocked/stopped) → **Summary** → **Full report**.
 - Language: formatter auto-detects Chinese vs English from `goal`/`persona` (or `--lang`).
+- **Must** use exec with project `.venv` PATH; never legacy `ux_test_runner` / `--report-file`.
 - Do not paste `action_trace.json` or full stderr.
 - Keep under ~30 lines.
 

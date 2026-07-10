@@ -29,9 +29,10 @@ Primary plan: **`docs/OPENCLAW_INTEGRATION.md`**
 |---|---|
 | Todo | Sync `docs/openclaw/OPENCLAW_SKILL.md` (YAML frontmatter `name: oc-visual-test-runner`) → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` |
 | Todo | Confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready** (not legacy `ux_test_runner`) |
-| Todo | Agent bash: `python3 scripts/ux_testing.py` then `format_skill_reply.py` |
+| Todo | Agent bash: `.venv` PATH + `invoke_runner.sh` then `format_skill_reply.py` (Hard rules in OPENCLAW_SKILL.md) |
 | Todo | Optional pathway smoke (`--use-stub`) before first NL |
 | Todo | NL extraction + missing-field clarifying question in Feishu |
+| Todo | Prefer disable legacy `ux-test-skill` during 5.3; confirm `tools.allow` includes `exec` |
 
 **Do not** paste `AGENT_PROMPT.md` into Agent Instructions — OpenClaw injects skill `SKILL.md` automatically. Legacy `ux_test_runner` is a different skill; do not use it for Phase 5.
 
