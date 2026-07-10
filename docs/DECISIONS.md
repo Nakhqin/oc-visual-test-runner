@@ -534,6 +534,25 @@ Real-web runs (e.g. Lenovo `web-lenovo-gaming-1`) could `blocked` after 6 hover 
 
 ---
 
+## 2026-07-10 — OpenClaw skill install: SKILL.md frontmatter only (not Agent Instructions)
+
+**Status:** Accepted
+
+**Context:**
+Phase 5.2 docs previously said to paste `AGENT_PROMPT.md` into OpenClaw Agent Instructions. OpenClaw 2026.4.x loads skills from directories containing `SKILL.md` with YAML frontmatter (`name`, `description`); the markdown body is injected automatically. A copy without frontmatter at `~/.openclaw/skills/oc-visual-test-runner/` did not appear in `openclaw skills list`. Legacy `ux_test_runner` (`ux-test-skill/`) is a **different** skill and must not be conflated with `oc-visual-test-runner`.
+
+**Decision:**
+- Canonical installable skill: `docs/openclaw/OPENCLAW_SKILL.md` with frontmatter `name: oc-visual-test-runner`.
+- Install path: `~/.openclaw/skills/oc-visual-test-runner/SKILL.md`.
+- `AGENT_PROMPT.md` is reference-only — do not paste into Agent Instructions.
+- Phase 5 verification uses **`oc-visual-test-runner` only**, not `ux_test_runner`.
+
+**Consequences:**
+- Operators: `cp` skill file → `openclaw skills list | grep oc-visual` → Feishu `/new` or gateway restart → NL E2E.
+- Docs: `OPENCLAW_INTEGRATION.md`, `TASKS.md`, `VERIFY.md`, `AGENT_PROMPT.md` updated.
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

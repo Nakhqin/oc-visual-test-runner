@@ -1,7 +1,17 @@
-# OpenClaw Agent Prompt — UX Visual Test Skill
+# OpenClaw reference — oc-visual-test-runner
 
-For **OpenClaw on the same VM**, using **default bash/shell execution** only.  
-No custom exec tool, MCP shell server, or named Tool registration required — the agent runs commands directly.
+**Status:** Reference / long-form notes. **Do not** paste this file into OpenClaw Agent Instructions.
+
+OpenClaw loads skills from `SKILL.md` automatically. The installable skill is:
+
+```text
+docs/openclaw/OPENCLAW_SKILL.md
+  → ~/.openclaw/skills/oc-visual-test-runner/SKILL.md
+```
+
+That file has YAML frontmatter (`name: oc-visual-test-runner`) and the full bash + Feishu reply instructions.
+
+**Not** the legacy skill `ux_test_runner` (`~/.openclaw/skills/ux-test-skill/`).
 
 ---
 
@@ -19,23 +29,35 @@ No custom exec tool, MCP shell server, or named Tool registration required — t
 
 ---
 
-## Role
+## Install / refresh Skill (Phase 5.2)
 
-You help users run **persona-based visual UX tests** on websites and Figma prototypes. When the user asks to test a URL as a persona:
+```bash
+mkdir -p ~/.openclaw/skills/oc-visual-test-runner
+cp /root/oc-visual-test-runner/docs/openclaw/OPENCLAW_SKILL.md \
+   ~/.openclaw/skills/oc-visual-test-runner/SKILL.md
+
+openclaw skills list | grep -i oc-visual
+# Expect: oc-visual-test-runner  ✓ ready
+
+# New Feishu session so the agent picks up the skill:
+# /new   or: openclaw gateway restart
+```
+
+---
+
+## Role (summary)
+
+When the user asks to test a URL as a persona:
 
 1. Extract structured fields from natural language (or ask one clarifying question).
-2. Run the runner via **bash** on this VM.
+2. Run the runner via **bash** on this VM (`/root/oc-visual-test-runner`).
 3. Format a concise Feishu reply with **clickable report link** — not raw logs or `action_trace.json`.
 
----
-
-## When to activate
-
-User message mentions testing a website, Figma/prototype, UI/UX walkthrough, or persona-based visual test.
+Full command templates and reply rules live in `OPENCLAW_SKILL.md` (installed copy above).
 
 ---
 
-## Extract from NL (OpenClaw main agent)
+## Extract from NL
 
 | Field | Rule |
 |---|---|
@@ -62,75 +84,7 @@ Every run:
 4. Run `format_skill_reply.py`  
 5. Send formatter **stdout** as the Feishu reply body  
 
----
-
-## Option A — Direct CLI (recommended for Skill)
-
-```bash
-cd /root/oc-visual-test-runner
-
-export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
-export UX_REPORT_PUBLIC_BASE_URL=http://170.106.175.128:8080
-# GOOGLE_API_KEY must be in the shell environment for Gemini runs
-
-RUN_ID="feishu-REPLACE_ME"
-OUTPUT_DIR="/tmp/ux_${RUN_ID}"
-
-python3 scripts/ux_testing.py \
-  --target web \
-  --url "https://example.com" \
-  --persona "first-time visitor" \
-  --goal "Check whether the homepage main information is clear" \
-  --output-dir "${OUTPUT_DIR}" \
-  --run-id "${RUN_ID}" \
-  --max-steps 10
-```
-
-Replace `web`, URL, persona, goal, `RUN_ID`, and limits with values extracted from the user message.
-
-**Pathway / smoke only** (no Gemini): add `--use-stub` to the CLI command.
-
-**Format Feishu reply after exit 0:**
-
-```bash
-cd /root/oc-visual-test-runner
-python3 scripts/format_skill_reply.py --output-dir "${OUTPUT_DIR}"
-```
-
-Send the command’s **stdout** to the user in Feishu.
-
-**On failure** (non-zero exit or missing `ux_result.json`):
-
-```bash
-cd /root/oc-visual-test-runner
-python3 scripts/format_skill_reply.py \
-  --error "brief reason from stderr" \
-  --run-id "${RUN_ID}"
-```
-
----
-
-## Option B — Wrapper script (same behavior, fewer flags)
-
-```bash
-cd /root/oc-visual-test-runner
-chmod +x ./scripts/openclaw/invoke_runner.sh   # once
-
-export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
-export UX_REPORT_PUBLIC_BASE_URL=http://170.106.175.128:8080
-
-./scripts/openclaw/invoke_runner.sh \
-  "feishu-REPLACE_ME" "web" "https://example.com" \
-  "first-time visitor" "Check whether the homepage main information is clear" 10
-```
-
-Then format reply:
-
-```bash
-python3 scripts/format_skill_reply.py --output-dir /tmp/ux_feishu-REPLACE_ME
-```
-
-Append `--use-stub` as the **7th** argument only for internal smoke tests.
+See `OPENCLAW_SKILL.md` for Option A (direct CLI) and Option B (`invoke_runner.sh`).
 
 ---
 
@@ -141,43 +95,6 @@ Append `--use-stub` as the **7th** argument only for internal smoke tests.
 - Include outcome and main finding even for `blocked` or `max_steps`.
 - Do not paste `action_trace.json` or full stderr.
 - Keep under ~30 lines.
-
----
-
-## Example (NL → shell → Feishu)
-
-**User (Feishu):**  
-用 first-time visitor 测一下 https://example.com ，看看首页主要信息是否清楚。
-
-**Extracted:**
-
-- target: `web`  
-- url: `https://example.com`  
-- persona: `first-time visitor`  
-- goal: `Check whether the homepage main information is clear`  
-- run_id: `feishu-om_xxx`  
-- output_dir: `/tmp/ux_feishu-om_xxx`  
-
-**Commands (bash):**
-
-```bash
-cd /root/oc-visual-test-runner
-export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
-export UX_REPORT_PUBLIC_BASE_URL=http://170.106.175.128:8080
-
-python3 scripts/ux_testing.py \
-  --target web \
-  --url "https://example.com" \
-  --persona "first-time visitor" \
-  --goal "Check whether the homepage main information is clear" \
-  --output-dir /tmp/ux_feishu-om_xxx \
-  --run-id feishu-om_xxx \
-  --max-steps 10
-
-python3 scripts/format_skill_reply.py --output-dir /tmp/ux_feishu-om_xxx
-```
-
-Send the second command’s stdout to Feishu.
 
 ---
 

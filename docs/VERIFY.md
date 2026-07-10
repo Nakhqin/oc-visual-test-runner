@@ -567,11 +567,13 @@ python3 ./scripts/format_skill_reply.py --output-dir /tmp/ux_pathway-smoke-001
 
 ### Phase 5.3 — Feishu NL E2E
 
-Install `docs/openclaw/AGENT_PROMPT.md` in OpenClaw; sync `docs/openclaw/OPENCLAW_SKILL.md` to `~/.openclaw/skills/oc-visual-test-runner/SKILL.md`; agent runs bash CLI + `format_skill_reply.py`.
+Install skill only: sync `docs/openclaw/OPENCLAW_SKILL.md` → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md`, then confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready**. Agent runs bash CLI + `format_skill_reply.py`. Do **not** use legacy `ux_test_runner`.
 
 **Example Feishu input:**
 
 > 用 first-time visitor 测一下 https://example.com ，看看首页主要信息是否清楚。
+
+Or explicit: `/oc-visual-test-runner` with the same request.
 
 **Confirm:**
 

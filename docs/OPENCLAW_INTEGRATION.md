@@ -109,16 +109,20 @@ OpenClaw subprocess **must** inherit publish env vars (see [Environment](#enviro
 
 ### Phase 5.2 — OpenClaw wiring (OpenClaw side) — in progress
 
-**Goal:** Feishu NL → runner → formatted Feishu reply with `report_url`.
+**Goal:** Feishu NL → **`oc-visual-test-runner`** skill → runner → formatted Feishu reply with `report_url`.
+
+**Not** the legacy OpenClaw skill `ux_test_runner` (`~/.openclaw/skills/ux-test-skill/`). Keep them separate.
 
 | Task | Status |
 |---|---|
-| Install prompt from `docs/openclaw/AGENT_PROMPT.md` | Todo |
-| Sync `docs/openclaw/OPENCLAW_SKILL.md` → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` | Todo |
+| Sync `docs/openclaw/OPENCLAW_SKILL.md` (with YAML frontmatter) → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` | Todo |
+| Confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready** | Todo |
 | Agent runs bash: `ux_testing.py` then `format_skill_reply.py` (no custom exec tool) | Todo |
 | Post-run `format_skill_reply.py` → Feishu stdout | Todo |
 | Optional pathway smoke (`--use-stub`) before first NL | Todo |
 | NL extraction + clarifying question when fields missing | Todo |
+
+**Do not** paste `AGENT_PROMPT.md` into Agent Instructions. OpenClaw injects skill body from `SKILL.md` automatically ([Creating skills](https://docs.openclaw.ai/tools/creating-skills)).
 
 **Note:** Fixed JSON invoke is optional internal smoke only — not a separate milestone.
 
@@ -318,12 +322,14 @@ Exact manifest format depends on your OpenClaw version — adjust paths to match
 | Working directory | `/root/oc-visual-test-runner` (VM) |
 | Entry | Agent runs **bash**: `python3 scripts/ux_testing.py` … then `format_skill_reply.py` |
 | OpenClaw Skill file | `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` (template: `docs/openclaw/OPENCLAW_SKILL.md`) |
+| Skill `name` (frontmatter) | `oc-visual-test-runner` |
+| Legacy skill (do not use for Phase 5) | `ux_test_runner` → `~/.openclaw/skills/ux-test-skill/` |
 | Custom exec tool / MCP shell | **Not used** — default shell command execution only |
 | Required secrets | `GOOGLE_API_KEY` |
 | Required env | `UX_REPORT_PUBLIC_DIR`, `UX_REPORT_PUBLIC_BASE_URL` |
 | Timeout | ≥ `timeout_seconds` + buffer (e.g. 300s+) for long runs |
 
-Document the final manifest path in OpenClaw config when registered (outside this repo).
+Document the final skill path when verified with `openclaw skills list` (outside this repo if needed).
 
 ---
 
@@ -333,7 +339,7 @@ Document the final manifest path in OpenClaw config when registered (outside thi
 |---|---|
 | `scripts/openclaw/invoke_runner.sh` | OpenClaw subprocess wrapper (publish env + CLI args) |
 | `scripts/format_skill_reply.py` | Print Feishu-ready text from `ux_result.json` |
-| `docs/openclaw/AGENT_PROMPT.md` | Copy-paste OpenClaw agent / Skill prompt |
+| `docs/openclaw/AGENT_PROMPT.md` | Long-form reference only — **not** pasted into Agent Instructions |
 
 ### Pathway smoke (optional, ~5 min)
 
@@ -351,7 +357,7 @@ Expect clickable `Report:` URL in the formatted output.
 
 ### OpenClaw agent flow (NL, bash only)
 
-1. User message in Feishu → OpenClaw agent (`docs/openclaw/AGENT_PROMPT.md`)
+1. User message in Feishu → OpenClaw loads skill **`oc-visual-test-runner`** from `SKILL.md`
 2. Agent extracts fields; asks if `url` or `goal` missing
 3. **Bash:** `cd /root/oc-visual-test-runner` → `python3 scripts/ux_testing.py` with `--target`, `--url`, `--persona`, `--goal`, `--output-dir`, `--run-id`
 4. **Bash:** `python3 scripts/format_skill_reply.py --output-dir /tmp/ux_{run_id}`
@@ -359,12 +365,21 @@ Expect clickable `Report:` URL in the formatted output.
 
 Optional wrapper: `scripts/openclaw/invoke_runner.sh` (same VM, same publish env).
 
-**Install Skill file on VM:**
+**Install / refresh Skill on VM:**
 
 ```bash
+cd /root/oc-visual-test-runner && git pull origin main   # if needed
+
 mkdir -p ~/.openclaw/skills/oc-visual-test-runner
 cp /root/oc-visual-test-runner/docs/openclaw/OPENCLAW_SKILL.md \
    ~/.openclaw/skills/oc-visual-test-runner/SKILL.md
+
+# Must show frontmatter name and ready status:
+head -5 ~/.openclaw/skills/oc-visual-test-runner/SKILL.md
+openclaw skills list | grep -i oc-visual
+
+# New session so the agent picks up the skill:
+# Feishu: /new   or: openclaw gateway restart
 ```
 
 ---
