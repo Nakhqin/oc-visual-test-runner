@@ -259,37 +259,36 @@ If `target`, `url`, `persona`, or `goal` cannot be inferred, OpenClaw should **a
 
 ## Feishu reply template
 
-Build from `ux_result.json` — not from raw logs. Align with `SKILL.md` **User-Facing Return**.
+Build from `ux_result.json` via `scripts/format_skill_reply.py` — not from raw logs. Align with `SKILL.md` **User-Facing Return**.
 
-### Field mapping
+**Language:** Labels and Status follow the user request language. Default detection uses CJK characters in `goal` / `persona`; override with `--lang zh` or `--lang en`.
 
-| User-facing line | Source |
-|---|---|
-| Outcome | `terminal_state` |
-| Target | `target` |
-| Persona | `persona` |
-| Goal | `goal` |
-| Main finding | `main_finding` |
-| Classification | `classifications` (or "(none)") |
-| One-line summary | `skill.return_summary` |
-| Report link | `skill.report_url` |
-| Recording link | `skill.recording_url` (publish) or `{report_base_url}/{artifacts.recording}` |
-| Result JSON (optional) | `skill.result_json_url` |
+### Required shape
 
-### Example Feishu message
+1. **Status** (+ **Reason** when `blocked` / `max_steps` / `timeout`)
+2. **Summary** (test summary)
+3. **Full report** (`skill.report_url`)
+
+### Example (English)
 
 ```text
-UX visual test completed.
+Status: Blocked
+Reason: UVG alignment exhausted after 6 hover passes without click.
 
-Target: web
-Persona: first-time visitor
-Goal: Check whether the homepage main information is clear
-Outcome: max_steps
-Main finding: The agent loop exhausted max_steps without a done or blocked action.
-Classification: (none)
+Summary: Walkthrough stopped before confirming the Gaming PC filter chip.
 
-Report: http://170.106.175.128:8080/feishu-om_xxx/index.html
+Full report: http://170.106.175.128:8080/feishu-om_xxx/index.html
 Recording: http://170.106.175.128:8080/feishu-om_xxx/ux_test_recording.webm
+```
+
+### Example (Chinese)
+
+```text
+状态: 已完成
+
+测试摘要: 已完成首次设置并进入桌面。
+
+完整报告: http://170.106.175.128:8080/feishu-om_xxx/index.html
 ```
 
 Feishu supports clickable URLs in plain text when the channel renders links.
@@ -304,6 +303,8 @@ Run id: <run_id if known>
 
 Please check runner logs on the VM or retry with a simpler goal.
 ```
+
+(Chinese users get the zh error template from `format_feishu_error` / `--lang zh`.)
 
 Do **not** paste full `action_trace.json` into Feishu.
 

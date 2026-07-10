@@ -41,6 +41,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Run id for --error replies",
     )
+    parser.add_argument(
+        "--lang",
+        choices=["en", "zh"],
+        default=None,
+        help="Reply language (default: detect from goal/persona CJK)",
+    )
     return parser
 
 
@@ -55,7 +61,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.error is not None:
-        print(format_feishu_error(message=args.error, run_id=args.run_id))
+        print(
+            format_feishu_error(
+                message=args.error,
+                run_id=args.run_id,
+                lang=args.lang,
+            )
+        )
         return 1
 
     path = resolve_ux_result_path(args)
@@ -64,12 +76,13 @@ def main(argv: list[str] | None = None) -> int:
             format_feishu_error(
                 message=f"ux_result.json not found: {path}",
                 run_id=args.run_id,
+                lang=args.lang,
             )
         )
         return 1
 
     payload = json.loads(path.read_text(encoding="utf-8"))
-    print(format_feishu_reply(payload))
+    print(format_feishu_reply(payload, lang=args.lang))
     return 0
 
 

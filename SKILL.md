@@ -151,39 +151,37 @@ SELECTED_RUNNER=visual_agent
 
 ## User-Facing Return (OpenClaw → User)
 
-The final response to the user should **not** be raw logs. OpenClaw returns a concise summary plus report and evidence links or paths.
+The final response to the user should **not** be raw logs. OpenClaw runs `scripts/format_skill_reply.py` and sends that **stdout** to Feishu.
 
-The user-facing response should include:
+The reply has three parts (labels follow the **user request language** — Chinese if `goal`/`persona` contain CJK, else English; override with `--lang zh|en`):
 
-- test status
-- target
-- persona
-- goal
-- final outcome (`done`, `blocked`, `max_steps`, `timeout`)
-- main finding
-- classification
-- report link or path
-- recording link or path
-- result JSON link or path when useful
+1. **Status** — Completed / Blocked / Stopped (max steps|timeout). For `blocked` (and stop states), include **Reason**.
+2. **Summary** — short test summary (`skill.return_summary` or `main_finding`).
+3. **Full report** — public `skill.report_url` when publish is enabled.
 
-Example user-facing return:
+Example (English request):
 
 ```text
-UX visual test completed.
+Status: Blocked
+Reason: UVG alignment exhausted after 6 hover passes without click.
 
-Target: figma
-Persona: first-time tablet user
-Goal: complete first-time setup flow
-Outcome: blocked
-Main finding: the persona identified the primary action but the prototype did not visibly progress after clicking.
-Classification: Prototype limitation / Automation limitation, not confirmed UX issue
+Summary: Walkthrough stopped before the persona could confirm the Gaming PC filter chip.
 
-Report: http://170.106.175.128:8080/example-run-id/index.html
+Full report: http://170.106.175.128:8080/example-run-id/index.html
 Recording: http://170.106.175.128:8080/example-run-id/ux_test_recording.webm
-Result JSON: http://170.106.175.128:8080/example-run-id/ux_result.json
 ```
 
-> **Phase 3+:** `persona_report.md` is the minimal first-person report. **Phase 4+:** `index.html` and `ux_report.md` are generated locally each run. **Phase 4.5+:** when publish env is set, `skill.report_url` points to the public copy under `{UX_REPORT_PUBLIC_BASE_URL}/{run_id}/`. **Phase 5+:** OpenClaw/Feishu returns `report_url` to the user.
+Example (Chinese request):
+
+```text
+状态: 已完成
+
+测试摘要: 已完成首次设置并进入桌面。
+
+完整报告: http://170.106.175.128:8080/example-run-id/index.html
+```
+
+> **Phase 3+:** `persona_report.md` is the minimal first-person report. **Phase 4+:** `index.html` and `ux_report.md` are generated locally each run. **Phase 4.5+:** when publish env is set, `skill.report_url` points to the public copy under `{UX_REPORT_PUBLIC_BASE_URL}/{run_id}/`. **Phase 5+:** OpenClaw/Feishu returns the formatted Status / Summary / Full report block.
 
 ## Output Files
 

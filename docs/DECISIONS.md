@@ -553,6 +553,24 @@ Phase 5.2 docs previously said to paste `AGENT_PROMPT.md` into OpenClaw Agent In
 
 ---
 
+## 2026-07-10 — Feishu reply: Status / Summary / Full report + language match
+
+**Status:** Accepted
+
+**Context:**
+Operators want a short Feishu reply after each run: completion vs blocked (with reason), test summary, and full report link. Replies must follow the user’s language (Chinese vs English).
+
+**Decision:**
+- `format_feishu_reply` emits **Status** (+ **Reason** for blocked/stop), **Summary**, **Full report** (optional Recording).
+- Language auto-detects CJK in `goal`/`persona` (override `--lang zh|en`).
+- OpenClaw Agent must send formatter stdout unchanged.
+
+**Consequences:**
+- `scripts/core/skill_return.py`, `format_skill_reply.py`, `SKILL.md`, OpenClaw skill docs updated.
+- Summary body text still comes from run artifacts (may remain English if VLM wrote English); chrome/labels are localized.
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

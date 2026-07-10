@@ -94,7 +94,7 @@ cd /root/oc-visual-test-runner
 python3 scripts/format_skill_reply.py --output-dir "${OUTPUT_DIR}"
 ```
 
-Send that command’s **stdout** to the user.
+Send that command’s **stdout** to the user **unchanged**. Do not rewrite or translate the block yourself — the formatter already matches the user language (Chinese vs English) from `goal`/`persona` (or `--lang zh|en`).
 
 On failure (non-zero exit or missing `ux_result.json`):
 
@@ -105,12 +105,21 @@ python3 scripts/format_skill_reply.py \
   --run-id "${RUN_ID}"
 ```
 
+If the user wrote in Chinese, pass `--lang zh` on error replies when `ux_result.json` is missing.
+
+### Reply shape (required)
+
+1. **Status** — Completed / Blocked / … (`状态: 已完成` / `已阻塞` when Chinese)
+2. **Reason** — required when Blocked (or max_steps / timeout)
+3. **Summary** — short test summary
+4. **Full report** — public report URL
+
 ### Reply rules
 
-- Must include **Report:** with `skill.report_url` when publish env is set.
-- Include outcome and main finding even for `blocked` or `max_steps`.
+- Must include **Full report** with `skill.report_url` when publish env is set.
 - Do not paste `action_trace.json` or full stderr.
 - Keep under ~30 lines.
+- Match the user’s language (EN ↔ ZH); do not mix label languages.
 
 ## Example
 
