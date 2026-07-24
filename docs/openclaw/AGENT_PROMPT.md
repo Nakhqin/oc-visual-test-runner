@@ -80,17 +80,16 @@ Every run:
 
 1. `cd` to workspace  
 2. `export` publish env (and ensure `GOOGLE_API_KEY` is set for real runs)  
-3. Run CLI (or wrapper script)  
-4. Run `format_skill_reply.py`  
-5. Send formatter **stdout** as the Feishu reply body  
+3. Run **`./scripts/openclaw/invoke_runner.sh`** once — **stdout is the Feishu reply**  
+4. Send that stdout as the Feishu message body — **no interim “Executing…” message**
 
-See `OPENCLAW_SKILL.md` for Option A (direct CLI) and Option B (`invoke_runner.sh`).
+For ops/debug only: direct `ux_testing.py` + separate `format_skill_reply.py` (see `OPENCLAW_SKILL.md`).
 
 ---
 
 ## Feishu reply rules
 
-- Use **stdout** of `format_skill_reply.py` as the message body **unchanged**.
+- Use **stdout** of `invoke_runner.sh` (or `format_skill_reply.py` in debug flows) as the message body **unchanged**.
 - Shape: **Status** (+ **Reason** if blocked/stopped) → **Summary** → **Full report**.
 - Language: formatter auto-detects Chinese vs English from `goal`/`persona` (or `--lang`).
 - **Must** use exec with project `.venv` PATH; never legacy `ux_test_runner` / `--report-file`.

@@ -589,6 +589,25 @@ Feishu Agent often acknowledged UX test requests without running `invoke_runner.
 
 ---
 
+## 2026-07-22 — Single exec: `invoke_runner.sh` prints Feishu reply on stdout
+
+**Status:** Accepted
+
+**Context:**
+Long Figma runs (~180s+) completed on the VM but Feishu often received only an interim “Executing…” message. The agent had to run `invoke_runner.sh` and `format_skill_reply.py` as two steps; OpenClaw exec timeout or turn boundaries could skip the formatter.
+
+**Decision:**
+- Extend `scripts/openclaw/invoke_runner.sh` to run `format_skill_reply.py` after the runner and print the Feishu body on **stdout** (metadata stays on stderr).
+- Support `--timeout-seconds N` and optional `--lang en|zh` on the wrapper.
+- Update `OPENCLAW_SKILL.md`: **one exec, one Feishu message**; ban interim replies; note OpenClaw exec timeout ≥ runner timeout + buffer.
+
+**Consequences:**
+- Agents send `invoke_runner.sh` stdout unchanged as the Feishu reply.
+- `format_skill_reply.py` remains available for SSH/debug.
+- Long flows should pass e.g. `20 600 --timeout-seconds 600` (max_steps positional + flag).
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

@@ -559,15 +559,13 @@ Optional internal check — not a Phase 5 milestone. See `docs/OPENCLAW_INTEGRAT
 chmod +x ./scripts/openclaw/invoke_runner.sh
 ./scripts/openclaw/invoke_runner.sh pathway-smoke-001 web https://example.com \
   "first-time visitor" "pathway smoke" 2 --use-stub
-
-python3 ./scripts/format_skill_reply.py --output-dir /tmp/ux_pathway-smoke-001
 ```
 
-**Confirm:** formatted output includes clickable `Report:` URL.
+**Confirm:** stdout is Feishu-ready text (Status / Summary / Full report with clickable URL).
 
 ### Phase 5.3 — Feishu NL E2E
 
-Install skill only: sync `docs/openclaw/OPENCLAW_SKILL.md` → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md`, then confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready**. Agent must **exec** the canonical block (venv PATH + `invoke_runner.sh` + `format_skill_reply.py`). Do **not** use legacy `ux_test_runner` / `--report-file`. Prefer temporarily disabling `~/.openclaw/skills/ux-test-skill`. `tools.allow` must include `exec`. After Feishu run, `/tmp/ux_<run_id>` must exist.
+Install skill only: sync `docs/openclaw/OPENCLAW_SKILL.md` → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md`, then confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready**. Agent must **exec once**: venv PATH + `./scripts/openclaw/invoke_runner.sh` (stdout = Feishu reply). Do **not** use legacy `ux_test_runner` / `--report-file`. Prefer temporarily disabling `~/.openclaw/skills/ux-test-skill`. `tools.allow` must include `exec`. OpenClaw exec timeout must exceed runner `--timeout-seconds` + buffer. After Feishu run, `/tmp/ux_<run_id>` must exist.
 
 **Example Feishu input:**
 
@@ -580,7 +578,7 @@ Or explicit: `/oc-visual-test-runner` with the same request.
 - [ ] OpenClaw extracts `target`, `url`, `persona`, `goal` without runner-side NL parser
 - [ ] Agent actually execs (not verbal-only); `/tmp/ux_<run_id>` exists
 - [ ] `--run-id` correlates to Feishu context when configured
-- [ ] Feishu reply is formatter stdout: Status/Summary/Full report (or 状态/测试摘要/完整报告)
+- [ ] Feishu reply is **invoke_runner.sh stdout** (Status/Summary/Full report, or 状态/测试摘要/完整报告) — **one message**, no interim “Executing…”
 - [ ] `terminal_state=blocked` or `max_steps` still returns readable summary + report link
 - [ ] Runner failure (exit `1`/`2`) produces short Feishu error via `format_skill_reply.py --error`, not legacy JSON/`--report-file` errors
 

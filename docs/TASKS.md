@@ -29,7 +29,7 @@ Primary plan: **`docs/OPENCLAW_INTEGRATION.md`**
 |---|---|
 | Todo | Sync `docs/openclaw/OPENCLAW_SKILL.md` (YAML frontmatter `name: oc-visual-test-runner`) → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` |
 | Todo | Confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready** (not legacy `ux_test_runner`) |
-| Todo | Agent bash: `.venv` PATH + `invoke_runner.sh` then `format_skill_reply.py` (Hard rules in OPENCLAW_SKILL.md) |
+| Todo | Agent bash: one exec — `.venv` PATH + `./scripts/openclaw/invoke_runner.sh` (stdout = Feishu reply; Hard rules in OPENCLAW_SKILL.md) |
 | Todo | Optional pathway smoke (`--use-stub`) before first NL |
 | Todo | NL extraction + missing-field clarifying question in Feishu |
 | Todo | Prefer disable legacy `ux-test-skill` during 5.3; confirm `tools.allow` includes `exec` |
