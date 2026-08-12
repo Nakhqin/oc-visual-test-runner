@@ -540,7 +540,16 @@ python3 ./scripts/ux_testing.py \
 
 ## Phase 5 — OpenClaw / Feishu Skill Delivery (Current)
 
-**Not implemented end-to-end yet.** Plan: `docs/OPENCLAW_INTEGRATION.md`. Phase 4.5 publish on VM `170.106.175.128` verified.
+**Partial E2E verified on VM `170.106.175.128` (2026-07-22).** Plan: `docs/OPENCLAW_INTEGRATION.md`. Phase 4.5 publish verified. **Remaining:** long Figma NL E2E + non-`done` terminal states after single-exec wrapper (`97cefbe`).
+
+### VM verification log (Phase 5.3)
+
+| Date | Run / context | Result | Notes |
+|---|---|---|---|
+| 2026-07 | Feishu stub (`--use-stub`) | Pass | Formatter reply: Status / Summary / Full report |
+| 2026-07-22 | Feishu NL + Gemini, `example.com`, 2 steps | Pass | `terminal_state=done`; `feishu-om_x100b693…` |
+| 2026-07-22 | Feishu NL + Gemini, Figma tablet onboarding | Partial | Runner `timeout` @ 180s; artifacts OK; Feishu only interim “Executing…” (pre–single-exec) |
+| — | Feishu NL + long Figma + `invoke_runner.sh` stdout (post-`97cefbe`) | **Todo** | Requires VM `git pull`, skill refresh, `--timeout-seconds 600`, exec timeout check |
 
 ### Prerequisites (same VM)
 
@@ -575,17 +584,27 @@ Or explicit: `/oc-visual-test-runner` with the same request.
 
 **Confirm:**
 
-- [ ] OpenClaw extracts `target`, `url`, `persona`, `goal` without runner-side NL parser
-- [ ] Agent actually execs (not verbal-only); `/tmp/ux_<run_id>` exists
-- [ ] `--run-id` correlates to Feishu context when configured
-- [ ] Feishu reply is **invoke_runner.sh stdout** (Status/Summary/Full report, or 状态/测试摘要/完整报告) — **one message**, no interim “Executing…”
-- [ ] `terminal_state=blocked` or `max_steps` still returns readable summary + report link
-- [ ] Runner failure (exit `1`/`2`) produces short Feishu error via `format_skill_reply.py --error`, not legacy JSON/`--report-file` errors
+- [x] OpenClaw extracts `target`, `url`, `persona`, `goal` without runner-side NL parser (2026-07-22, Feishu NL)
+- [x] Agent actually execs (not verbal-only); `/tmp/ux_<run_id>` exists (2026-07-22)
+- [x] `--run-id` correlates to Feishu context when configured (`feishu-om_*`, 2026-07-22)
+- [x] Short web run: Feishu reply is **invoke_runner.sh stdout** — Status/Summary/Full report (2026-07-22, `example.com`)
+- [ ] Long run: **one message**, no interim “Executing…” (retest after `97cefbe` on VM)
+- [ ] `terminal_state=timeout` / `max_steps` / `blocked` → readable summary + report link via wrapper stdout
+- [ ] Runner failure (exit `1`/`2`) produces short Feishu error via wrapper (or `format_skill_reply.py --error`)
 
 **Failure checks:**
 
 - [ ] Missing publish env → Feishu warns no public link (or ops-only local path)
-- [ ] Missing `GOOGLE_API_KEY` → clear error (stub not used for E2E)
+- [x] Missing `GOOGLE_API_KEY` → stub/blocked (fixed: add `GOOGLE_API_KEY` to gateway env, 2026-07-22)
+
+### Phase 5.3 — remaining sign-off (VM)
+
+1. `cd /root/oc-visual-test-runner && git pull origin main`
+2. `cp docs/openclaw/OPENCLAW_SKILL.md ~/.openclaw/skills/oc-visual-test-runner/SKILL.md`
+3. `systemctl --user restart openclaw-gateway.service` — Feishu `/new`
+4. Confirm gateway exec timeout ≥ 660s if using `--timeout-seconds 600`
+5. Feishu NL: Figma tablet onboarding with `max_steps=20 --timeout-seconds 600 --lang zh` — **one** formatter reply
+6. Optionally re-check stub `blocked` path still formats correctly
 
 ---
 
@@ -601,6 +620,8 @@ Or explicit: `/oc-visual-test-runner` with the same request.
 | `terminal_state=blocked` + VLM 503 | Gemini API high demand (transient) | Wait and re-run; not a UX finding — `system-runtime issue` |
 | `terminal_state=max_steps` | Goal too hard for `max_steps` | Increase `--max-steps` for test only; note in results |
 | Recording missing | Context closed before finalize | Re-run; check `ux_test_recording.webm` path on stderr |
+| Feishu only “Executing…”, no final reply | Two-step exec or OpenClaw exec timeout; interim agent reply | Use `invoke_runner.sh` post-`97cefbe` (stdout = reply); increase exec timeout; ban interim replies in skill |
+| `GOOGLE_API_KEY count: 0` in gateway | Only `GEMINI_API_KEY` set | Add `GOOGLE_API_KEY` to gateway/systemd env (runner does not read `GEMINI_API_KEY`) |
 
 ### Run CLI Help
 

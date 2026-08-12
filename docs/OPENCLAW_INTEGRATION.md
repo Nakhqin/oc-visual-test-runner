@@ -2,7 +2,7 @@
 
 Phase 5 delivery plan for wiring **oc-visual-test-runner** into **OpenClaw** on the cloud VM, with replies via the **existing Feishu channel**.
 
-**Status:** Phase 5.1 helpers implemented in repo; **5.2 OpenClaw wiring in progress** (NL-first path). Runner Phases 1–4.5 complete.
+**Status:** Phase 5.1 **Done**; 5.2 **Done on VM** (2026-07-22); **5.3 in progress** — short web Gemini E2E passed; long Figma + single-exec retest pending. Runner Phases 1–4.5 complete.
 
 **Implementation path (agreed):** Feishu NL as main line; fixed JSON only for internal pathway smoke — not a separate milestone.
 
@@ -42,8 +42,8 @@ Feishu user (NL message)
         ▼
 OpenClaw (same VM: 170.106.175.128)
   ├── main agent: NL → { target, url, persona, goal, … }
-  ├── subprocess: scripts/ux_testing.py
-  └── format reply from ux_result.json → Feishu channel
+  ├── subprocess: ./scripts/openclaw/invoke_runner.sh (runner + formatter; stdout → Feishu)
+  └── send wrapper stdout unchanged → Feishu channel
         │
         ▼
 Runner (this repo)
@@ -107,7 +107,7 @@ OpenClaw subprocess **must** inherit publish env vars (see [Environment](#enviro
 | `skill.recording_url` + `skill.result_json_url` when publish enabled | Done |
 | Link from `README.md` / `AGENTS.md` | Done |
 
-### Phase 5.2 — OpenClaw wiring (OpenClaw side) — in progress
+### Phase 5.2 — OpenClaw wiring (OpenClaw side) — Done (VM `170.106.175.128`, 2026-07-22)
 
 **Goal:** Feishu NL → **`oc-visual-test-runner`** skill → runner → formatted Feishu reply with `report_url`.
 
@@ -115,27 +115,34 @@ OpenClaw subprocess **must** inherit publish env vars (see [Environment](#enviro
 
 | Task | Status |
 |---|---|
-| Sync `docs/openclaw/OPENCLAW_SKILL.md` (with YAML frontmatter) → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` | Todo |
-| Confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready** | Todo |
-| Agent runs bash: `./scripts/openclaw/invoke_runner.sh` once (stdout = Feishu reply) | Todo |
-| Post-run Feishu text from wrapper stdout (includes `format_skill_reply.py`) | Todo |
-| Optional pathway smoke (`--use-stub`) before first NL | Todo |
-| NL extraction + clarifying question when fields missing | Todo |
+| Sync `docs/openclaw/OPENCLAW_SKILL.md` (with YAML frontmatter) → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` | Done |
+| Confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready** | Done |
+| Agent runs bash: `./scripts/openclaw/invoke_runner.sh` once (stdout = Feishu reply) | Done |
+| Post-run Feishu text from wrapper stdout (includes `format_skill_reply.py`) | Done (short web); long Figma retest in 5.3 |
+| Optional pathway smoke (`--use-stub`) before first NL | Done |
+| NL extraction + clarifying question when fields missing | Done |
+| Legacy `ux-test-skill` disabled; `tools.profile=coding`; `exec` allowed | Done |
+| `GOOGLE_API_KEY` in gateway env for Gemini exec | Done |
 
 **Do not** paste `AGENT_PROMPT.md` into Agent Instructions. OpenClaw injects skill body from `SKILL.md` automatically ([Creating skills](https://docs.openclaw.ai/tools/creating-skills)).
 
 **Note:** Fixed JSON invoke is optional internal smoke only — not a separate milestone.
 
-### Phase 5.3 — E2E verification
+### Phase 5.3 — E2E verification — in progress
 
 **Goal:** Close Phase 5 in `docs/TASKS.md` and `docs/VERIFY.md`.
 
 | Task | Status |
 |---|---|
-| Feishu NL message → full run (Gemini, not stub) | Todo |
-| Reply contains clickable `report_url` (public network) | Todo |
-| `blocked` / `max_steps` runs still produce readable summary | Todo |
-| Document failure modes (no publish env, runner exit 1) | Todo |
+| Feishu NL stub → exec → reply with `report_url` | Done |
+| Feishu NL → short web run (Gemini, not stub) | Done (2026-07-22, `example.com`, `terminal_state=done`) |
+| Reply contains clickable `report_url` (public network) | Done (short web) |
+| Long Figma NL E2E, single exec, one Feishu message (post-`97cefbe`) | Todo |
+| `timeout` / `max_steps` / `blocked` → readable summary via wrapper stdout | Todo |
+| Document failure modes (no publish env, runner exit 1) | Done (`docs/VERIFY.md` troubleshooting) |
+| OpenClaw exec timeout ≥ runner `--timeout-seconds` + buffer on VM | Todo |
+
+**Operator skill path (verified):** `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` (sync from `docs/openclaw/OPENCLAW_SKILL.md`).
 
 ---
 
@@ -149,7 +156,8 @@ export UX_REPORT_PUBLIC_DIR=/var/www/ux-reports
 export UX_REPORT_PUBLIC_BASE_URL=http://170.106.175.128:8080
 
 # Gemini (required for real runs; omit --use-stub)
-export GOOGLE_API_KEY=...          # from .env or OpenClaw secret store — never commit
+export GOOGLE_API_KEY=...          # runner reads this — set in gateway/systemd env; never commit
+export GEMINI_API_KEY=...          # optional; OpenClaw chat may use this — also set GOOGLE_API_KEY for exec
 export GEMINI_MODEL=gemini-2.5-flash   # optional
 
 # Optional persona polish

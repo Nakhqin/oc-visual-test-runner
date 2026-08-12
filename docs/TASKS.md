@@ -23,29 +23,38 @@ Primary plan: **`docs/OPENCLAW_INTEGRATION.md`**
 | Done | `skill.recording_url` + `skill.result_json_url` when publish enabled |
 | Done | Link plan doc from `README.md` and `AGENTS.md` |
 
-### Phase 5.2 — OpenClaw wiring (OpenClaw side, same VM) — in progress
+### Phase 5.2 — OpenClaw wiring (OpenClaw side, same VM) — Done (2026-07-22, VM `170.106.175.128`)
 
 | Status | Task |
 |---|---|
-| Todo | Sync `docs/openclaw/OPENCLAW_SKILL.md` (YAML frontmatter `name: oc-visual-test-runner`) → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` |
-| Todo | Confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready** (not legacy `ux_test_runner`) |
-| Todo | Agent bash: one exec — `.venv` PATH + `./scripts/openclaw/invoke_runner.sh` (stdout = Feishu reply; Hard rules in OPENCLAW_SKILL.md) |
-| Todo | Optional pathway smoke (`--use-stub`) before first NL |
-| Todo | NL extraction + missing-field clarifying question in Feishu |
-| Todo | Prefer disable legacy `ux-test-skill` during 5.3; confirm `tools.allow` includes `exec` |
+| Done | Sync `docs/openclaw/OPENCLAW_SKILL.md` (YAML frontmatter `name: oc-visual-test-runner`) → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` |
+| Done | Confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready** (not legacy `ux_test_runner`) |
+| Done | Agent bash: one exec — `.venv` PATH + `./scripts/openclaw/invoke_runner.sh` (stdout = Feishu reply; Hard rules in OPENCLAW_SKILL.md) |
+| Done | Optional pathway smoke (`--use-stub`) before first NL |
+| Done | NL extraction + missing-field clarifying question in Feishu |
+| Done | Disable legacy `ux-test-skill` during 5.3; `tools.profile=coding` + `tools.allow` includes `exec` |
+| Done | Gateway env: `GOOGLE_API_KEY` set for exec subprocess (same value as `GEMINI_API_KEY` if needed) |
+| Done | Workspace symlink: `/root/.openclaw/workspace/oc-visual-test-runner` → repo (exec cwd) |
+
+**Ops refresh after repo pull:** `git pull` → `cp docs/openclaw/OPENCLAW_SKILL.md` → `~/.openclaw/skills/...` → gateway restart → Feishu `/new`.
 
 **Do not** paste `AGENT_PROMPT.md` into Agent Instructions — OpenClaw injects skill `SKILL.md` automatically. Legacy `ux_test_runner` is a different skill; do not use it for Phase 5.
 
-### Phase 5.3 — E2E verification
+### Phase 5.3 — E2E verification — in progress
 
 | Status | Task |
 |---|---|
-| Todo | Feishu NL → run (Gemini) → reply with clickable `report_url` |
-| Todo | Verify `blocked` / `max_steps` still produce readable Feishu summary |
-| Todo | Document failure modes in `docs/VERIFY.md` Phase 5 |
-| Todo | OpenClaw manifest path recorded (OpenClaw config; note in integration doc) |
+| Done | Feishu NL stub → exec → formatter reply with `report_url` |
+| Done | Feishu NL → short web run (Gemini, `example.com`) → **Status: Completed** + clickable `report_url` + recording |
+| Done | Document failure modes in `docs/VERIFY.md` Phase 5 (troubleshooting table) |
+| Todo | **Long Figma NL E2E** after single-exec wrapper (`97cefbe`): `--timeout-seconds 600`, one Feishu message (no interim “Executing…”) |
+| Todo | Verify `timeout` / `max_steps` / `blocked` still produce readable Feishu summary via **wrapper stdout** |
+| Todo | Confirm OpenClaw **exec timeout** ≥ runner `--timeout-seconds` + 60s on VM |
+| Todo | OpenClaw manifest / skill path recorded in integration doc (operator note) |
 
-**Exit criteria:** User asks in natural language via Feishu; OpenClaw on the VM invokes runner and returns concise summary plus **public `report_url`** and evidence links.
+**Exit criteria:** User asks in natural language via Feishu; OpenClaw on the VM invokes runner and returns concise summary plus **public `report_url`** and evidence links — including long runs and non-`done` terminal states.
+
+**VM verification log:** `docs/VERIFY.md` — Phase 5.3 section.
 
 **Non-goals (Phase 5):** Re-implementing publish (Phase 4.5); Feishu SDK in this repo; NL parser in this repo.
 

@@ -8,7 +8,7 @@ Stable facts for oc-visual-test-runner. Keep this file short.
 
 ## Current Stage
 
-**Phase 5 in progress (planned).** OpenClaw + Feishu on same VM; see `docs/OPENCLAW_INTEGRATION.md`.
+**Phase 5.3 in progress.** Phase 5.1–5.2 done on VM `170.106.175.128`; short web Feishu Gemini E2E passed (2026-07-22). Remaining: long Figma NL E2E + non-`done` terminal states after single-exec wrapper (`97cefbe`). See `docs/VERIFY.md` Phase 5 verification log.
 
 ## Users / Audience
 
@@ -75,6 +75,6 @@ User-facing vs system-facing roles: see `SKILL.md`.
 - Full visual agent loop works for Phase 1 targets — see `docs/TASKS.md` and `docs/VERIFY.md` verification record
 - `ux_report.md` or `index.html` exist — Phase 4 (done)
 - Public `report_url` works without OpenClaw — Phase 4.5
-- OpenClaw NL → user return with clickable report link — Phase 5
+- Phase 5 fully signed off — short web E2E passed; long Figma E2E still open (`docs/VERIFY.md`)
 - Legacy `figma_runner.py` / `web_runner.py` exist in this repo
 - Failed clicks imply UX bugs
