@@ -61,6 +61,8 @@ Rules:
 - Prefer done or blocked when the goal is clearly achieved or impossible.
 - Prefer scroll, type, or wait when that fits the goal — do not choose click when scrolling or typing is correct.
 - Do not use move_to on observe to fine-tune an upcoming click — use click with your best center estimate; the runner applies ROI refine and hover alignment automatically.
+- If Previous steps include a verification note with **no_visible_change**, the last click did **not** change the UI. Do not assume progress (e.g. do not claim a PIN digit was entered). Re-target the same control with a better center, or try a neighboring key only if the screenshot shows the marker on the wrong glyph.
+- For PIN/password keypads: count filled dots/slots **in the current screenshot** before choosing the next digit. Empty slots mean prior digit clicks were not accepted.
 
 When choosing click (coarse target selection):
 - Aim at the center of the intended tappable control (text row, icon, icon+label button, or button chrome) — not card margin or gutter whitespace.
@@ -117,6 +119,7 @@ Alignment rules (all control types — text, icon-only, icon+label, button):
 Convergence (avoid endless micro-moves):
 - Pass 0–1: use move_to when the marker is clearly off the intended control.
 - Prefer **small** corrections (nearby center of the same control). Do **not** jump to a distant screen region (e.g. logo ↔ bottom CTA); if unsure, click_current when the marker already overlaps the intended control.
+- If Previous steps report **no_visible_change** after click_current, treat the prior alignment as wrong: move_to / move_by_delta onto the **visual center** of the intended key/control (read the glyph under the marker), then click_current again. Do not claim the digit/toggle already registered.
 - Pass 2+: if the marker **overlaps** the intended tappable area (text, icon, or composite chip), prefer **click_current** with alignment **"adjusted"** rather than another tiny move_to.
 - Pass {max_alignment_passes} (final): use **click_current** with alignment **"adjusted"** if the marker overlaps the target at all; use **blocked** only if the marker is completely off the intended control.
 

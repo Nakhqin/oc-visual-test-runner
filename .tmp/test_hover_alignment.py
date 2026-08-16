@@ -17,6 +17,8 @@ from core.hover import (
     coerce_hover_to_click,
     l1_snap_before_adjusted_click,
     should_force_hover_click,
+    should_recover_missed_click,
+    append_missed_click_history,
 )
 
 
@@ -148,6 +150,57 @@ def test_l1_snap_action() -> None:
     assert "L1 fine" in (snap.reason or "")
 
 
+def test_should_recover_missed_click() -> None:
+    assert (
+        should_recover_missed_click(
+            verification={"applied": True, "outcome": "no_visible_change"},
+            missed_recoveries=0,
+        )
+        is True
+    )
+    assert (
+        should_recover_missed_click(
+            verification={"applied": True, "outcome": "visible_change"},
+            missed_recoveries=0,
+        )
+        is False
+    )
+    assert (
+        should_recover_missed_click(
+            verification={"applied": True, "outcome": "no_visible_change"},
+            missed_recoveries=2,
+        )
+        is False
+    )
+
+
+def test_derive_clicked_off_target_on_miss() -> None:
+    assert (
+        derive_hover_alignment(
+            pass_count=1,
+            final_action_type="click_current",
+            vlm_alignment="aligned",
+            verification_outcome="no_visible_change",
+        )
+        == "clicked_off_target"
+    )
+
+
+def test_append_missed_click_history() -> None:
+    class _Maker:
+        def __init__(self) -> None:
+            self._history: list[dict] = []
+
+    maker = _Maker()
+    pending = Action(type="click", x=300, y=600, reason="digit 1 key")
+    append_missed_click_history(
+        maker, step_index=7, recovery_index=1, pending_click=pending
+    )
+    assert len(maker._history) == 1
+    assert "no_visible_change" in maker._history[0]["action"]["reason"]
+    assert "digit 1" in maker._history[0]["action"]["reason"]
+
+
 def main() -> None:
     test_derive_aligned_first_pass()
     test_derive_adjusted_after_reposition()
@@ -163,6 +216,9 @@ def main() -> None:
     test_clamp_allows_nearby_move_to()
     test_clamp_caps_large_delta()
     test_l1_snap_action()
+    test_should_recover_missed_click()
+    test_derive_clicked_off_target_on_miss()
+    test_append_missed_click_history()
     print("hover alignment unit tests OK")
 
 

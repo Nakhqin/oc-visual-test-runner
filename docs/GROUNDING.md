@@ -130,6 +130,7 @@ Confirmed from scenario A run `grounding-A-test-1`: G2 refused off-target `click
 
 - **Success:** `click_current` with marker on target (human review + optional VLM `alignment`)
 - **Adjusted success:** after micro-moves stall or on the **final** alignment pass, runner **snaps to L1 fine** then **force `click_current`** with `alignment: adjusted` (see `should_force_hover_click` / `l1_snap_before_adjusted_click` in `hover.py`). Hover `move_to` is also **clamped** near L1 fine so runaway VLM jumps (e.g. CTA → logo) cannot become the click point.
+- **Missed-click recovery:** if post-click verification is `no_visible_change`, runner grants limited re-aim passes (skips L1 clamp, refreshes aim from VLM `move_to`), records verify-miss notes in VLM history, and demotes final alignment to `clicked_off_target` when the last click still shows no change.
 - **Failure:** `blocked` with reason after `N_hover` only when the pointer never overlaps the target (e.g. VLM returns `wait` repeatedly, or final pass is completely off-target)
 
 ### L3 — Dedicated spatial model (G4)

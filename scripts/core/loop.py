@@ -18,13 +18,16 @@ from core.executor import execute_action
 from core.hover import (
     HOVER_ALIGNMENT_ACTION_TYPES,
     MAX_HOVER_ALIGNMENT_PASSES,
+    MISSED_CLICK_RECOVERY_PASSES,
     action_triggers_hover,
     alignment_exhausted_blocked_action,
+    append_missed_click_history,
     clamp_hover_alignment_action,
     coerce_hover_to_click,
     derive_hover_alignment,
     l1_snap_before_adjusted_click,
     should_force_hover_click,
+    should_recover_missed_click,
 )
 from core.refine import run_roi_refine
 from core.formal_report import write_formal_reports
@@ -187,8 +190,12 @@ def _run_hover_confirmation(
     passes: list[dict[str, Any]] = []
     final_hover_action: Action | None = None
     final_hover_frame: ObservationFrame | None = None
+    final_verification_outcome: str | None = None
+    missed_recoveries = 0
+    pass_index = 0
+    pass_limit = MAX_HOVER_ALIGNMENT_PASSES
 
-    for pass_index in range(MAX_HOVER_ALIGNMENT_PASSES + 1):
+    while pass_index <= pass_limit:
         hover_frame = adapter.capture_frame(
             step=step_index,
             output_dir=config.output_dir,
@@ -204,17 +211,32 @@ def _run_hover_confirmation(
             alignment_pass=pass_index,
         )
         assert pending_click.x is not None and pending_click.y is not None
-        hover_action = clamp_hover_alignment_action(
-            hover_action,
-            anchor_x=pending_click.x,
-            anchor_y=pending_click.y,
-        )
+        # After a verified miss, allow re-aim beyond the original L1 fine clamp.
+        if missed_recoveries == 0:
+            hover_action = clamp_hover_alignment_action(
+                hover_action,
+                anchor_x=pending_click.x,
+                anchor_y=pending_click.y,
+            )
+        elif (
+            hover_action.type == "move_to"
+            and hover_action.x is not None
+            and hover_action.y is not None
+        ):
+            pending_click = Action(
+                type="click",
+                x=hover_action.x,
+                y=hover_action.y,
+                reason=pending_click.reason,
+                target_kind=hover_action.target_kind or pending_click.target_kind,
+            )
         if should_force_hover_click(
             pass_index=pass_index,
             passes=passes,
             hover_action=hover_action,
+            max_pass_index=pass_limit,
         ):
-            # Stall / final-pass: click at L1 fine, not at a runaway hover pointer.
+            # Stall / final-pass: click at L1 fine (or recovery re-aim), not a runaway pointer.
             snap = l1_snap_before_adjusted_click(pending_click)
             execute_action(adapter, snap)
             hover_action = coerce_hover_to_click(
@@ -254,6 +276,23 @@ def _run_hover_confirmation(
                     execution=hover_execution,
                 )
             )
+            verification = hover_execution.get("verification")
+            if isinstance(verification, dict):
+                final_verification_outcome = verification.get("outcome")
+            if should_recover_missed_click(
+                verification=verification if isinstance(verification, dict) else None,
+                missed_recoveries=missed_recoveries,
+            ):
+                missed_recoveries += 1
+                append_missed_click_history(
+                    maker,
+                    step_index=step_index,
+                    recovery_index=missed_recoveries,
+                    pending_click=pending_click,
+                )
+                pass_limit = pass_index + MISSED_CLICK_RECOVERY_PASSES
+                pass_index += 1
+                continue
             break
 
         if hover_action.type in HOVER_ALIGNMENT_ACTION_TYPES:
@@ -268,8 +307,9 @@ def _run_hover_confirmation(
                     execution=hover_execution,
                 )
             )
-            if pass_index >= MAX_HOVER_ALIGNMENT_PASSES:
+            if pass_index >= pass_limit:
                 break
+            pass_index += 1
             continue
 
         passes.append(
@@ -312,6 +352,7 @@ def _run_hover_confirmation(
         pass_count=len(passes),
         final_action_type=final_hover_action.type,
         vlm_alignment=final_hover_action.alignment,
+        verification_outcome=final_verification_outcome,
     )
 
     hover_block: dict[str, Any] = {
@@ -326,6 +367,8 @@ def _run_hover_confirmation(
     }
     if alignment is not None:
         hover_block["alignment"] = alignment
+    if missed_recoveries:
+        hover_block["missed_click_recoveries"] = missed_recoveries
     target_kind = pending_click.target_kind or final_hover_action.target_kind
     if target_kind is not None:
         hover_block["target_kind"] = target_kind
@@ -425,6 +468,26 @@ def run_visual_agent_loop(
                     }
                 )
 
+                hover_execution = (hover_trace["hover"] or {}).get("execution") or {}
+                verification = (
+                    hover_execution.get("verification")
+                    if isinstance(hover_execution, dict)
+                    else None
+                )
+                if (
+                    isinstance(verification, dict)
+                    and verification.get("outcome") == "no_visible_change"
+                ):
+                    recoveries = int(
+                        (hover_trace["hover"] or {}).get("missed_click_recoveries") or 0
+                    )
+                    append_missed_click_history(
+                        maker,
+                        step_index=step_index,
+                        recovery_index=recoveries + 1,
+                        pending_click=refined_click,
+                    )
+
                 if is_terminal_action(hover_action):
                     terminal_state = hover_action.type
                     terminal_action = hover_action
@@ -439,6 +502,16 @@ def run_visual_agent_loop(
                 output_dir=config.output_dir,
                 step_index=step_index,
             )
+            if (
+                isinstance(execution.get("verification"), dict)
+                and execution["verification"].get("outcome") == "no_visible_change"
+            ):
+                append_missed_click_history(
+                    maker,
+                    step_index=step_index,
+                    recovery_index=1,
+                    pending_click=action,
+                )
             trace.add_step(
                 {
                     "step": step_index,

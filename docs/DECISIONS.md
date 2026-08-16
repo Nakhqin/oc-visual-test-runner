@@ -554,6 +554,24 @@ Feishu Figma run `feishu-om_x100b67282758f4a0b2c555e04a3e204`: L1 fine placed th
 
 ---
 
+## 2026-08-17 — UVG L2: missed-click recovery + observe progress honesty
+
+**Status:** Accepted
+
+**Context:**
+Feishu run `feishu-om_x100b67295540eca0b48aa73a32af172` cleared splash after L1-snap fix but burned `max_steps` on the 6-digit PIN keypad: hover often claimed `aligned` while six password dots stayed empty (`no_visible_change`), and observe hallucinated “already entered digit N”.
+
+**Decision:**
+- After hover `click_current` with `no_visible_change`, run up to `MAX_MISSED_CLICK_RECOVERIES` recovery rounds (`MISSED_CLICK_RECOVERY_PASSES` each): skip L1 clamp, allow VLM re-aim, refresh pending click from recovery `move_to`.
+- Append verification-miss notes to VLM history for hover + next observe; prompt rules: count PIN dots in the screenshot; never assume progress after `no_visible_change`.
+- Demote final hover `alignment` to `clicked_off_target` when the last click still has `no_visible_change`.
+
+**Consequences:**
+- More Gemini calls per stubborn key; still bounded.
+- Does not invent Figma hotspots — only reduces false progress and re-aims after telemetry miss.
+
+---
+
 ## 2026-07-10 — OpenClaw skill install: SKILL.md frontmatter only (not Agent Instructions)
 
 **Status:** Accepted

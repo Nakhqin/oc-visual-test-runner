@@ -22,6 +22,9 @@ HOVER_STALL_MAX_NORM_DELTA = 15
 # Larger jumps are treated as VLM re-estimates and snapped back to the refine point
 # (Feishu run feishu-om_x100b672…: hover jumped 750→500 / logo, then force-clicked off-target).
 HOVER_MAX_ANCHOR_NORM_DELTA = 120
+# After click_current with no_visible_change, allow limited re-aim rounds (PIN keypad false "aligned").
+MAX_MISSED_CLICK_RECOVERIES = 2
+MISSED_CLICK_RECOVERY_PASSES = 3
 HOVER_TARGET_KINDS = frozenset({"text", "icon", "composite", "button"})
 HOVER_ALIGNMENT_OUTCOMES = frozenset({"aligned", "adjusted", "clicked_off_target", "unresolved"})
 
@@ -160,14 +163,57 @@ def should_force_hover_click(
     pass_index: int,
     passes: list[dict[str, Any]],
     hover_action: Action,
+    max_pass_index: int = MAX_HOVER_ALIGNMENT_PASSES,
 ) -> bool:
     if hover_action.type not in HOVER_ALIGNMENT_ACTION_TYPES:
         return False
     if hover_action.type == "wait":
         return False
-    if pass_index >= MAX_HOVER_ALIGNMENT_PASSES:
+    if pass_index >= max_pass_index:
         return True
     return hover_adjustment_stalled(passes)
+
+
+def should_recover_missed_click(
+    *,
+    verification: dict[str, Any] | None,
+    missed_recoveries: int,
+    max_recoveries: int = MAX_MISSED_CLICK_RECOVERIES,
+) -> bool:
+    """True when post-click telemetry shows no change and recovery budget remains."""
+    if missed_recoveries >= max_recoveries:
+        return False
+    if not verification or not verification.get("applied"):
+        return False
+    return verification.get("outcome") == "no_visible_change"
+
+
+def append_missed_click_history(
+    maker: Any,
+    *,
+    step_index: int,
+    recovery_index: int,
+    pending_click: Action,
+) -> None:
+    """Tell the VLM the last click did not change the UI (e.g. PIN dots still empty)."""
+    history = getattr(maker, "_history", None)
+    if not isinstance(history, list):
+        return
+    target = pending_click.reason or "intended control"
+    history.append(
+        {
+            "step": f"{step_index}:verify-miss-{recovery_index}",
+            "action": {
+                "type": "verification",
+                "reason": (
+                    f"Post-click verification: no_visible_change after click_current "
+                    f"(recovery {recovery_index}/{MAX_MISSED_CLICK_RECOVERIES}). "
+                    f"Do not assume progress (PIN/password dots, toggles, navigation). "
+                    f"Re-aim the marker onto the center of: {target}"
+                ),
+            },
+        }
+    )
 
 
 def derive_hover_alignment(
@@ -175,8 +221,11 @@ def derive_hover_alignment(
     pass_count: int,
     final_action_type: str,
     vlm_alignment: str | None = None,
+    verification_outcome: str | None = None,
 ) -> str | None:
     """Derive hover alignment outcome for trace (G2)."""
+    if verification_outcome == "no_visible_change" and final_action_type == "click_current":
+        return "clicked_off_target"
     if vlm_alignment in HOVER_ALIGNMENT_OUTCOMES:
         return vlm_alignment
     if final_action_type == "click_current":
