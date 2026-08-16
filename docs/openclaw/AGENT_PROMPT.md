@@ -80,8 +80,9 @@ Every run:
 
 1. `cd` to workspace  
 2. `export` publish env (and ensure `GOOGLE_API_KEY` is set for real runs)  
-3. Run **`./scripts/openclaw/invoke_runner.sh`** once — **stdout is the Feishu reply**  
-4. Send that stdout as the Feishu message body — **no interim “Executing…” message**
+3. Run **`./scripts/openclaw/invoke_runner.sh`** once in the **foreground** — **stdout is the Feishu reply**  
+4. Send that stdout as the Feishu message body — **no interim “Executing…” message**  
+5. Do **not** `background=true`, `yieldMs`, or detach+poll; wait until the same exec exits (long Figma runs may take many minutes)
 
 For ops/debug only: direct `ux_testing.py` + separate `format_skill_reply.py` (see `OPENCLAW_SKILL.md`).
 

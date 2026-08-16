@@ -608,6 +608,24 @@ Long Figma runs (~180s+) completed on the VM but Feishu often received only an i
 
 ---
 
+## 2026-08-16 — Foreground exec required for Feishu delivery
+
+**Status:** Accepted
+
+**Context:**
+On VM Phase 5.3 long Figma runs, `invoke_runner.sh` completed (`/tmp/ux_feishu-*` + `report_url` + formatter stdout) but Feishu often stayed silent. Short web replies worked. Likely cause: OpenClaw exec auto-background / `yieldMs` / turn boundary so the agent never forwarded wrapper stdout after a long run.
+
+**Decision:**
+- Strengthen `docs/openclaw/OPENCLAW_SKILL.md` Hard rules: exec **must** stay foreground — ban `background=true`, `yieldMs`, and detach+`process` poll; wait on the same exec then send stdout only.
+- Mirror the rule in `docs/openclaw/AGENT_PROMPT.md` (reference only; operators still sync `OPENCLAW_SKILL.md` to `~/.openclaw/skills/...`).
+
+**Consequences:**
+- After `cp` skill + gateway restart + Feishu `/new`, agents should wait through long OOBE runs and deliver one formatter reply.
+- Skill text cannot force runtime defaults if the gateway still auto-yields; operators may need OpenClaw upgrade or config if silence persists.
+- Ops fallback remains: SSH `format_skill_reply.py --output-dir /tmp/ux_<run_id>`.
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title

@@ -13,16 +13,21 @@ Persona-based visual UX testing for **web** and **Figma** prototypes on this VM.
 
 1. You **MUST** call the **exec** tool **once** with `./scripts/openclaw/invoke_runner.sh`. Do **not** only say you will run the test.
 2. Do **NOT** send an interim reply such as “Executing…” or “This may take a few moments.” Wait for exec to finish, then send **one** message.
-3. Do **NOT** use skill `ux_test_runner` or any CLI that takes `--report-file`, JSON report on stdin, or similar legacy report parsers.
-4. Do **NOT** invent another Python entrypoint. Allowed:
+3. Exec **MUST** run in the **foreground** until completion (long Figma OOBE may take many minutes — still wait on the same call):
+   - Do **NOT** set `background=true`
+   - Do **NOT** set `yieldMs` (or any auto-background / yield that returns before the command exits)
+   - Do **NOT** detach and poll via a separate `process` tool instead of waiting on this exec
+   - After exec exits, the Feishu body **MUST** be exactly that exec’s **stdout** (already formatted by `invoke_runner.sh`)
+4. Do **NOT** use skill `ux_test_runner` or any CLI that takes `--report-file`, JSON report on stdin, or similar legacy report parsers.
+5. Do **NOT** invent another Python entrypoint. Allowed:
    - **Preferred:** `./scripts/openclaw/invoke_runner.sh ...` (runs runner + formatter; stdout is the Feishu body)
    - **Fallback (ops/debug only):** `.venv/bin/python3 scripts/ux_testing.py ...` then `format_skill_reply.py`
-5. The Feishu reply body **MUST** be exactly the **stdout** of `invoke_runner.sh` (Status/Summary/Full report, or 状态/测试摘要/完整报告). Do not rewrite, translate, or wrap it.
-6. Every exec block **MUST** set:
+6. The Feishu reply body **MUST** be exactly the **stdout** of `invoke_runner.sh` (Status/Summary/Full report, or 状态/测试摘要/完整报告). Do not rewrite, translate, or wrap it.
+7. Every exec block **MUST** set:
    - `PATH="/root/oc-visual-test-runner/.venv/bin:$PATH"`
    - `LANG=C.UTF-8` `PYTHONUTF8=1` `PYTHONIOENCODING=utf-8`
    - `UX_REPORT_PUBLIC_DIR` and `UX_REPORT_PUBLIC_BASE_URL`
-7. Success check: directory `/tmp/ux_<run_id>` must exist after exec. If it does not, retry with the canonical block below.
+8. Success check: directory `/tmp/ux_<run_id>` must exist after exec. If it does not, retry with the canonical block below.
 
 ## Workspace
 
@@ -60,6 +65,8 @@ Explicit invoke: `/oc-visual-test-runner` or `/skill oc-visual-test-runner`.
 ## Canonical exec block (one exec, one Feishu reply)
 
 Replace `RUN_ID`, `TARGET`, `URL`, `PERSONA`, `GOAL`, and options. **Send only exec stdout to the user.**
+
+**Foreground only:** Do not background or yield this block. Wait until `invoke_runner.sh` exits, then send its stdout unchanged — even when `--timeout-seconds` is 600+.
 
 ```bash
 export LANG=C.UTF-8
@@ -112,7 +119,7 @@ OUTPUT_DIR="/tmp/ux_${RUN_ID}"
 
 ## Feishu reply
 
-Send **only** the **stdout** of `invoke_runner.sh` to the user. Do not rewrite. Do not send a second follow-up unless exec failed before producing stdout.
+Send **only** the **stdout** of `invoke_runner.sh` to the user. Do not rewrite. Do not send a second follow-up unless exec failed before producing stdout. Silence after a completed foreground exec is a delivery failure — do not invent a summary; the stdout from that exec is the only allowed body.
 
 ### Reply shape (required)
 
