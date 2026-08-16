@@ -532,6 +532,26 @@ Real-web runs (e.g. Lenovo `web-lenovo-gaming-1`) could `blocked` after 6 hover 
 **Consequences:**
 - `scripts/core/hover.py`, `loop.py`, `vlm.py`; tests in `.tmp/test_hover_alignment.py`.
 
+**Superseded in part by:** 2026-08-16 — L2 snap-to-L1 + hover clamp (below).
+
+---
+
+## 2026-08-16 — UVG L2: clamp hover jumps; adjusted click at L1 fine
+
+**Status:** Accepted
+
+**Context:**
+Feishu Figma run `feishu-om_x100b67282758f4a0b2c555e04a3e204`: L1 fine placed the marker on the splash CTA, then hover VLM jumped to logo `(500,500)` / below-button `(500,875)`. Stall detection force-clicked **at the runaway pointer**, so `no_visible_change` and eventual `blocked`.
+
+**Decision:**
+- Clamp hover `move_to` / large `move_by_delta` to within `HOVER_MAX_ANCHOR_NORM_DELTA` (120) Manhattan of **L1 fine**; farther proposals snap back to the refine point.
+- On `should_force_hover_click`, **`move_to` L1 fine** then `click_current` with `alignment: adjusted` (not click-at-current-wrong-pointer).
+- Prompt: prefer small corrections; forbid distant region jumps when marker already near the control.
+
+**Consequences:**
+- `scripts/core/hover.py`, `loop.py`, `vlm.py`; `.tmp/test_hover_alignment.py`; `docs/GROUNDING.md` L2 exit wording.
+- Re-verify on same ZUXOS splash CTA after VM `git pull`.
+
 ---
 
 ## 2026-07-10 — OpenClaw skill install: SKILL.md frontmatter only (not Agent Instructions)

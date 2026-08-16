@@ -18,6 +18,10 @@ HOVER_ALIGNMENT_ACTION_TYPES = frozenset({"move_to", "move_by_delta", "wait"})
 MAX_HOVER_ALIGNMENT_PASSES = 5
 HOVER_STALL_MIN_ADJUSTMENTS = 3
 HOVER_STALL_MAX_NORM_DELTA = 15
+# Max Manhattan distance (norm 0–1000) a hover move_to may stray from L1 fine.
+# Larger jumps are treated as VLM re-estimates and snapped back to the refine point
+# (Feishu run feishu-om_x100b672…: hover jumped 750→500 / logo, then force-clicked off-target).
+HOVER_MAX_ANCHOR_NORM_DELTA = 120
 HOVER_TARGET_KINDS = frozenset({"text", "icon", "composite", "button"})
 HOVER_ALIGNMENT_OUTCOMES = frozenset({"aligned", "adjusted", "clicked_off_target", "unresolved"})
 
@@ -79,14 +83,76 @@ def hover_adjustment_stalled(
 
 
 def coerce_hover_to_click(action: Action, *, prefix: str) -> Action:
-    """Last-resort L2: click at pointer when micro-adjustments are not converging."""
-    reason = action.reason or "Confirming click at the marked pointer."
+    """Last-resort L2: click after runner has snapped to L1 fine (see loop)."""
+    reason = action.reason or "Confirming click at the L1 refine point."
     return Action(
         type="click_current",
         reason=f"{prefix} {reason}".strip(),
         alignment="adjusted",
         target_kind=action.target_kind,
     )
+
+
+def l1_snap_before_adjusted_click(pending_click: Action) -> Action:
+    """Move pointer back to L1 fine before an adjusted click_current."""
+    assert pending_click.x is not None and pending_click.y is not None
+    return Action(
+        type="move_to",
+        x=pending_click.x,
+        y=pending_click.y,
+        reason="UVG L2: snap to L1 fine before adjusted click",
+        target_kind=pending_click.target_kind,
+    )
+
+
+def clamp_hover_alignment_action(
+    action: Action,
+    *,
+    anchor_x: int,
+    anchor_y: int,
+    max_delta: int = HOVER_MAX_ANCHOR_NORM_DELTA,
+) -> Action:
+    """Keep hover move_to / move_by_delta near L1 fine; reject runaway re-points."""
+    if action.type == "move_to":
+        if action.x is None or action.y is None:
+            return action
+        dist = abs(action.x - anchor_x) + abs(action.y - anchor_y)
+        if dist <= max_delta:
+            return action
+        original = action.reason or "hover move_to"
+        return Action(
+            type="move_to",
+            x=anchor_x,
+            y=anchor_y,
+            reason=(
+                f"UVG L2 clamp: hover move_to {dist} norm from L1 fine "
+                f"(>{max_delta}); returning to refine point. Original: {original}"
+            ),
+            target_kind=action.target_kind,
+        )
+
+    if action.type == "move_by_delta":
+        dx = int(action.delta_x or 0)
+        dy = int(action.delta_y or 0)
+        # move_by_delta is in pixels; approximate with a generous pixel budget (~12% of 1000-grid).
+        max_px = max_delta
+        mag = abs(dx) + abs(dy)
+        if mag <= max_px:
+            return action
+        scale = max_px / mag
+        original = action.reason or "hover move_by_delta"
+        return Action(
+            type="move_by_delta",
+            delta_x=int(round(dx * scale)),
+            delta_y=int(round(dy * scale)),
+            reason=(
+                f"UVG L2 clamp: hover delta {mag}px capped to {max_px}px. "
+                f"Original: {original}"
+            ),
+            target_kind=action.target_kind,
+        )
+
+    return action
 
 
 def should_force_hover_click(

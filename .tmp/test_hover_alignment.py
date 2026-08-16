@@ -10,9 +10,12 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from core.actions import Action, ActionParseError, parse_action_payload
 from core.hover import (
+    HOVER_MAX_ANCHOR_NORM_DELTA,
+    clamp_hover_alignment_action,
     derive_hover_alignment,
     hover_adjustment_stalled,
     coerce_hover_to_click,
+    l1_snap_before_adjusted_click,
     should_force_hover_click,
 )
 
@@ -115,6 +118,36 @@ def test_coerce_hover_to_click() -> None:
     assert "test:" in coerced.reason
 
 
+def test_clamp_rejects_runaway_move_to() -> None:
+    runaway = Action(type="move_to", x=500, y=500, reason="jump to logo")
+    clamped = clamp_hover_alignment_action(runaway, anchor_x=500, anchor_y=750)
+    assert clamped.x == 500 and clamped.y == 750
+    assert "UVG L2 clamp" in (clamped.reason or "")
+
+
+def test_clamp_allows_nearby_move_to() -> None:
+    nearby = Action(type="move_to", x=510, y=760, reason="nudge")
+    clamped = clamp_hover_alignment_action(nearby, anchor_x=500, anchor_y=750)
+    assert clamped.x == 510 and clamped.y == 760
+    assert clamped.reason == "nudge"
+
+
+def test_clamp_caps_large_delta() -> None:
+    big = Action(type="move_by_delta", delta_x=0, delta_y=-400, reason="big jump")
+    clamped = clamp_hover_alignment_action(big, anchor_x=500, anchor_y=750)
+    assert clamped.type == "move_by_delta"
+    assert abs(clamped.delta_x or 0) + abs(clamped.delta_y or 0) <= HOVER_MAX_ANCHOR_NORM_DELTA
+    assert "UVG L2 clamp" in (clamped.reason or "")
+
+
+def test_l1_snap_action() -> None:
+    pending = Action(type="click", x=500, y=750, target_kind="button", reason="cta")
+    snap = l1_snap_before_adjusted_click(pending)
+    assert snap.type == "move_to"
+    assert snap.x == 500 and snap.y == 750
+    assert "L1 fine" in (snap.reason or "")
+
+
 def main() -> None:
     test_derive_aligned_first_pass()
     test_derive_adjusted_after_reposition()
@@ -126,6 +159,10 @@ def main() -> None:
     test_hover_stall_detects_oscillation()
     test_should_force_on_final_pass()
     test_coerce_hover_to_click()
+    test_clamp_rejects_runaway_move_to()
+    test_clamp_allows_nearby_move_to()
+    test_clamp_caps_large_delta()
+    test_l1_snap_action()
     print("hover alignment unit tests OK")
 
 

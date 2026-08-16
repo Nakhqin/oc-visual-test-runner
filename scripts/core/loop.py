@@ -20,8 +20,10 @@ from core.hover import (
     MAX_HOVER_ALIGNMENT_PASSES,
     action_triggers_hover,
     alignment_exhausted_blocked_action,
+    clamp_hover_alignment_action,
     coerce_hover_to_click,
     derive_hover_alignment,
+    l1_snap_before_adjusted_click,
     should_force_hover_click,
 )
 from core.refine import run_roi_refine
@@ -201,14 +203,23 @@ def _run_hover_confirmation(
             pending_action=pending_click,
             alignment_pass=pass_index,
         )
+        assert pending_click.x is not None and pending_click.y is not None
+        hover_action = clamp_hover_alignment_action(
+            hover_action,
+            anchor_x=pending_click.x,
+            anchor_y=pending_click.y,
+        )
         if should_force_hover_click(
             pass_index=pass_index,
             passes=passes,
             hover_action=hover_action,
         ):
+            # Stall / final-pass: click at L1 fine, not at a runaway hover pointer.
+            snap = l1_snap_before_adjusted_click(pending_click)
+            execute_action(adapter, snap)
             hover_action = coerce_hover_to_click(
                 hover_action,
-                prefix="UVG L2 convergence (adjusted click at pointer):",
+                prefix="UVG L2 convergence (adjusted click at L1 fine):",
             )
         final_hover_action = hover_action
         final_hover_frame = hover_frame

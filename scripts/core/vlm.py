@@ -116,6 +116,7 @@ Alignment rules (all control types — text, icon-only, icon+label, button):
 
 Convergence (avoid endless micro-moves):
 - Pass 0–1: use move_to when the marker is clearly off the intended control.
+- Prefer **small** corrections (nearby center of the same control). Do **not** jump to a distant screen region (e.g. logo ↔ bottom CTA); if unsure, click_current when the marker already overlaps the intended control.
 - Pass 2+: if the marker **overlaps** the intended tappable area (text, icon, or composite chip), prefer **click_current** with alignment **"adjusted"** rather than another tiny move_to.
 - Pass {max_alignment_passes} (final): use **click_current** with alignment **"adjusted"** if the marker overlaps the target at all; use **blocked** only if the marker is completely off the intended control.
 
