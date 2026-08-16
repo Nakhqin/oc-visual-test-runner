@@ -124,7 +124,7 @@ python3 ./scripts/ux_testing.py \
   --max-steps 10
 ```
 
-**Phase 4.5 (complete):** Public report publish — see `docs/VERIFY.md`. **Current:** Phase 5.3 — OpenClaw / Feishu E2E sign-off (short web passed on VM 2026-07-22; long Figma pending). **Next:** Phase 5.5b — **UVG** (`docs/GROUNDING.md`). G1+G2 foundation shipped.
+**Phase 4.5 (complete):** Public report publish — see `docs/VERIFY.md`. **Phase 5 (complete):** OpenClaw / Feishu E2E signed off on VM (short web 2026-07-22; long Figma 2026-08-16). **Current:** Phase 5.5b — **UVG** (`docs/GROUNDING.md`). G1+G2+L1/L2 foundation shipped.
 
 ## Output Contract (by Phase)
 
@@ -138,13 +138,13 @@ python3 ./scripts/ux_testing.py \
 └── screenshots/            # user-facing + raw evidence
 ```
 
-**Phase 4.5:** public `report_url` via publish (implemented). **Phase 5 (in progress):** OpenClaw / Feishu Skill delivery via `invoke_runner.sh` stdout (short web E2E verified).
+**Phase 4.5:** public `report_url` via publish (implemented). **Phase 5 (complete):** OpenClaw / Feishu Skill delivery via `invoke_runner.sh` stdout (short web + long Figma E2E signed off).
 
 Full file purposes: see `SKILL.md`.
 
 ## Current Phase
 
-**Phase 5.3 in progress.** Phase 5.1–5.2 wired on VM; short web Feishu Gemini E2E passed. See `docs/VERIFY.md` Phase 5 verification log for remaining sign-off.
+**Phase 5.5 — Visual click grounding / UVG.** Phase 5.1–5.3 Done on VM. See `docs/GROUNDING.md` and `docs/VERIFY.md`.
 
 ## Out of Scope (Phase 1)
 

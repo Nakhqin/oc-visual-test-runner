@@ -8,7 +8,7 @@ Stable facts for oc-visual-test-runner. Keep this file short.
 
 ## Current Stage
 
-**Phase 5.3 in progress.** Phase 5.1–5.2 done on VM `170.106.175.128`; short web Feishu Gemini E2E passed (2026-07-22). Remaining: long Figma NL E2E + non-`done` terminal states after single-exec wrapper (`97cefbe`). See `docs/VERIFY.md` Phase 5 verification log.
+**Phase 5.5 (UVG / grounding).** Phase 5.1–5.3 Done on VM `170.106.175.128` (5.3 long Figma Feishu delivery: 2026-08-16, run `feishu-om_x100b67282758f4a0b2c555e04a3e204`). See `docs/VERIFY.md` Phase 5 log and `docs/GROUNDING.md`.
 
 ## Users / Audience
 

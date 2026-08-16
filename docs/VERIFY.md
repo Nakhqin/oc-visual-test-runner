@@ -538,9 +538,9 @@ python3 ./scripts/ux_testing.py \
 
 ---
 
-## Phase 5 — OpenClaw / Feishu Skill Delivery (Current)
+## Phase 5 — OpenClaw / Feishu Skill Delivery (Done — 2026-08-16)
 
-**Partial E2E verified on VM `170.106.175.128` (2026-07-22).** Plan: `docs/OPENCLAW_INTEGRATION.md`. Phase 4.5 publish verified. **Remaining:** long Figma NL E2E + non-`done` terminal states after single-exec wrapper (`97cefbe`).
+**E2E signed off on VM `170.106.175.128`.** Plan: `docs/OPENCLAW_INTEGRATION.md`. Phase 4.5 publish verified. Short web (2026-07-22) + long Figma Feishu delivery (2026-08-16). **Next:** Phase 5.5 grounding (`docs/GROUNDING.md`).
 
 ### VM verification log (Phase 5.3)
 
@@ -549,7 +549,7 @@ python3 ./scripts/ux_testing.py \
 | 2026-07 | Feishu stub (`--use-stub`) | Pass | Formatter reply: Status / Summary / Full report |
 | 2026-07-22 | Feishu NL + Gemini, `example.com`, 2 steps | Pass | `terminal_state=done`; `feishu-om_x100b693…` |
 | 2026-07-22 | Feishu NL + Gemini, Figma tablet onboarding | Partial | Runner `timeout` @ 180s; artifacts OK; Feishu only interim “Executing…” (pre–single-exec) |
-| — | Feishu NL + long Figma + `invoke_runner.sh` stdout (post-`97cefbe`) | **Todo** | Requires VM `git pull`, skill refresh, `--timeout-seconds 600`, exec timeout check |
+| 2026-08-16 | Feishu NL + long Figma OOBE + `invoke_runner.sh` stdout | Pass (delivery) | Run `feishu-om_x100b67282758f4a0b2c555e04a3e204`; one Feishu Status/Summary + report; [report](http://170.106.175.128:8080/feishu-om_x100b67282758f4a0b2c555e04a3e204/index.html) · [recording](http://170.106.175.128:8080/feishu-om_x100b67282758f4a0b2c555e04a3e204/ux_test_recording.webm). Ops: `timeoutSec=1800`, `tools.deny` includes `process`. Click misses → Phase 5.5 |
 
 ### Prerequisites (same VM)
 
@@ -588,23 +588,21 @@ Or explicit: `/oc-visual-test-runner` with the same request.
 - [x] Agent actually execs (not verbal-only); `/tmp/ux_<run_id>` exists (2026-07-22)
 - [x] `--run-id` correlates to Feishu context when configured (`feishu-om_*`, 2026-07-22)
 - [x] Short web run: Feishu reply is **invoke_runner.sh stdout** — Status/Summary/Full report (2026-07-22, `example.com`)
-- [ ] Long run: **one message**, no interim “Executing…” (retest after `97cefbe` on VM)
-- [ ] `terminal_state=timeout` / `max_steps` / `blocked` → readable summary + report link via wrapper stdout
-- [ ] Runner failure (exit `1`/`2`) produces short Feishu error via wrapper (or `format_skill_reply.py --error`)
+- [x] Long run: **one message** with Status/Summary/Full report (2026-08-16, Figma OOBE, `feishu-om_x100b67282758f4a0b2c555e04a3e204`; after `tools.deny: ["process"]` + skill foreground rules)
+- [x] Non-`done` (`blocked` and related) → readable summary + report link via wrapper stdout (2026-08-16 ops)
+- [ ] Runner failure (exit `1`/`2`) produces short Feishu error via wrapper (or `format_skill_reply.py --error`) — optional ops check; not blocking 5.3 sign-off
 
 **Failure checks:**
 
 - [ ] Missing publish env → Feishu warns no public link (or ops-only local path)
 - [x] Missing `GOOGLE_API_KEY` → stub/blocked (fixed: add `GOOGLE_API_KEY` to gateway env, 2026-07-22)
 
-### Phase 5.3 — remaining sign-off (VM)
+### Phase 5.3 — ops refresh (VM, after repo pull)
 
 1. `cd /root/oc-visual-test-runner && git pull origin main`
 2. `cp docs/openclaw/OPENCLAW_SKILL.md ~/.openclaw/skills/oc-visual-test-runner/SKILL.md`
-3. `systemctl --user restart openclaw-gateway.service` — Feishu `/new`
-4. Confirm gateway exec timeout ≥ 660s if using `--timeout-seconds 600`
-5. Feishu NL: Figma tablet onboarding with `max_steps=20 --timeout-seconds 600 --lang zh` — **one** formatter reply
-6. Optionally re-check stub `blocked` path still formats correctly
+3. Confirm `openclaw.json`: `tools.exec.timeoutSec` ≥ runner `--timeout-seconds` + buffer (signed-off value: **1800**); `tools.deny` includes **`process`** so long exec stays synchronous
+4. `systemctl --user restart openclaw-gateway.service` — Feishu `/new`
 
 ---
 
@@ -621,6 +619,7 @@ Or explicit: `/oc-visual-test-runner` with the same request.
 | `terminal_state=max_steps` | Goal too hard for `max_steps` | Increase `--max-steps` for test only; note in results |
 | Recording missing | Context closed before finalize | Re-run; check `ux_test_recording.webm` path on stderr |
 | Feishu only “Executing…”, no final reply | Two-step exec or OpenClaw exec timeout; interim agent reply | Use `invoke_runner.sh` post-`97cefbe` (stdout = reply); increase exec timeout; ban interim replies in skill |
+| Artifacts OK under `/tmp/ux_*` but Feishu silent after long run | OpenClaw auto-background / `process` poll; agent never forwards stdout | Add `"process"` to `tools.deny`; keep skill Hard rules (no `background`/`yieldMs`); `timeoutSec` ≥ runner timeout + buffer; restart gateway + Feishu `/new` |
 | `GOOGLE_API_KEY count: 0` in gateway | Only `GEMINI_API_KEY` set | Add `GOOGLE_API_KEY` to gateway/systemd env (runner does not read `GEMINI_API_KEY`) |
 
 ### Run CLI Help

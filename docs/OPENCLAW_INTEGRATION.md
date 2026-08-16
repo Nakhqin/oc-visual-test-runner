@@ -2,7 +2,7 @@
 
 Phase 5 delivery plan for wiring **oc-visual-test-runner** into **OpenClaw** on the cloud VM, with replies via the **existing Feishu channel**.
 
-**Status:** Phase 5.1 **Done**; 5.2 **Done on VM** (2026-07-22); **5.3 in progress** — short web Gemini E2E passed; long Figma + single-exec retest pending. Runner Phases 1–4.5 complete.
+**Status:** Phase 5.1–**5.3 Done** on VM `170.106.175.128` (5.2: 2026-07-22; 5.3 long Figma Feishu delivery: 2026-08-16). Runner Phases 1–4.5 complete. **Next:** Phase 5.5 grounding (`docs/GROUNDING.md`).
 
 **Implementation path (agreed):** Feishu NL as main line; fixed JSON only for internal pathway smoke — not a separate milestone.
 
@@ -118,7 +118,7 @@ OpenClaw subprocess **must** inherit publish env vars (see [Environment](#enviro
 | Sync `docs/openclaw/OPENCLAW_SKILL.md` (with YAML frontmatter) → `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` | Done |
 | Confirm `openclaw skills list` shows **`oc-visual-test-runner` ✓ ready** | Done |
 | Agent runs bash: `./scripts/openclaw/invoke_runner.sh` once (stdout = Feishu reply) | Done |
-| Post-run Feishu text from wrapper stdout (includes `format_skill_reply.py`) | Done (short web); long Figma retest in 5.3 |
+| Post-run Feishu text from wrapper stdout (includes `format_skill_reply.py`) | Done (short web + long Figma, 2026-08-16) |
 | Optional pathway smoke (`--use-stub`) before first NL | Done |
 | NL extraction + clarifying question when fields missing | Done |
 | Legacy `ux-test-skill` disabled; `tools.profile=coding`; `exec` allowed | Done |
@@ -128,7 +128,7 @@ OpenClaw subprocess **must** inherit publish env vars (see [Environment](#enviro
 
 **Note:** Fixed JSON invoke is optional internal smoke only — not a separate milestone.
 
-### Phase 5.3 — E2E verification — in progress
+### Phase 5.3 — E2E verification — Done (2026-08-16)
 
 **Goal:** Close Phase 5 in `docs/TASKS.md` and `docs/VERIFY.md`.
 
@@ -136,13 +136,22 @@ OpenClaw subprocess **must** inherit publish env vars (see [Environment](#enviro
 |---|---|
 | Feishu NL stub → exec → reply with `report_url` | Done |
 | Feishu NL → short web run (Gemini, not stub) | Done (2026-07-22, `example.com`, `terminal_state=done`) |
-| Reply contains clickable `report_url` (public network) | Done (short web) |
-| Long Figma NL E2E, single exec, one Feishu message (post-`97cefbe`) | Todo |
-| `timeout` / `max_steps` / `blocked` → readable summary via wrapper stdout | Todo |
+| Reply contains clickable `report_url` (public network) | Done (short web + long Figma) |
+| Long Figma NL E2E, single exec, one Feishu message (post-`97cefbe`) | Done (`feishu-om_x100b67282758f4a0b2c555e04a3e204`) |
+| `timeout` / `max_steps` / `blocked` → readable summary via wrapper stdout | Done (`blocked` + related paths verified in ops) |
 | Document failure modes (no publish env, runner exit 1) | Done (`docs/VERIFY.md` troubleshooting) |
-| OpenClaw exec timeout ≥ runner `--timeout-seconds` + buffer on VM | Todo |
+| OpenClaw exec timeout ≥ runner `--timeout-seconds` + buffer on VM | Done (`tools.exec.timeoutSec=1800`) |
 
 **Operator skill path (verified):** `~/.openclaw/skills/oc-visual-test-runner/SKILL.md` (sync from `docs/openclaw/OPENCLAW_SKILL.md`).
+
+**VM ops notes (Phase 5.3 sign-off):**
+
+| Setting | Value / note |
+|---|---|
+| Exec timeout | `tools.exec.timeoutSec: 1800` (OpenClaw v2026.4.12 — do **not** use invalid key `timeoutSeconds`) |
+| Sync long runs | `tools.deny` includes `"process"` so exec stays foreground (avoids silent Feishu after auto-background) |
+| Skill Hard rules | Foreground only — no `background=true` / `yieldMs` / detach+`process` poll (`docs/DECISIONS.md` 2026-08-16) |
+| Sign-off evidence | [report](http://170.106.175.128:8080/feishu-om_x100b67282758f4a0b2c555e04a3e204/index.html) · [recording](http://170.106.175.128:8080/feishu-om_x100b67282758f4a0b2c555e04a3e204/ux_test_recording.webm) |
 
 ---
 
@@ -336,9 +345,10 @@ Exact manifest format depends on your OpenClaw version — adjust paths to match
 | Custom exec tool / MCP shell | **Not used** — default shell command execution only |
 | Required secrets | `GOOGLE_API_KEY` |
 | Required env | `UX_REPORT_PUBLIC_DIR`, `UX_REPORT_PUBLIC_BASE_URL` |
-| Timeout | ≥ `timeout_seconds` + buffer (e.g. 300s+) for long runs |
+| Timeout | `tools.exec.timeoutSec` ≥ runner `--timeout-seconds` + buffer (signed-off: **1800**) |
+| Long-run sync | Prefer `tools.deny: ["process"]` so gateway does not auto-background the invoke |
 
-Document the final skill path when verified with `openclaw skills list` (outside this repo if needed).
+Documented skill path verified with `openclaw skills list`: **`oc-visual-test-runner` ✓ ready**.
 
 ---
 

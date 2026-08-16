@@ -6,11 +6,13 @@ Status categories: **Todo**, **In Progress**, **Done**, **Blocked**.
 
 ## Current Priority
 
-**Phase 5 — OpenClaw / Feishu Skill delivery**
+**Phase 5.5 — Visual click grounding / UVG**
 
-Primary plan: **`docs/OPENCLAW_INTEGRATION.md`**
+Primary plan: **`docs/GROUNDING.md`** (Tier 2 B–C + L1/L2 measurement; L3 only if below bar)
 
-**Confirmed (2026-07-03):** Same VM deployment (`170.106.175.128`); NL extraction in OpenClaw main agent; existing Feishu channel.
+**Phase 5 (OpenClaw / Feishu) — Done.** Plan: **`docs/OPENCLAW_INTEGRATION.md`**. 5.1–5.3 signed off on VM `170.106.175.128` (5.3: 2026-08-16).
+
+**Confirmed (2026-07-03):** Same VM deployment; NL extraction in OpenClaw main agent; existing Feishu channel.
 
 ### Phase 5.1 — Integration contract (this repo)
 
@@ -40,19 +42,19 @@ Primary plan: **`docs/OPENCLAW_INTEGRATION.md`**
 
 **Do not** paste `AGENT_PROMPT.md` into Agent Instructions — OpenClaw injects skill `SKILL.md` automatically. Legacy `ux_test_runner` is a different skill; do not use it for Phase 5.
 
-### Phase 5.3 — E2E verification — in progress
+### Phase 5.3 — E2E verification — Done (2026-08-16, VM `170.106.175.128`)
 
 | Status | Task |
 |---|---|
 | Done | Feishu NL stub → exec → formatter reply with `report_url` |
 | Done | Feishu NL → short web run (Gemini, `example.com`) → **Status: Completed** + clickable `report_url` + recording |
 | Done | Document failure modes in `docs/VERIFY.md` Phase 5 (troubleshooting table) |
-| Todo | **Long Figma NL E2E** after single-exec wrapper (`97cefbe`): `--timeout-seconds 600`, one Feishu message (no interim “Executing…”) |
-| Todo | Verify `timeout` / `max_steps` / `blocked` still produce readable Feishu summary via **wrapper stdout** |
-| Todo | Confirm OpenClaw **exec timeout** ≥ runner `--timeout-seconds` + 60s on VM |
-| Todo | OpenClaw manifest / skill path recorded in integration doc (operator note) |
+| Done | **Long Figma NL E2E** (post-`97cefbe` + foreground exec): one Feishu formatter reply with `report_url` + recording (`feishu-om_x100b67282758f4a0b2c555e04a3e204`) |
+| Done | Non-`done` terminal states (`blocked` / related) still produce readable Feishu summary via **wrapper stdout** |
+| Done | OpenClaw **exec timeout** on VM: `tools.exec.timeoutSec=1800` (≥ runner `--timeout-seconds` + buffer) |
+| Done | OpenClaw skill path / ops notes in `docs/OPENCLAW_INTEGRATION.md` (incl. `tools.deny: ["process"]` for sync exec) |
 
-**Exit criteria:** User asks in natural language via Feishu; OpenClaw on the VM invokes runner and returns concise summary plus **public `report_url`** and evidence links — including long runs and non-`done` terminal states.
+**Exit criteria met:** Feishu NL → OpenClaw invokes runner → concise summary + public `report_url` + evidence — including long Figma runs. Click-accuracy misses are **Phase 5.5**, not 5.3 blockers.
 
 **VM verification log:** `docs/VERIFY.md` — Phase 5.3 section.
 
@@ -60,13 +62,13 @@ Primary plan: **`docs/OPENCLAW_INTEGRATION.md`**
 
 ---
 
-## Next Priority (after Phase 5.3)
+## Current Priority detail (Phase 5.5)
 
 **Phase 5.5 — Visual click grounding (G1 + G2 foundation)**
 
 Primary plan: **`docs/GROUNDING.md`**
 
-**Phase 5.5b — UVG (Universal Visual Grounding)** — **current implementation priority** after G1+G2 formal regression failed scenario A.
+**Phase 5.5b — UVG (Universal Visual Grounding)** — **current implementation priority**.
 
 | Status | Task |
 |---|---|

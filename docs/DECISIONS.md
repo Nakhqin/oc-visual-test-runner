@@ -626,6 +626,24 @@ On VM Phase 5.3 long Figma runs, `invoke_runner.sh` completed (`/tmp/ux_feishu-*
 
 ---
 
+## 2026-08-16 — Deny `process` tool for synchronous Feishu long runs
+
+**Status:** Accepted
+
+**Context:**
+On OpenClaw v2026.4.12 (VM), default exec ~10s `backgroundMs` / auto-background caused long Figma invokes to finish under `/tmp/ux_*` with valid formatter stdout while Feishu stayed silent. Skill Hard rules alone were insufficient.
+
+**Decision:**
+- Set gateway `tools.deny` to include `"process"` so the agent cannot detach/poll and must keep `invoke_runner.sh` in one foreground exec.
+- Keep `tools.exec.timeoutSec: 1800` (valid key on this OpenClaw version; reject invalid `timeoutSeconds`).
+- Record Phase 5.3 delivery sign-off on run `feishu-om_x100b67282758f4a0b2c555e04a3e204` (report + recording on `:8080`). Click-point misses remain Phase 5.5 scope.
+
+**Consequences:**
+- Long Feishu E2E can deliver one Status/Summary/Full report message after OOBE-length runs.
+- Operators must re-apply deny + timeout after OpenClaw config resets; document in `docs/OPENCLAW_INTEGRATION.md` and `docs/VERIFY.md`.
+
+---
+
 ## Decision Template
 
 ### YYYY-MM-DD — Decision Title
