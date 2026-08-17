@@ -21,6 +21,10 @@ from core.report import (
 
 UX_REPORT_FILENAME = "ux_report.md"
 INDEX_HTML_FILENAME = "index.html"
+# Report-only playback seek (does not trim the .webm file). Aligns with Figma post-load wait (~3s) + nav buffer.
+FIGMA_RECORDING_SEEK_SECONDS = 4.0
+WEB_RECORDING_SEEK_SECONDS = 0.0
+VIDEO_PLAYBACK_RATES = (0.5, 1.0, 1.5, 2.0)
 
 
 @dataclass(frozen=True)
@@ -463,7 +467,17 @@ def build_ux_report_md(
 
     lines.extend(["", "### 5. Appendix", "", "**Video record**", ""])
     if recording:
+        seek = _recording_seek_seconds(config.target)
         lines.append(f"- `{recording}`")
+        if seek > 0:
+            lines.append(
+                f"- _In `index.html`, playback seeks to {seek:g}s by default to skip typical "
+                f"load/intro (file unchanged). Use speed controls 0.5× / 1× / 1.5× / 2× in the HTML report._"
+            )
+        else:
+            lines.append(
+                "- _In `index.html`, use speed controls 0.5× / 1× / 1.5× / 2× for playback._"
+            )
     else:
         lines.append("- _(no recording artifact)_")
     lines.extend(["", "**Screenshots**", ""])
@@ -486,6 +500,75 @@ def build_ux_report_md(
         ]
     )
     return "\n".join(lines).rstrip() + "\n"
+
+
+def _recording_seek_seconds(target: str) -> float:
+    if target == "figma":
+        return FIGMA_RECORDING_SEEK_SECONDS
+    return WEB_RECORDING_SEEK_SECONDS
+
+
+def _build_recording_player_html(*, recording: str, seek_seconds: float) -> str:
+    """Embed video with optional intro seek and playback-rate controls (file unchanged)."""
+    src = html.escape(recording)
+    seek = max(0.0, float(seek_seconds))
+    rate_buttons = []
+    for rate in VIDEO_PLAYBACK_RATES:
+        label = str(int(rate)) if rate == int(rate) else str(rate)
+        active = " active" if rate == 1.0 else ""
+        rate_buttons.append(
+            f'<button type="button" class="oc-rate-btn{active}" data-rate="{rate}">'
+            f"{html.escape(label)}×</button>"
+        )
+    rates_html = "\n      ".join(rate_buttons)
+    skip_note = ""
+    if seek > 0:
+        skip_note = (
+            f"<p class=\"oc-video-note\">Playback starts at "
+            f"<strong>{seek:g}s</strong> to skip typical Figma/page load "
+            f"(full file unchanged — drag the scrubber to 0:00 to review the intro).</p>"
+        )
+    return f"""<div class="oc-video-player" data-seek-seconds="{seek}">
+  <video id="oc-ux-recording" controls width="960" preload="metadata" src="{src}"></video>
+  {skip_note}
+  <div class="oc-video-toolbar" role="group" aria-label="Playback speed">
+    <span class="oc-video-toolbar-label">Speed:</span>
+    {rates_html}
+  </div>
+  <p><code>{src}</code></p>
+</div>
+<script>
+(function () {{
+  var root = document.currentScript.previousElementSibling;
+  if (!root || !root.classList.contains("oc-video-player")) {{
+    root = document.querySelector(".oc-video-player");
+  }}
+  if (!root) return;
+  var video = root.querySelector("video");
+  var seek = parseFloat(root.getAttribute("data-seek-seconds") || "0") || 0;
+  var appliedSeek = false;
+  function applySeek() {{
+    if (appliedSeek || seek <= 0 || !video || !isFinite(video.duration)) return;
+    if (seek < video.duration) {{
+      video.currentTime = seek;
+      appliedSeek = true;
+    }}
+  }}
+  if (video) {{
+    video.addEventListener("loadedmetadata", applySeek);
+    video.addEventListener("durationchange", applySeek);
+  }}
+  root.querySelectorAll(".oc-rate-btn").forEach(function (btn) {{
+    btn.addEventListener("click", function () {{
+      var rate = parseFloat(btn.getAttribute("data-rate") || "1") || 1;
+      if (video) video.playbackRate = rate;
+      root.querySelectorAll(".oc-rate-btn").forEach(function (b) {{
+        b.classList.toggle("active", b === btn);
+      }});
+    }});
+  }});
+}})();
+</script>"""
 
 
 def _html_section(title: str, body_html: str) -> str:
@@ -636,9 +719,9 @@ def build_index_html(
 
     recording_block = "<p><em>(no recording artifact)</em></p>"
     if recording:
-        recording_block = (
-            f'<video controls width="960" src="{html.escape(recording)}"></video>'
-            f"<p><code>{html.escape(recording)}</code></p>"
+        recording_block = _build_recording_player_html(
+            recording=recording,
+            seek_seconds=_recording_seek_seconds(config.target),
         )
 
     shots_html = "<p><em>(no screenshots)</em></p>"
@@ -730,6 +813,11 @@ def build_index_html(
     section {{ margin-bottom: 1.5rem; }}
     figure {{ margin: 0.75rem 0; }}
     figcaption {{ font-size: 0.85rem; color: #555; }}
+    .oc-video-toolbar {{ display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.75rem 0; font-family: system-ui, sans-serif; }}
+    .oc-video-toolbar-label {{ font-weight: 600; margin-right: 0.25rem; }}
+    .oc-rate-btn {{ font: inherit; padding: 0.35rem 0.75rem; border: 1px solid #888; border-radius: 4px; background: #fff; cursor: pointer; }}
+    .oc-rate-btn.active {{ background: #222; color: #fff; border-color: #222; }}
+    .oc-video-note {{ font-family: system-ui, sans-serif; font-size: 0.95rem; color: #444; }}
   </style>
 </head>
 <body>

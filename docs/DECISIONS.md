@@ -614,6 +614,24 @@ Operators want the public `index.html` / `ux_report.md` to read like a classic u
 
 ---
 
+## 2026-08-17 — Report video: intro seek + playback speed (no file trim)
+
+**Status:** Accepted
+
+**Context:**
+Long Figma recordings open with several seconds of prototype load. Operators want to skip that in the report and choose playback speed, without re-encoding `.webm`.
+
+**Decision:**
+- **Seek-only (option A):** `index.html` seeks to `FIGMA_RECORDING_SEEK_SECONDS` (4s) for `figma` targets on `loadedmetadata`; web stays at 0. File on disk unchanged; scrubber can return to 0:00.
+- **Speed controls:** 0.5× / 1× / 1.5× / 2× via `HTMLMediaElement.playbackRate`.
+- Markdown appendix notes the HTML behavior; does not embed interactive controls.
+
+**Consequences:**
+- `scripts/core/formal_report.py` only; no ffmpeg dependency.
+- Seek is a fixed heuristic — may undershoot/overshoot some loads; revisit if needed.
+
+---
+
 ## 2026-07-10 — OpenClaw skill install: SKILL.md frontmatter only (not Agent Instructions)
 
 **Status:** Accepted
