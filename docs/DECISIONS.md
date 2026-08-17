@@ -591,6 +591,29 @@ Run `feishu-om_x100b670513a480a0b1caf53ea9b26bc` cleared OOBE through lock-passw
 
 ---
 
+## 2026-08-17 — Formal report outline: User Testing Report (EN)
+
+**Status:** Accepted
+
+**Context:**
+Operators want the public `index.html` / `ux_report.md` to read like a classic user-testing write-up (executive summary, positives/pain points, recommendations, appendix), while keeping the full step Journey for evidence review.
+
+**Decision:**
+- Restructure Phase 4 formal reports (English) to:
+  1. Executive Summary
+  2. Key Findings (What Worked Well / Pain Points)
+  3. Journey Timeline (full steps retained)
+  4. Recommendations (High/Medium priority)
+  5. Appendix (video, screenshots, related files)
+- Keep `persona_report.md` as a related first-person narrative (not deleted).
+- Pain points from `no_visible_change` remain **telemetry**, not automatic UX defect classifications.
+
+**Consequences:**
+- `scripts/core/formal_report.py` updated; Feishu still links `index.html` as primary report.
+- New runs after deploy use the outline; old published runs keep prior HTML until re-run.
+
+---
+
 ## 2026-07-10 — OpenClaw skill install: SKILL.md frontmatter only (not Agent Instructions)
 
 **Status:** Accepted
