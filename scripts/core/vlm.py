@@ -155,13 +155,15 @@ Coarse intent from the previous step:
 - target_kind: {target_kind}
 - reason: {coarse_reason}
 
-Point at the **center** of the intended tappable control (text, icon, icon+label, or button) visible in this crop.
+Point at the **visual center of the glyph / hit target** of the intended control in this crop
+(digit key, icon, or button interior — not the cell padding below/beside the glyph).
 
 Respond with JSON only:
 {{"x": <int 0-1000>, "y": <int 0-1000>, "reason": "<why this point is the control center>"}}
 
 Rules:
 - x and y must be integers from 0 to 1000 inclusive.
+- For keypad digits, aim at the **number glyph center**, not the bottom edge of the key cell.
 - If the control is not visible in this crop, still return your best point toward it and explain in reason.
 - Do not output markdown.
 """

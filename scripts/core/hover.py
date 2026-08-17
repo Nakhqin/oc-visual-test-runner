@@ -22,11 +22,38 @@ HOVER_STALL_MAX_NORM_DELTA = 15
 # Larger jumps are treated as VLM re-estimates and snapped back to the refine point
 # (Feishu run feishu-om_x100b672…: hover jumped 750→500 / logo, then force-clicked off-target).
 HOVER_MAX_ANCHOR_NORM_DELTA = 120
+# Tighter hover clamp when refining small controls (button/icon/PIN keys).
+HOVER_TIGHT_ANCHOR_NORM_DELTA = 60
 # After click_current with no_visible_change, allow limited re-aim rounds (PIN keypad false "aligned").
 MAX_MISSED_CLICK_RECOVERIES = 2
 MISSED_CLICK_RECOVERY_PASSES = 3
 HOVER_TARGET_KINDS = frozenset({"text", "icon", "composite", "button"})
 HOVER_ALIGNMENT_OUTCOMES = frozenset({"aligned", "adjusted", "clicked_off_target", "unresolved"})
+
+_KEYPAD_REASON_HINTS = (
+    "digit",
+    "password",
+    "passwd",
+    "pin",
+    "keypad",
+    "keyboard",
+    "密码",
+    "数字",
+    "锁屏",
+    "secure keyboard",
+    "安全键盘",
+)
+
+
+def hover_anchor_max_delta(pending_click: Action) -> int:
+    """Smaller clamp radius for button/icon/PIN-like targets."""
+    kind = (pending_click.target_kind or "").strip().lower()
+    if kind in {"icon", "button"}:
+        return HOVER_TIGHT_ANCHOR_NORM_DELTA
+    reason = (pending_click.reason or "").lower()
+    if any(hint in reason for hint in _KEYPAD_REASON_HINTS):
+        return HOVER_TIGHT_ANCHOR_NORM_DELTA
+    return HOVER_MAX_ANCHOR_NORM_DELTA
 
 
 def action_triggers_hover(action: Action) -> bool:

@@ -572,6 +572,25 @@ Feishu run `feishu-om_x100b67295540eca0b48aa73a32af172` cleared splash after L1-
 
 ---
 
+## 2026-08-17 — UVG L1: tight ROI for button/icon/PIN keypad
+
+**Status:** Accepted
+
+**Context:**
+Run `feishu-om_x100b670513a480a0b1caf53ea9b26bc` cleared OOBE through lock-password choice, but 6-digit Lenovo secure keyboard clicks stayed `no_visible_change` / `clicked_off_target` even with missed-click recovery. Hover often reported the marker **below** the digit glyph; default 25% L1 crop was too coarse for dense keys.
+
+**Decision:**
+- Adaptive L1 crop: **tight** (~12% viewport, min 160px) when `target_kind` is `button`/`icon` or reason hints PIN/keypad/密码; else default 25%/240px.
+- Record `crop.profile` / `fraction` in trace.
+- Tighter hover clamp (`HOVER_TIGHT_ANCHOR_NORM_DELTA=60`) for the same small-control cases (recovery still skips clamp).
+- Refine prompt: aim at **glyph center**, not key-cell bottom padding.
+
+**Consequences:**
+- `scripts/core/refine.py`, `hover.py`, `loop.py`, `vlm.py`; `.tmp/test_refine.py`.
+- Re-verify same Figma PIN screen after VM `git pull`.
+
+---
+
 ## 2026-07-10 — OpenClaw skill install: SKILL.md frontmatter only (not Agent Instructions)
 
 **Status:** Accepted

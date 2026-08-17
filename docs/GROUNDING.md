@@ -107,14 +107,15 @@ Confirmed from scenario A run `grounding-A-test-1`: G2 refused off-target `click
 
 | Parameter | Default (implement at 5.5b) |
 |---|---|
-| Crop size | ~25% × 25% of viewport (e.g. 320×225 @ 1280×900), min 240×240 |
+| Crop size (default) | ~25% × 25% of viewport (e.g. 320×225 @ 1280×900), min 240×240 |
+| Crop size (tight) | ~12% × 12%, min 160×160 — for `target_kind` **button** / **icon**, or PIN/keypad-like reasons |
 | Center | `(x₀, y₀)` from observe after pixel mapping |
 | Second VLM | Norm 0–1000 **within crop**; map back to global norm/px |
-| Trace | `refine.crop`, `refine.coarse`, `refine.fine`, optional crop PNG |
+| Trace | `refine.crop` (+ `profile` / `fraction`), `refine.coarse`, `refine.fine`, optional crop PNG |
 
 **When coarse point is far off:** crop may miss target → L2 may still fail → `blocked` (acceptable; no silent mis-click).
 
-**Not list-specific:** same crop for icons, buttons, and text rows.
+**Adaptive, not per-UI hacks:** profile chosen from `target_kind` / reason hints (digit, password, 密码, …), not from a specific Figma node list.
 
 ### L2 — Convergence alignment (G2 upgrade)
 

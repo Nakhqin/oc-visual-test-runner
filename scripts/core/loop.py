@@ -25,6 +25,7 @@ from core.hover import (
     clamp_hover_alignment_action,
     coerce_hover_to_click,
     derive_hover_alignment,
+    hover_anchor_max_delta,
     l1_snap_before_adjusted_click,
     should_force_hover_click,
     should_recover_missed_click,
@@ -217,6 +218,7 @@ def _run_hover_confirmation(
                 hover_action,
                 anchor_x=pending_click.x,
                 anchor_y=pending_click.y,
+                max_delta=hover_anchor_max_delta(pending_click),
             )
         elif (
             hover_action.type == "move_to"

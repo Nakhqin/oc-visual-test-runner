@@ -11,9 +11,11 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from core.actions import Action, ActionParseError, parse_action_payload
 from core.hover import (
     HOVER_MAX_ANCHOR_NORM_DELTA,
+    HOVER_TIGHT_ANCHOR_NORM_DELTA,
     clamp_hover_alignment_action,
     derive_hover_alignment,
     hover_adjustment_stalled,
+    hover_anchor_max_delta,
     coerce_hover_to_click,
     l1_snap_before_adjusted_click,
     should_force_hover_click,
@@ -201,6 +203,13 @@ def test_append_missed_click_history() -> None:
     assert "digit 1" in maker._history[0]["action"]["reason"]
 
 
+def test_hover_anchor_max_delta_tight_for_button() -> None:
+    pending = Action(type="click", x=300, y=600, target_kind="button", reason="digit 1")
+    assert hover_anchor_max_delta(pending) == HOVER_TIGHT_ANCHOR_NORM_DELTA
+    text = Action(type="click", x=500, y=400, target_kind="text", reason="language row")
+    assert hover_anchor_max_delta(text) == HOVER_MAX_ANCHOR_NORM_DELTA
+
+
 def main() -> None:
     test_derive_aligned_first_pass()
     test_derive_adjusted_after_reposition()
@@ -219,6 +228,7 @@ def main() -> None:
     test_should_recover_missed_click()
     test_derive_clicked_off_target_on_miss()
     test_append_missed_click_history()
+    test_hover_anchor_max_delta_tight_for_button()
     print("hover alignment unit tests OK")
 
 

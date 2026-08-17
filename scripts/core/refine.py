@@ -13,7 +13,25 @@ from core.coordinates import norm_coords_to_pixels, norm_to_pixel, pixel_to_norm
 
 CROP_VIEWPORT_FRACTION = 0.25
 MIN_CROP_SIZE = 240
+# Tight crop for small controls (PIN keypad digits, icons) — Feishu run
+# feishu-om_x100b670513a480a0b1caf53ea9b26bc: default 25% ROI left digit clicks off-glyph.
+TIGHT_CROP_VIEWPORT_FRACTION = 0.12
+TIGHT_MIN_CROP_SIZE = 160
 CROP_COORDINATE_SPACE = "norm_1000_local"
+
+_KEYPAD_REASON_HINTS = (
+    "digit",
+    "password",
+    "passwd",
+    "pin",
+    "keypad",
+    "keyboard",
+    "密码",
+    "数字",
+    "锁屏",
+    "secure keyboard",
+    "安全键盘",
+)
 
 
 @dataclass(frozen=True)
@@ -30,6 +48,22 @@ class CropRegion:
             "width": self.width,
             "height": self.height,
         }
+
+
+def uses_tight_refine_crop(action: Action) -> bool:
+    """True for small tappable controls that benefit from a denser local norm grid."""
+    kind = (action.target_kind or "").strip().lower()
+    if kind in {"icon", "button"}:
+        return True
+    reason = (action.reason or "").lower()
+    return any(hint in reason for hint in _KEYPAD_REASON_HINTS)
+
+
+def crop_profile_for_action(action: Action) -> tuple[float, int, str]:
+    """Return (viewport_fraction, min_size_px, profile_name)."""
+    if uses_tight_refine_crop(action):
+        return TIGHT_CROP_VIEWPORT_FRACTION, TIGHT_MIN_CROP_SIZE, "tight"
+    return CROP_VIEWPORT_FRACTION, MIN_CROP_SIZE, "default"
 
 
 class RefineDecisionMaker(Protocol):
@@ -56,9 +90,12 @@ def compute_crop_region(
     center_y_px: int,
     viewport_width: int,
     viewport_height: int,
+    *,
+    fraction: float = CROP_VIEWPORT_FRACTION,
+    min_size: int = MIN_CROP_SIZE,
 ) -> CropRegion:
-    crop_width = max(MIN_CROP_SIZE, round(viewport_width * CROP_VIEWPORT_FRACTION))
-    crop_height = max(MIN_CROP_SIZE, round(viewport_height * CROP_VIEWPORT_FRACTION))
+    crop_width = max(min_size, round(viewport_width * fraction))
+    crop_height = max(min_size, round(viewport_height * fraction))
     crop_width = min(crop_width, viewport_width)
     crop_height = min(crop_height, viewport_height)
 
@@ -141,11 +178,14 @@ def run_roi_refine(
         viewport_width,
         viewport_height,
     )
+    fraction, min_size, profile = crop_profile_for_action(coarse)
     crop = compute_crop_region(
         center_x_px,
         center_y_px,
         viewport_width,
         viewport_height,
+        fraction=fraction,
+        min_size=min_size,
     )
     crop_path = frame.image_path.parent / (
         f"step-{step_index:03d}{refine_crop_filename_suffix()}.png"
@@ -186,6 +226,9 @@ def run_roi_refine(
             "screenshot": crop_path.relative_to(config.output_dir).as_posix(),
             "coordinate_space": CROP_COORDINATE_SPACE,
             "center_px": {"x": center_x_px, "y": center_y_px},
+            "profile": profile,
+            "fraction": fraction,
+            "min_size": min_size,
         },
         "source": maker.source,
         "fallback_to_coarse": refine_failed,
